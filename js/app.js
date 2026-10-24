@@ -219,7 +219,7 @@
       el('div', { class: 'page-actions' }, [
         el('button', { class: 'btn', type: 'button', text: '导出文丘里压力', onclick: openExport }),
         el('button', { class: 'btn primary', type: 'button', id: 'btnRatioHome', text: '绝压比计算', onclick: openRatioCalc }),
-        canInstall() ? el('button', { class: 'btn ghost', type: 'button', id: 'btnInstall', text: '安装到桌面', onclick: installPwa }) : null
+        canInstall() ? el('button', { class: 'btn install-btn', type: 'button', id: 'btnInstall', text: '安装到桌面', onclick: installPwa }) : null
       ])
     ]));
 

@@ -201,6 +201,10 @@ body {
 
 .btn.ghost:hover { background: var(--surface-2); color: var(--brand); }
 
+.btn.install-btn { border-color: var(--brand); color: var(--brand); font-weight: 600; }
+
+.btn.install-btn:hover { background: var(--brand-weak); border-color: var(--brand); color: var(--brand); }
+
 .btn.danger-text { color: var(--danger); }
 .btn.danger-text:hover { border-color: var(--danger); color: var(--danger); }
 
@@ -3720,7 +3724,7 @@ body.furnace-mode .app-shell { padding-top: 8px; }
       el('div', { class: 'page-actions' }, [
         el('button', { class: 'btn', type: 'button', text: '导出文丘里压力', onclick: openExport }),
         el('button', { class: 'btn primary', type: 'button', id: 'btnRatioHome', text: '绝压比计算', onclick: openRatioCalc }),
-        canInstall() ? el('button', { class: 'btn ghost', type: 'button', id: 'btnInstall', text: '安装到桌面', onclick: installPwa }) : null
+        canInstall() ? el('button', { class: 'btn install-btn', type: 'button', id: 'btnInstall', text: '安装到桌面', onclick: installPwa }) : null
       ])
     ]));
 

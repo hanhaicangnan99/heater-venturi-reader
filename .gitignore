@@ -6,3 +6,8 @@ tests/_*
 *.log
 .DS_Store
 Thumbs.db
+
+tests/pwa-cdp-profile/
+tests/pwa-cdp.pid
+tests/pwa-cdp-check.cjs
+tests/u*.png
