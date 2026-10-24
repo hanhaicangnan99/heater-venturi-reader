@@ -246,6 +246,8 @@ GaugeApp.pushReading(0.170);   // 识别到一个读数 → 填入当前识别�
 
 线上地址已经是可安装的 PWA：
 
+![安装按钮位置](docs/screenshot-install-location.png)
+
 - **Android Chrome**：打开线上地址 → 首页点「安装到桌面」，或右上角 ⋮ → 安装应用 / 添加到主屏幕。
 - **iPhone / iPad**：用 Safari 打开 → 点底部分享按钮 → 添加到主屏幕。
 - 装好后桌面出现「**读表**」图标，全屏打开，没有地址栏，像 App 一样。
