@@ -1,5 +1,5 @@
 /* 加热炉文丘里压力 · PWA Service Worker */
-const CACHE = 'hvp-pwa-v1';
+const CACHE = 'hvp-pwa-v2';
 const CORE = [
   './',
   './index.html',
