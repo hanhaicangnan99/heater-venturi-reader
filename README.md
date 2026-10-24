@@ -242,6 +242,17 @@ GaugeApp.pushReading(0.170);   // 识别到一个读数 → 填入当前识别�
 
 手机 Chrome / Safari 打开即可，HTTPS 安全上下文，能正常申请摄像头。代码推送到 GitHub 后，Pages 会自动更新。
 
+### 安装到手机桌面（PWA）
+
+线上地址已经是可安装的 PWA：
+
+- **Android Chrome**：打开线上地址 → 首页点「安装到桌面」，或右上角 ⋮ → 安装应用 / 添加到主屏幕。
+- **iPhone / iPad**：用 Safari 打开 → 点底部分享按钮 → 添加到主屏幕。
+- 装好后桌面出现「**读表**」图标，全屏打开，没有地址栏，像 App 一样。
+- 页面已注册 Service Worker，会缓存界面文件；断网时仍能打开已缓存页面。
+- 只有 `https://` 线上地址能安装；`file://` 本地文件和单文件版不能安装。
+- 如果首页没看到「安装到桌面」，先刷新一次，或直接用浏览器菜单安装。
+
 如果不用线上地址、直接打开本地文件，常见两个问题：
 
 1. **只传了 index.html**：页面缺 `js/`、`assets/`，会空白或没样式。用 [读表软件_手机版.html](读表软件_手机版.html)，CSS/JS 已内联，只传一个文件即可。
@@ -330,6 +341,9 @@ t = (∠P − ∠S) / (∠E − ∠S)
 ```
 打开读表软件.bat         双击启动
 index.html               页面结构
+manifest.webmanifest     PWA 应用清单
+sw.js                    Service Worker（离线缓存）
+icons/                   桌面/主屏幕图标
 读表软件_手机版.html     单文件手机版（CSS/JS 内联，直接发手机）
 assets/styles.css        样式（浅色/深色、桌面/手机）
 js/core.js               炉子/组/读数模型、统计、绝压比、方式1解析、文本导出、Excel 工作簿读写
@@ -387,6 +401,12 @@ chrome --headless=new --no-sandbox --disable-gpu --user-data-dir=tests/prof ^
 ---
 
 ## 十二、版本
+
+**v2.14.0（2026-10-24）**
+
+- 增加 PWA：`manifest.webmanifest`、Service Worker、192/512/maskable 图标
+- 首页增加「安装到桌面」按钮；Android Chrome 可一键安装，iOS Safari 可按分享 → 添加到主屏幕
+- 安装后全屏运行，Service Worker 缓存界面，断网可打开已缓存页面
 
 **v2.13.0（2026-10-24）**
 

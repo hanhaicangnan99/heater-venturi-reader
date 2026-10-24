@@ -16,6 +16,7 @@
   var ui = { view: 'home', furnaceId: null, group: 0, reverse: false, paused: true, started: false, cursor: null };
   var cameraStream = null;
   var cameraTried = false;
+  var deferredInstall = null;
   var convText = '';
   var conv = null;
   var saveTimer = null;
@@ -146,6 +147,58 @@
     document.body.classList.toggle('furnace-mode', ui.view === 'furnace' && !!currentFurnace());
   }
 
+  function isStandalone() {
+    return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+  }
+
+  function canInstall() {
+    if (isStandalone()) return false;
+    if (location.protocol === 'https:') return true;
+    return location.hostname === 'localhost' || location.hostname === '127.0.0.1';
+  }
+
+  function installPwa() {
+    var prompt = deferredInstall || window.__hvpInstallPrompt;
+    if (prompt && prompt.prompt) {
+      deferredInstall = null;
+      window.__hvpInstallPrompt = null;
+      prompt.prompt();
+      if (prompt.userChoice && prompt.userChoice.then) {
+        prompt.userChoice.then(function (choice) {
+          if (choice && choice.outcome === 'accepted') toast('已添加到手机桌面', 'ok', 2400);
+        });
+      }
+      return;
+    }
+    if (/iPad|iPhone|iPod/.test(navigator.userAgent)) {
+      alert('iPhone / iPad：用 Safari 打开后，点底部分享按钮 → 添加到主屏幕。');
+    } else {
+      alert('Chrome：点右上角 ⋮ → 安装应用 / 添加到主屏幕。');
+    }
+  }
+
+  function initInstall() {
+    window.addEventListener('beforeinstallprompt', function (e) {
+      e.preventDefault();
+      deferredInstall = e;
+      window.__hvpInstallPrompt = e;
+    });
+    window.addEventListener('appinstalled', function () {
+      deferredInstall = null;
+      window.__hvpInstallPrompt = null;
+      var b = $('#btnInstall');
+      if (b) b.remove();
+      toast('已添加到手机桌面', 'ok', 2400);
+    });
+    if (window.__hvpInstallPrompt) deferredInstall = window.__hvpInstallPrompt;
+  }
+
+  function registerServiceWorker() {
+    if (!('serviceWorker' in navigator)) return;
+    if (location.protocol !== 'https:' && location.hostname !== 'localhost' && location.hostname !== '127.0.0.1') return;
+    navigator.serviceWorker.register('sw.js').catch(function () { /* 离线能力失败不影响使用 */ });
+  }
+
   function renderHome() {
     var st = C.batchStat(batch);
     var host = $('#view');
@@ -165,7 +218,8 @@
       ]),
       el('div', { class: 'page-actions' }, [
         el('button', { class: 'btn', type: 'button', text: '导出文丘里压力', onclick: openExport }),
-        el('button', { class: 'btn primary', type: 'button', id: 'btnRatioHome', text: '绝压比计算', onclick: openRatioCalc })
+        el('button', { class: 'btn primary', type: 'button', id: 'btnRatioHome', text: '绝压比计算', onclick: openRatioCalc }),
+        canInstall() ? el('button', { class: 'btn ghost', type: 'button', id: 'btnInstall', text: '安装到桌面', onclick: installPwa }) : null
       ])
     ]));
 
@@ -1710,6 +1764,8 @@
     var loaded = loadBatch();
     batch = loaded.batch;
     applyTheme(readStore(KEYS.theme) || 'light');
+    initInstall();
+    registerServiceWorker();
     bind();
     bindSwipeBack();
     render();

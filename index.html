@@ -4,8 +4,21 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#0b64c4">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="读表">
 <title>加热炉文丘里压力 · 快捷读数</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Ccircle cx='24' cy='25' r='16' fill='%23f4f7fb' stroke='%230b64c4' stroke-width='3'/%3E%3Cpath d='M24 25l9-11' stroke='%230b64c4' stroke-width='3' stroke-linecap='round'/%3E%3Ccircle cx='24' cy='25' r='2.6' fill='%230b64c4'/%3E%3C/svg%3E">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<script>
+window.addEventListener('beforeinstallprompt', function (e) {
+  e.preventDefault();
+  window.__hvpInstallPrompt = e;
+});
+</script>
 <link rel="stylesheet" href="assets/styles.css">
 </head>
 <body>
@@ -165,6 +178,12 @@
         <li><b>导出所有数据</b>（顶栏）：Excel（.xlsx），所有数据一张表，每台炉一块、一组一行；组最高值加粗、剔除划线、送检写「送检」；每台炉附 A/B 集合管压力，最大绝压比注明第几组第几块。</li>
         <li><b>方式2</b>：在「绝压比计算」页面生成，①～⑧ 圈号 + &lt;表号&gt;读数 + A/B集合管压力，最后一行「最大绝压比 ⑤ 0.84375」。</li>
         <li>只导出有读数的炉子；空组在方式1里显示为 <code>- -</code>。</li>
+      </ul>
+      <h3>安装到桌面</h3>
+      <ul>
+        <li>手机 Chrome 打开线上地址 <code>https://hanhaicangnan99.github.io/heater-venturi-reader/</code>，点首页「安装到桌面」，或浏览器右上角 ⋮ → 安装应用 / 添加到主屏幕。</li>
+        <li>iPhone / iPad 用 Safari 打开，点底部分享按钮 → 添加到主屏幕。</li>
+        <li>装好后桌面出现「读表」图标，全屏打开、没有地址栏；页面已缓存，断网也能打开已缓存部分。</li>
       </ul>
       <h3>手机打开</h3>
       <ul>
