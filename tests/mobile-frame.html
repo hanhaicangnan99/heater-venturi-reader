@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>手机宽度预览</title>
+<style>
+  html, body { margin: 0; padding: 0; background: #55606b; }
+  iframe { display: block; width: 390px; height: 100vh; border: 0; background: #fff; }
+</style>
+</head>
+<body>
+<iframe id="frame" title="手机预览"></iframe>
+<script>
+  document.getElementById('frame').src = 'demo.html' + location.search;
+</script>
+</body>
+</html>

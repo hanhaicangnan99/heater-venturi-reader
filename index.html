@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<title>加热炉文丘里压力 · 快捷读数</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Ccircle cx='24' cy='25' r='16' fill='%23f4f7fb' stroke='%230b64c4' stroke-width='3'/%3E%3Cpath d='M24 25l9-11' stroke='%230b64c4' stroke-width='3' stroke-linecap='round'/%3E%3Ccircle cx='24' cy='25' r='2.6' fill='%230b64c4'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="assets/styles.css">
+</head>
+<body>
+
+<div class="app-shell">
+
+  <header class="topbar">
+    <div class="brand">
+      <svg class="brand-mark" viewBox="0 0 48 48" aria-hidden="true">
+        <circle cx="24" cy="25" r="16" fill="none" stroke="currentColor" stroke-width="3.2"/>
+        <path d="M24 25 L33.5 14.5" stroke="currentColor" stroke-width="3.2" stroke-linecap="round"/>
+        <circle cx="24" cy="25" r="2.6" fill="currentColor"/>
+        <path d="M13 9 v4 M35 9 v4" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/>
+      </svg>
+      <div class="brand-text">
+        <h1>加热炉文丘里压力</h1>
+        <p class="brand-sub">2#～5# 炉 · 每台 8 组 · 0～0.4 MPa</p>
+      </div>
+    </div>
+
+    <div class="meta-fields">
+      <label class="field">
+        <span>日期</span>
+        <input id="metaDate" type="date">
+      </label>
+      <label class="field">
+        <span>时间</span>
+        <input id="metaTime" type="time">
+      </label>
+      <label class="field">
+        <span>记录人</span>
+        <input id="metaOperator" type="text" placeholder="姓名" maxlength="40" autocomplete="off">
+      </label>
+    </div>
+
+    <div class="topbar-actions">
+      <button class="btn ghost" id="btnNew" type="button">新建</button>
+      <button class="btn ghost" id="btnImport" type="button">导入 Excel</button>
+      <button class="btn primary" id="btnExport" type="button">导出所有数据</button>
+      <button class="btn ghost" id="btnHelp" type="button">说明</button>
+      <button class="icon-btn" id="btnTheme" type="button" title="切换深色/浅色">☾</button>
+    </div>
+  </header>
+
+  <main id="view" class="view"></main>
+
+  <footer class="foot">
+    <span id="saveHint">自动保存已开启</span>
+    <span class="foot-note">数据只存本机浏览器，请定期导出备份 · 识别模块接口：GaugeApp.pushReading(读数)</span>
+  </footer>
+
+</div>
+
+<div id="toasts" class="toasts" aria-live="polite"></div>
+
+<!-- 导出文丘里压力（方式1） -->
+<dialog id="dlgExport" class="dialog dialog-wide">
+  <form method="dialog">
+    <header class="dialog-head">
+      <h2>导出文丘里压力</h2>
+      <button class="icon-btn" type="button" data-close="dlgExport" aria-label="关闭">✕</button>
+    </header>
+    <div class="dialog-body">
+      <p class="hint" id="exportHint"></p>
+      <pre class="export-preview" id="exportPreview" tabindex="-1" autofocus></pre>
+      <p class="hint" id="exportNote"></p>
+    </div>
+    <footer class="dialog-foot">
+      <button class="btn ghost left" type="button" id="btnOpenRatio">绝压比计算 ›</button>
+      <button class="btn" type="button" id="btnCopyExport">复制</button>
+      <button class="btn primary" type="button" id="btnDownloadExport">下载 .txt</button>
+    </footer>
+  </form>
+</dialog>
+
+<!-- 导出所有数据 -->
+<dialog id="dlgExportAll" class="dialog dialog-wide">
+  <form method="dialog">
+    <header class="dialog-head">
+      <h2>导出所有数据</h2>
+      <button class="icon-btn" type="button" data-close="dlgExportAll" aria-label="关闭">✕</button>
+    </header>
+    <div class="dialog-body">
+      <p class="hint">Excel 文件（.xlsx）：所有数据在一张表，每台炉一块、一组一行；组最高值加粗、剔除读数划线；每台炉附 A/B 集合管压力，最大绝压比注明第几组第几块。</p>
+      <div id="exportAllSummary" class="export-summary" tabindex="-1" autofocus></div>
+      <p class="hint" id="exportAllNote"></p>
+    </div>
+    <footer class="dialog-foot">
+      <button class="btn ghost left" type="button" id="btnExportAllRatio">绝压比计算 ›</button>
+      <button class="btn" type="button" data-close="dlgExportAll">关闭</button>
+      <button class="btn primary" type="button" id="btnDownloadExportAll">下载 .xlsx</button>
+    </footer>
+  </form>
+</dialog>
+
+<!-- 识别结果填入 -->
+<dialog id="dlgFill" class="dialog">
+  <form method="dialog">
+    <header class="dialog-head">
+      <h2 id="fillTitle">识别结果填入</h2>
+      <button class="icon-btn" type="button" data-close="dlgFill" aria-label="关闭">✕</button>
+    </header>
+    <div class="dialog-body">
+      <p class="hint">识别模块每识别到一个读数，会自动填入下一个空位。这里也可以手动粘贴一批识别结果：每行一个，或用空格 / 逗号分隔。</p>
+      <textarea id="fillText" class="textarea" rows="7" spellcheck="false" placeholder="0.170&#10;0.148&#10;0.148"></textarea>
+      <label class="check"><input type="checkbox" id="fillAdvance" checked> 本组填满后自动进入下一组</label>
+    </div>
+    <footer class="dialog-foot">
+      <button class="btn" type="button" data-close="dlgFill">取消</button>
+      <button class="btn primary" type="button" id="btnFill">填入</button>
+    </footer>
+  </form>
+</dialog>
+
+<!-- 说明 -->
+<dialog id="dlgHelp" class="dialog">
+  <form method="dialog">
+    <header class="dialog-head">
+      <h2>使用说明</h2>
+      <button class="icon-btn" type="button" data-close="dlgHelp" aria-label="关闭">✕</button>
+    </header>
+    <div class="dialog-body help-body">
+      <h3>流程</h3>
+      <ul>
+        <li>顶部填日期、时间、记录人；首页选炉子（2# / 3# / 4# / 5#）→ 逐组录入 → 「下一组」→「完成本炉」回主界面。</li>
+        <li>2#～5# 炉都录完后，回主界面点「<b>绝压比计算</b>」，填集合管压力生成方式2。</li>
+        <li>每台炉卡片左下角有「<b>清空</b>」，只清空这一台炉的读数。</li>
+        <li>每台炉 8 组：<b>第 1～4 组 = A 炉膛</b>，<b>第 5～8 组 = B 炉膛</b>。右上角可切换「整台 / A炉膛 / B炉膛」，只测半台时选 A 或 B。</li>
+        <li>2号炉每组 2 块表（每行一组）；3/4/5号炉每组 12 块表（每行 6 块，两行一组）。</li>
+      </ul>
+      <h3>录入</h3>
+      <ul>
+        <li>单炉页隐藏顶部栏：第一行只显示炉号和炉膛选择，第二行是加宽的返回主界面按钮；手机从页面中间向右划也能返回。</li>
+        <li>单炉页主区域是相机实时画面；手机浏览器需要 HTTPS，没权限时点「打开相机」重试。</li>
+        <li>进炉子页默认暂停，点中间大按钮「开始识别」后才接收识别读数；再点变成「暂停识别」。</li>
+        <li>指定起点：点下面组内任意一块表，再点「开始识别」，就从这块开始；识别中点击某格会自动暂停。</li>
+        <li>「上一组 / 下一组」在大按钮两侧；下一行是「跳过（送检）」和「剔除本块」。</li>
+        <li>点格子输入读数；<b>回车</b>跳到下一块，<b>方向键</b>按位置跳格，<b>X</b> 剔除当前读数，<b>Esc</b> 退出输入框。</li>
+        <li>读数支持全角数字、带单位（0.170 MPa）、逗号小数点。</li>
+        <li>识别模块识别到一个读数就调用一次 <code>GaugeApp.pushReading(0.170)</code>，会顺序填入当前识别位置；也可以点「识别填入」粘贴一批结果。</li>
+        <li>「剔除」的读数不参与最高值，原始值仍保留在本机 JSON 中。</li>
+        <li><b>表被送检</b>：点「跳过（送检）」或格子右下「送」，该表标记为送检，不参与最高值/绝压比；点「送」可恢复。</li>
+        <li><b>反向读取</b>：点底部的「方向：正序/倒序」，整台炉按 组8→1、组内 12#→1# 识别。</li>
+        <li><b>现场排表/换表</b>：点「暂停识别」，换好表后点下面那一块表，再点「开始识别」，就从这块开始。</li>
+      </ul>
+      <h3>绝压比计算</h3>
+      <ul>
+        <li>正常流程：先把所有炉子的文丘里读数录完，再去操作室看集合管压力。</li>
+        <li>主界面点「绝压比计算」，会自动载入当前读数；也可以粘贴方式1文本（老记录/别人发来的）。</li>
+        <li>粘贴的炉膛标题支持简写：<code>4号炉A</code>、<code>4号炉 A</code>、<code>4号炉A炉膛</code>、<code>4号炉B侧</code> 都能识别。</li>
+        <li>A、B 炉膛各填一个集合管压力（MPa）；绝压比 =（单炉膛最高 + 大气压）/（集合管压力 + 大气压），大气压取 <b>0.1 MPa</b>。</li>
+        <li>两个炉膛取较大者作为「最大绝压比」，并标出最高读数所在的组，生成方式2。</li>
+      </ul>
+      <h3>导出</h3>
+      <ul>
+        <li><b>导出文丘里压力（方式1）</b>：每台炉一个标题（半台带 A/B炉膛），每组一行「最高值表号 最高值」。</li>
+        <li><b>导出所有数据</b>（顶栏）：Excel（.xlsx），所有数据一张表，每台炉一块、一组一行；组最高值加粗、剔除划线、送检写「送检」；每台炉附 A/B 集合管压力，最大绝压比注明第几组第几块。</li>
+        <li><b>方式2</b>：在「绝压比计算」页面生成，①～⑧ 圈号 + &lt;表号&gt;读数 + A/B集合管压力，最后一行「最大绝压比 ⑤ 0.84375」。</li>
+        <li>只导出有读数的炉子；空组在方式1里显示为 <code>- -</code>。</li>
+      </ul>
+      <h3>手机打开</h3>
+      <ul>
+        <li>手机只传一个文件：用 <code>读表软件_手机版.html</code>，CSS/JS 已内联；只传 <code>index.html</code> 会缺 <code>js/</code>、<code>assets/</code>，页面会空白或没样式。</li>
+        <li>直接打开本地文件时，录入、导入导出、绝压比计算都能用；手机浏览器不允许 <code>file://</code> 调用摄像头。</li>
+        <li>要实时相机：页面必须在 <code>https://</code> 开头的网址下；<code>file://</code> 和 <code>http://192.168…</code> 都不允许调用摄像头。可把单文件放到 GitHub Pages / Netlify / 公司 HTTPS 服务器，或用 App 包壳；不要用微信/QQ 的文件预览打开。</li>
+      </ul>
+      <h3>数据</h3>
+      <ul>
+        <li>每次修改自动保存在本机浏览器；换电脑/清缓存前请「导出所有数据」Excel 或「导出文丘里压力」文本备份。</li>
+        <li>「导入 Excel」可把导出的 .xlsx 读回来，恢复读数、剔除、送检、集合管压力和日期时间；旧 JSON 备份也兼容。</li>
+        <li>整个页面离线运行，不上传任何数据。</li>
+      </ul>
+    </div>
+    <footer class="dialog-foot">
+      <button class="btn primary" type="button" data-close="dlgHelp">知道了</button>
+    </footer>
+  </form>
+</dialog>
+
+<input type="file" id="fileInput" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,.json,application/json" hidden>
+
+<script src="js/core.js"></script>
+<script src="js/xlsx-lite.js"></script>
+<script src="js/xlsx-read.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

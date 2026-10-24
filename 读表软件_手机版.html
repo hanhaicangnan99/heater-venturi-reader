@@ -1,0 +1,5209 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="light">
+<head>
+<!-- 单文件手机版：CSS/JS 已内联，可直接发到手机用浏览器打开 -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<title>加热炉文丘里压力 · 快捷读数</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Ccircle cx='24' cy='25' r='16' fill='%23f4f7fb' stroke='%230b64c4' stroke-width='3'/%3E%3Cpath d='M24 25l9-11' stroke='%230b64c4' stroke-width='3' stroke-linecap='round'/%3E%3Ccircle cx='24' cy='25' r='2.6' fill='%230b64c4'/%3E%3C/svg%3E">
+<style>
+/* ==========================================================================
+   加热炉文丘里压力 · 样式
+   浅色 / 深色、桌面 / 手机
+   ========================================================================== */
+
+:root {
+  --bg: #eef1f5;
+  --surface: #ffffff;
+  --surface-2: #f5f8fb;
+  --surface-3: #e9eef4;
+  --line: #dce4ed;
+  --line-strong: #c3cedb;
+  --text: #16212c;
+  --text-2: #4f6072;
+  --muted: #7d8b9b;
+  --brand: #0b64c4;
+  --brand-dark: #0954a6;
+  --brand-weak: #e8f1fc;
+  --brand-ring: rgba(11, 100, 196, .18);
+  --ok: #0f7a4d;
+  --ok-weak: #e6f5ee;
+  --warn: #a85a00;
+  --warn-weak: #fdf1de;
+  --danger: #b3261e;
+  --danger-weak: #fdecea;
+  --ex: #8b97a5;
+  --shadow-sm: 0 1px 2px rgba(16, 32, 48, .05);
+  --shadow: 0 1px 3px rgba(16, 32, 48, .06), 0 10px 24px -12px rgba(16, 32, 48, .16);
+  --mono: ui-monospace, "Cascadia Mono", "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  --sans: "Microsoft YaHei", "PingFang SC", "Hiragino Sans GB", "Noto Sans SC",
+    "Source Han Sans SC", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+[data-theme="dark"] {
+  --bg: #0e151e;
+  --surface: #172029;
+  --surface-2: #1c2733;
+  --surface-3: #22303f;
+  --line: #2a3846;
+  --line-strong: #3b4c5e;
+  --text: #e8eef5;
+  --text-2: #a9b8c8;
+  --muted: #7f8fa2;
+  --brand: #4a9bf0;
+  --brand-dark: #2f86e0;
+  --brand-weak: #16283c;
+  --brand-ring: rgba(74, 155, 240, .25);
+  --ok: #3ec28a;
+  --ok-weak: #12301f;
+  --warn: #f0a94a;
+  --warn-weak: #33250f;
+  --danger: #f06a60;
+  --danger-weak: #361715;
+  --ex: #6f7d8c;
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, .3);
+  --shadow: 0 1px 3px rgba(0, 0, 0, .4);
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+
+html, body { margin: 0; padding: 0; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--sans);
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+[hidden] { display: none !important; }
+
+:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
+
+.app-shell {
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 14px 18px 32px;
+}
+
+/* ---------------------------------------------------------------- 顶部 */
+
+.topbar {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+  padding: 2px 0 14px;
+}
+
+.brand { display: flex; align-items: center; gap: 12px; }
+
+.brand-mark { width: 42px; height: 42px; color: var(--brand); flex: none; }
+
+.brand-text h1 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: .01em;
+}
+
+.brand-sub { margin: 2px 0 0; font-size: 12px; color: var(--muted); }
+
+.meta-fields {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-left: auto;
+}
+
+.field { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+
+.field > span { font-size: 11px; color: var(--muted); letter-spacing: .02em; }
+
+.field > input,
+.field > select,
+.field > textarea {
+  height: 34px;
+  padding: 0 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  font-size: 13px;
+  min-width: 0;
+}
+
+.field > input:focus,
+.field > select:focus,
+.field > textarea:focus {
+  outline: none;
+  border-color: var(--brand);
+  box-shadow: 0 0 0 3px var(--brand-ring);
+}
+
+.topbar-actions { display: flex; align-items: center; gap: 6px; }
+
+/* ---------------------------------------------------------------- 按钮 */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 36px;
+  padding: 0 14px;
+  border: 1px solid var(--line-strong);
+  border-radius: 9px;
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  font-size: 13.5px;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: border-color .12s, background .12s, color .12s, transform .06s;
+}
+
+.btn:hover { border-color: var(--brand); color: var(--brand); }
+.btn:active { transform: translateY(1px); }
+.btn:disabled { opacity: .45; cursor: not-allowed; transform: none; }
+.btn:disabled:hover { border-color: var(--line-strong); color: var(--text); }
+
+.btn.primary {
+  background: var(--brand);
+  border-color: var(--brand);
+  color: #fff;
+  box-shadow: var(--shadow-sm);
+}
+
+.btn.primary:hover { background: var(--brand-dark); border-color: var(--brand-dark); color: #fff; }
+
+.btn.ghost { border-color: transparent; background: transparent; color: var(--text-2); }
+
+.btn.ghost:hover { background: var(--surface-2); color: var(--brand); }
+
+.btn.danger-text { color: var(--danger); }
+.btn.danger-text:hover { border-color: var(--danger); color: var(--danger); }
+
+.btn.sm { height: 28px; padding: 0 9px; font-size: 12px; border-radius: 7px; }
+
+.icon-btn {
+  width: 36px;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid transparent;
+  border-radius: 9px;
+  background: transparent;
+  color: var(--text-2);
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.icon-btn:hover { background: var(--surface-2); color: var(--brand); }
+
+/* ---------------------------------------------------------------- 页面标题 */
+
+.view { min-height: 62vh; }
+
+.file-warning {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin: 4px 0 14px;
+  padding: 10px 12px;
+  border: 1px solid #e6c46a;
+  border-radius: 10px;
+  background: #fff8e1;
+  color: #6b4e00;
+  font-size: 12.5px;
+  line-height: 1.6;
+}
+
+.file-warning strong { flex: none; }
+
+[data-theme="dark"] .file-warning {
+  border-color: #6b5a25;
+  background: #2a2415;
+  color: #e8d79a;
+}
+
+.page-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin: 6px 0 14px;
+}
+
+.page-title { margin: 0; font-size: 22px; font-weight: 700; }
+
+.page-sub { margin: 4px 0 0; font-size: 13px; color: var(--muted); }
+
+.page-actions { display: flex; gap: 8px; }
+
+.hint-line {
+  margin: 14px 0 0;
+  font-size: 12.5px;
+  color: var(--muted);
+  line-height: 1.7;
+}
+
+/* ---------------------------------------------------------------- 指标 */
+
+.kpis {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.kpi {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 13px 16px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+}
+
+.kpi-label { font-size: 12px; color: var(--muted); }
+
+.kpi-value {
+  font-family: var(--mono);
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1.25;
+  font-variant-numeric: tabular-nums;
+}
+
+.kpi-sub { font-size: 11.5px; color: var(--muted); }
+
+/* ---------------------------------------------------------------- 炉子卡片 */
+
+.furnace-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.furnace-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 16px 18px 14px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--surface);
+  box-shadow: var(--shadow);
+  cursor: pointer;
+  transition: border-color .12s, transform .12s;
+}
+
+.furnace-card:hover { border-color: var(--brand); transform: translateY(-1px); }
+.furnace-card:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
+
+.furnace-card.done { border-color: rgba(15, 122, 77, .35); }
+
+.fc-top { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+
+.fc-title { font-size: 20px; letter-spacing: .02em; }
+
+.tag {
+  display: inline-flex;
+  align-items: center;
+  height: 20px;
+  padding: 0 7px;
+  border-radius: 5px;
+  background: var(--surface-2);
+  color: var(--text-2);
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.tag.side { background: var(--brand-weak); color: var(--brand); }
+.tag.ok { background: var(--ok-weak); color: var(--ok); }
+
+.fc-bar {
+  height: 6px;
+  border-radius: 3px;
+  background: var(--surface-3);
+  overflow: hidden;
+}
+
+.fc-bar > span {
+  display: block;
+  height: 100%;
+  border-radius: 3px;
+  background: linear-gradient(90deg, var(--brand), #4a9bf0);
+  transition: width .3s ease;
+}
+
+.fc-stats {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  font-size: 12.5px;
+  color: var(--text-2);
+}
+
+.fc-stats b {
+  font-family: var(--mono);
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+
+.fc-ratio { font-size: 12px; color: var(--warn); }
+
+.fc-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 2px;
+}
+
+.fc-clear { color: var(--danger); }
+
+.fc-go {
+  font-size: 13px;
+  color: var(--brand);
+  font-weight: 600;
+}
+
+/* ---------------------------------------------------------------- 单炉页头 */
+
+.furnace-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 4px 0 12px;
+  margin-bottom: 12px;
+  border-bottom: 1px solid var(--line);
+}
+
+.furnace-head .back { padding-left: 6px; }
+
+/* 单炉页：隐藏全局顶栏，只留炉号/炉膛和返回 */
+body.furnace-mode .topbar { display: none; }
+
+body.furnace-mode .app-shell { padding-top: 8px; }
+
+.furnace-head.compact {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 8px;
+  margin-bottom: 4px;
+  padding: 0 0 6px;
+  border-bottom: 0;
+}
+
+.fh-line1 {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.fh-line1 .fh-name { margin: 0; font-size: 22px; }
+
+.fh-line2 {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.fh-line2 .back {
+  min-width: 180px;
+  height: 44px;
+  padding: 0 18px;
+  font-size: 15px;
+}
+
+.swipe-hint {
+  color: var(--muted);
+  font-size: 11px;
+  display: none;
+}
+
+@media (max-width: 640px) {
+  .fh-line2 .back { flex: 1; }
+  .swipe-hint { display: inline; }
+}
+
+.furnace-foot-tools {
+  display: flex;
+  justify-content: flex-start;
+  padding: 2px 0 6px;
+}
+
+.fh-title { display: flex; align-items: center; gap: 8px; }
+
+.fh-title h2 { margin: 0; font-size: 22px; }
+
+.fh-progress {
+  font-size: 12.5px;
+  color: var(--text-2);
+  font-variant-numeric: tabular-nums;
+}
+
+.fh-actions { display: flex; gap: 6px; margin-left: auto; }
+
+/* 分段控件 */
+
+.seg {
+  display: inline-flex;
+  padding: 2px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: var(--surface-2);
+}
+
+.seg-btn {
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--text-2);
+  font: inherit;
+  font-size: 12.5px;
+  padding: 5px 12px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.seg-btn:hover { color: var(--text); }
+
+.seg-btn.active {
+  background: var(--surface);
+  color: var(--brand);
+  font-weight: 600;
+  box-shadow: var(--shadow-sm);
+}
+
+/* ---------------------------------------------------------------- 组步进 */
+
+.stepper {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.band {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.band-label {
+  width: 48px;
+  flex: none;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.band-groups { display: flex; gap: 6px; flex-wrap: wrap; }
+
+.group-chip {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+  min-width: 52px;
+  padding: 4px 8px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--text-2);
+  font: inherit;
+  cursor: pointer;
+  transition: border-color .12s, background .12s;
+}
+
+.group-chip:hover { border-color: var(--brand); }
+
+.group-chip.active {
+  border-color: var(--brand);
+  background: var(--brand-weak);
+  color: var(--brand);
+}
+
+.group-chip .gc-num { font-size: 13px; font-weight: 700; }
+
+.group-chip .gc-max {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  font-variant-numeric: tabular-nums;
+  color: var(--muted);
+}
+
+.group-chip.active .gc-max { color: var(--brand); }
+.group-chip.full .gc-max { color: var(--ok); }
+
+/* ---------------------------------------------------------------- 当前组 */
+
+.group-card {
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--surface);
+  box-shadow: var(--shadow);
+  padding: 14px 16px 12px;
+  margin-bottom: 14px;
+}
+
+.group-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding-bottom: 10px;
+  border-bottom: 1px dashed var(--line);
+}
+
+.gh-title { display: flex; align-items: center; gap: 8px; }
+
+.circled {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: var(--brand-weak);
+  color: var(--brand);
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.gh-title h3 { margin: 0; font-size: 18px; }
+
+.gh-chips { display: flex; gap: 6px; flex-wrap: wrap; flex: 1 1 220px; }
+
+.chip {
+  font-size: 12px;
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  color: var(--text-2);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.chip.ok { color: var(--ok); background: var(--ok-weak); border-color: transparent; }
+.chip.warn { color: var(--warn); background: var(--warn-weak); border-color: transparent; }
+.chip.max { color: var(--brand); background: var(--brand-weak); border-color: transparent; }
+.chip.muted { color: var(--muted); }
+
+.gh-actions { display: flex; gap: 6px; }
+
+.target-line {
+  padding: 9px 0 3px;
+  font-size: 12.5px;
+  color: var(--brand);
+}
+
+/* 相机实时预览：单炉页主区域 */
+.camera-panel {
+  position: relative;
+  width: 100%;
+  height: clamp(190px, 38vh, 420px);
+  margin-bottom: 10px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  overflow: hidden;
+  background: #0b0f14;
+  box-shadow: var(--shadow);
+}
+
+.camera-panel video {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.camera-placeholder {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 18px;
+  text-align: center;
+  color: #d7e0ea;
+  background: radial-gradient(circle at 50% 40%, #1d2b3a, #0b0f14 70%);
+}
+
+.camera-placeholder.hidden { display: none; }
+
+.camera-placeholder strong { font-size: 16px; }
+.camera-placeholder span { color: #9fb0c2; font-size: 12px; }
+.cam-icon { font-size: 36px; color: #7f9ab5; }
+
+.camera-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 10px 12px;
+  background: linear-gradient(rgba(0, 0, 0, .55), rgba(0, 0, 0, 0));
+  pointer-events: none;
+}
+
+.cam-target,
+.cam-state {
+  padding: 4px 8px;
+  border-radius: 6px;
+  background: rgba(0, 0, 0, .55);
+  color: #fff;
+  font-size: 12.5px;
+  white-space: nowrap;
+}
+
+.cam-state { color: #b9e6c9; font-size: 11.5px; }
+
+.scan-frame {
+  position: absolute;
+  inset: 14% 9%;
+  border: 1px solid rgba(255, 255, 255, .38);
+  border-radius: 10px;
+  pointer-events: none;
+}
+
+.scan-frame::before { content: ''; }
+
+/* 识别主控制：上一组 | 开始/暂停识别（大） | 下一组 */
+.control-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.nav-big {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 8px;
+  align-items: stretch;
+}
+
+.nav-big .nav-side { height: 48px; }
+
+.btn-recognize {
+  width: 100%;
+  height: 48px;
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: .04em;
+}
+
+.action-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.action-row .btn { height: 42px; }
+
+/* 读数网格：每行 6 块，12 块两行 */
+
+.cell-grid {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 8px;
+  padding: 8px 0 10px;
+}
+
+.cell-grid.cols-2 {
+  grid-template-columns: repeat(2, minmax(0, 340px));
+  justify-content: start;
+}
+
+.cell {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 6px 6px 5px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: var(--surface);
+  transition: border-color .12s, box-shadow .12s;
+}
+
+.cell:hover { border-color: var(--line-strong); }
+
+.cell:focus-within {
+  border-color: var(--brand);
+  box-shadow: 0 0 0 3px var(--brand-ring);
+  z-index: 1;
+}
+
+.cell-input {
+  width: 100%;
+  min-width: 0;
+  padding: 2px 0;
+  border: 0;
+  background: transparent;
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 20px;
+  font-weight: 600;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.cell-input:focus { outline: none; }
+
+.cell-input::placeholder { color: var(--muted); opacity: .4; font-weight: 400; }
+
+.cell-input.invalid { color: var(--danger); }
+
+.cell-actions {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  width: 100%;
+}
+
+.cell-idx { color: var(--muted); font-family: var(--mono); flex: 1; }
+
+.cell-ex,
+.cell-skip {
+  display: inline-flex;
+  align-items: center;
+  height: 15px;
+  padding: 0 4px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: transparent;
+  color: var(--muted);
+  font: inherit;
+  font-size: 9.5px;
+  line-height: 1;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.cell-ex:hover { color: var(--warn); border-color: var(--warn); }
+.cell-skip:hover { color: var(--brand); border-color: var(--brand); }
+
+.cell-ex.active { background: var(--warn); border-color: var(--warn); color: #fff; }
+.cell-skip.active { background: var(--brand); border-color: var(--brand); color: #fff; }
+
+.cell.is-skipped {
+  border-style: dashed;
+  background: var(--surface-2);
+}
+
+.cell.is-skipped .cell-input {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.cell.is-skipped .cell-input::placeholder { color: var(--muted); }
+
+.cell.is-start {
+  border-color: var(--warn);
+  box-shadow: inset 0 0 0 2px var(--warn);
+}
+
+.cell.is-start .cell-input { color: var(--warn); }
+
+.cell.is-excluded .cell-input {
+  text-decoration: line-through;
+  color: var(--ex);
+  font-weight: 500;
+}
+
+.cell.is-over { border-color: rgba(179, 38, 30, .5); }
+
+.cell.is-over .cell-input { color: var(--danger); }
+
+.cell.is-max { box-shadow: inset 0 0 0 2px var(--brand); }
+
+.cell.is-max .cell-idx { color: var(--brand); font-weight: 700; }
+
+/* 组底部导航 */
+
+.group-nav {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--line);
+}
+
+.nav-info {
+  flex: 1;
+  text-align: center;
+  font-size: 12px;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------------------------------------------------------------- 面板 */
+
+.panel {
+  margin-bottom: 14px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--surface);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+
+.panel-head {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--line);
+  background: var(--surface-2);
+}
+
+.panel-title { margin: 0; font-size: 14px; font-weight: 700; }
+
+.panel-note { font-size: 11.5px; color: var(--muted); }
+
+.panel-body { padding: 14px 16px 16px; }
+
+/* 集合管压力 */
+
+.ratio-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  padding: 8px 0;
+  border-bottom: 1px dashed var(--line);
+}
+
+.ratio-row:last-of-type { border-bottom: 0; }
+
+.ratio-field { display: flex; align-items: center; gap: 8px; }
+
+.ratio-label {
+  font-size: 12.5px;
+  color: var(--text-2);
+  white-space: nowrap;
+}
+
+.ratio-input {
+  width: 104px;
+  height: 32px;
+  padding: 0 8px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: var(--surface);
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
+}
+
+.ratio-input:focus {
+  outline: none;
+  border-color: var(--brand);
+  box-shadow: 0 0 0 3px var(--brand-ring);
+}
+
+.ratio-max { font-size: 12px; color: var(--muted); }
+
+.ratio-value {
+  font-family: var(--mono);
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+
+.badge-best {
+  display: inline-flex;
+  align-items: center;
+  height: 20px;
+  padding: 0 8px;
+  border-radius: 999px;
+  background: var(--warn);
+  color: #fff;
+  font-size: 11px;
+}
+
+.best-line {
+  margin-top: 10px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: var(--brand-weak);
+  color: var(--brand);
+  font-size: 13px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+/* 汇总表 */
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.data-table th,
+.data-table td {
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--line);
+  text-align: left;
+  white-space: nowrap;
+}
+
+.data-table thead th {
+  background: var(--surface-2);
+  color: var(--text-2);
+  font-size: 11.5px;
+  font-weight: 600;
+  border-bottom: 1px solid var(--line-strong);
+}
+
+.data-table td.num,
+.data-table th.num {
+  text-align: right;
+  font-family: var(--mono);
+  font-variant-numeric: tabular-nums;
+}
+
+.data-table .strong { font-weight: 700; }
+
+.data-table tbody tr:last-child td { border-bottom: 0; }
+
+.data-table .warn-text { color: var(--warn); }
+
+.table-wrap { overflow: auto; }
+
+.summary-table td:first-child { font-weight: 600; white-space: nowrap; }
+
+.summary-panel .table-wrap { padding: 0 2px 2px; }
+
+.summary-panel .panel-body { padding: 10px 16px 14px; }
+
+.ratio-panel .panel-body { padding-top: 10px; }
+
+/* ---------------------------------------------------------------- 导出 */
+
+.dialog-wide { width: min(820px, calc(100vw - 28px)); }
+
+.export-preview {
+  margin: 12px 0;
+  padding: 14px 16px;
+  max-height: 46vh;
+  overflow: auto;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: var(--surface-2);
+  color: var(--text);
+  font-family: var(--mono), "Segoe UI Symbol", "Microsoft YaHei", "PingFang SC", sans-serif;
+  font-size: 14px;
+  line-height: 1.9;
+  white-space: pre;
+}
+
+.export-preview:focus { outline: none; }
+
+/* 导出所有数据：摘要 */
+.export-summary {
+  margin: 12px 0;
+  padding: 4px 2px;
+  max-height: 46vh;
+  overflow: auto;
+}
+
+.export-summary:focus { outline: none; }
+
+.es-meta {
+  margin: 0 0 10px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.es-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.es-table th,
+.es-table td {
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--line);
+  text-align: left;
+  vertical-align: middle;
+}
+
+.es-table th {
+  color: var(--muted);
+  font-weight: 600;
+  font-size: 12px;
+}
+
+.es-table tbody tr:last-child td { border-bottom: 0; }
+
+.es-ratio {
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.es-max {
+  font-weight: 700;
+  color: var(--brand);
+}
+
+/* ---------------------------------------------------------------- 对话框 */
+
+.dialog {
+  width: min(720px, calc(100vw - 28px));
+  max-height: calc(100vh - 60px);
+  padding: 0;
+  border: 0;
+  border-radius: 16px;
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: 0 30px 80px rgba(8, 20, 34, .35);
+  overflow: hidden;
+}
+
+.dialog::backdrop { background: rgba(10, 20, 32, .48); }
+
+.dialog form {
+  display: flex;
+  flex-direction: column;
+  max-height: calc(100vh - 60px);
+}
+
+.dialog-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 15px 20px;
+  border-bottom: 1px solid var(--line);
+}
+
+.dialog-head h2 { margin: 0; font-size: 17px; }
+
+.dialog-head .icon-btn:focus,
+.dialog-head .icon-btn:focus-visible {
+  outline: none;
+  background: var(--surface-2);
+  color: var(--brand);
+}
+
+.dialog-body { padding: 18px 20px; overflow: auto; }
+
+.dialog-foot {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 13px 20px;
+  border-top: 1px solid var(--line);
+  background: var(--surface-2);
+}
+
+.hint { margin: 0 0 12px; font-size: 12.5px; color: var(--muted); line-height: 1.7; }
+
+.textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 13.5px;
+  line-height: 1.7;
+  resize: vertical;
+}
+
+.textarea:focus {
+  outline: none;
+  border-color: var(--brand);
+  box-shadow: 0 0 0 3px var(--brand-ring);
+}
+
+.check {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+  font-size: 13px;
+  color: var(--text-2);
+  cursor: pointer;
+}
+
+.check input { width: 16px; height: 16px; accent-color: var(--brand); }
+
+.help-body h3 { font-size: 14px; margin: 18px 0 8px; }
+.help-body h3:first-child { margin-top: 0; }
+.help-body ul { margin: 0; padding-left: 20px; }
+.help-body li { margin: 5px 0; font-size: 13px; color: var(--text-2); line-height: 1.7; }
+.help-body b { color: var(--text); }
+.help-body code {
+  padding: 1px 5px;
+  border-radius: 4px;
+  background: var(--surface-2);
+  font-family: var(--mono);
+  font-size: 12px;
+}
+
+/* ---------------------------------------------------------------- 提示 */
+
+.toasts {
+  position: fixed;
+  left: 50%;
+  bottom: 24px;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  z-index: 120;
+  pointer-events: none;
+  width: max-content;
+  max-width: calc(100vw - 32px);
+}
+
+.toast {
+  padding: 9px 16px;
+  border-radius: 10px;
+  background: #21303f;
+  color: #fff;
+  font-size: 13px;
+  box-shadow: 0 10px 30px rgba(8, 20, 34, .3);
+  animation: toast-in .18s ease;
+}
+
+.toast.ok { background: #0d6b45; }
+.toast.warn { background: #8f5100; }
+.toast.error { background: #a02020; }
+
+.toast.out {
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity .24s, transform .24s;
+}
+
+@keyframes toast-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ---------------------------------------------------------------- 页脚 */
+
+.foot {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 22px;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.foot-note { margin-left: auto; }
+
+/* ---------------------------------------------------------------- 方式1 → 方式2 */
+
+.dialog-foot .left { margin-right: auto; }
+
+.conv-textarea {
+  min-height: 190px;
+  font-size: 13px;
+}
+
+.conv-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+
+.conv-issues {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-top: 10px;
+}
+
+.conv-msg {
+  padding: 6px 10px;
+  border-radius: 7px;
+  font-size: 12.5px;
+  line-height: 1.6;
+}
+
+.conv-msg.ok { background: var(--ok-weak); color: var(--ok); }
+.conv-msg.warn { background: var(--warn-weak); color: var(--warn); }
+.conv-msg.error { background: var(--danger-weak); color: var(--danger); }
+
+.conv-furnaces {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.conv-furnace {
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface-2);
+}
+
+.cf-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.cf-title { font-size: 16px; }
+
+.cf-groups {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.cf-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 7px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--surface);
+  font-size: 12px;
+}
+
+.cf-group i { font-style: normal; color: var(--brand); font-weight: 600; }
+.cf-group b { font-family: var(--mono); font-weight: 600; }
+.cf-group em { font-style: normal; color: var(--muted); font-size: 11px; }
+
+.cf-headers {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+
+.cf-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12.5px;
+  color: var(--text-2);
+}
+
+.cf-ratio {
+  margin-top: 8px;
+  font-size: 12.5px;
+  color: var(--warn);
+  font-variant-numeric: tabular-nums;
+}
+
+.seg-sm .seg-btn { padding: 3px 8px; font-size: 11.5px; }
+
+/* ---------------------------------------------------------------- 响应式 */
+
+@media (max-width: 900px) {
+  .topbar { gap: 14px; }
+  .meta-fields { order: 3; width: 100%; margin-left: 0; }
+  .furnace-grid { grid-template-columns: minmax(0, 1fr); }
+  .kpis { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .fh-actions { margin-left: 0; }
+}
+
+@media (max-width: 640px) {
+  .app-shell { padding: 10px 10px 26px; }
+
+  .topbar { gap: 8px 10px; }
+  .brand { flex: 1 1 auto; min-width: 0; }
+  .brand-mark { width: 32px; height: 32px; }
+  .brand-text h1 { font-size: 16px; }
+  .brand-sub { font-size: 11px; }
+  .topbar-actions { gap: 2px; margin-left: auto; }
+  .topbar-actions .btn { height: 32px; padding: 0 8px; font-size: 12.5px; }
+  .topbar-actions .icon-btn { width: 32px; height: 32px; }
+
+  .page-title { font-size: 19px; }
+  .page-head { align-items: flex-start; }
+  .page-actions { width: 100%; flex-wrap: wrap; }
+  .page-actions .btn { flex: 1 1 auto; padding: 0 8px; font-size: 12.5px; }
+
+  .kpis { gap: 8px; }
+  .kpi { padding: 10px 11px; }
+  .kpi-value { font-size: 19px; }
+  .kpi-label { font-size: 11px; }
+  .kpi-sub { font-size: 10.5px; }
+
+  .furnace-card { padding: 14px; }
+  .fc-title { font-size: 18px; }
+  .fc-stats { gap: 10px; font-size: 12px; }
+
+  .furnace-head { gap: 8px; }
+  .fh-title h2 { font-size: 19px; }
+  .fh-progress { width: 100%; order: 4; }
+  .fh-actions { margin-left: auto; }
+
+  .seg-btn { padding: 5px 9px; font-size: 12px; }
+
+  .stepper { gap: 6px; }
+  .band { gap: 6px; }
+  .band-label { width: 40px; font-size: 10.5px; }
+  .group-chip { min-width: 46px; padding: 3px 6px; }
+  .group-chip .gc-num { font-size: 12px; }
+  .group-chip .gc-max { font-size: 9.5px; }
+
+  .group-card { padding: 10px 10px 8px; border-radius: 12px; }
+  .camera-panel { height: 34vh; min-height: 190px; border-radius: 12px; }
+  .nav-big { gap: 5px; }
+  .nav-big .nav-side { height: 44px; padding: 0 8px; font-size: 12px; }
+  .btn-recognize { height: 44px; font-size: 15px; }
+  .action-row .btn { height: 40px; font-size: 13px; }
+  .group-head { gap: 8px; }
+  .circled { width: 26px; height: 26px; font-size: 14px; }
+  .gh-title h3 { font-size: 16px; }
+  .gh-chips { flex-basis: 100%; order: 3; }
+  .gh-actions { margin-left: auto; }
+  .target-line { font-size: 12px; }
+
+  .cell-grid { gap: 5px; padding: 6px 0 8px; }
+  .cell-grid.cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .cell { padding: 4px 3px; border-radius: 7px; }
+  .cell-input { font-size: 14px; padding: 1px 0; }
+  .cell-ex,
+  .cell-skip { height: 14px; padding: 0 2px; font-size: 8.5px; }
+
+  .group-nav { gap: 6px; }
+  .group-nav .btn { padding: 0 10px; font-size: 12.5px; }
+  .nav-info { font-size: 11px; }
+
+  .panel-head { padding: 10px 12px; }
+  .panel-body { padding: 12px; }
+  .ratio-row { gap: 6px 10px; }
+  .ratio-field { width: 100%; justify-content: space-between; }
+  .ratio-input { width: 92px; }
+  .ratio-max { font-size: 11px; }
+  .ratio-value { font-size: 12.5px; }
+  .best-line { font-size: 12px; }
+
+  .data-table th, .data-table td { padding: 7px 8px; font-size: 12px; }
+
+  .conv-furnace { padding: 10px 10px; }
+  .cf-header { width: 100%; justify-content: space-between; }
+  .conv-actions .btn { flex: 1 1 auto; }
+
+  .export-preview { white-space: pre-wrap; overflow-wrap: anywhere; font-size: 12.5px; }
+
+  .foot-note { margin-left: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation-duration: .001ms !important; transition-duration: .001ms !important; }
+}
+
+</style>
+</head>
+<body>
+
+<div class="app-shell">
+
+  <header class="topbar">
+    <div class="brand">
+      <svg class="brand-mark" viewBox="0 0 48 48" aria-hidden="true">
+        <circle cx="24" cy="25" r="16" fill="none" stroke="currentColor" stroke-width="3.2"/>
+        <path d="M24 25 L33.5 14.5" stroke="currentColor" stroke-width="3.2" stroke-linecap="round"/>
+        <circle cx="24" cy="25" r="2.6" fill="currentColor"/>
+        <path d="M13 9 v4 M35 9 v4" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/>
+      </svg>
+      <div class="brand-text">
+        <h1>加热炉文丘里压力</h1>
+        <p class="brand-sub">2#～5# 炉 · 每台 8 组 · 0～0.4 MPa</p>
+      </div>
+    </div>
+
+    <div class="meta-fields">
+      <label class="field">
+        <span>日期</span>
+        <input id="metaDate" type="date">
+      </label>
+      <label class="field">
+        <span>时间</span>
+        <input id="metaTime" type="time">
+      </label>
+      <label class="field">
+        <span>记录人</span>
+        <input id="metaOperator" type="text" placeholder="姓名" maxlength="40" autocomplete="off">
+      </label>
+    </div>
+
+    <div class="topbar-actions">
+      <button class="btn ghost" id="btnNew" type="button">新建</button>
+      <button class="btn ghost" id="btnImport" type="button">导入 Excel</button>
+      <button class="btn primary" id="btnExport" type="button">导出所有数据</button>
+      <button class="btn ghost" id="btnHelp" type="button">说明</button>
+      <button class="icon-btn" id="btnTheme" type="button" title="切换深色/浅色">☾</button>
+    </div>
+  </header>
+
+  <main id="view" class="view"></main>
+
+  <footer class="foot">
+    <span id="saveHint">自动保存已开启</span>
+    <span class="foot-note">数据只存本机浏览器，请定期导出备份 · 识别模块接口：GaugeApp.pushReading(读数)</span>
+  </footer>
+
+</div>
+
+<div id="toasts" class="toasts" aria-live="polite"></div>
+
+<!-- 导出文丘里压力（方式1） -->
+<dialog id="dlgExport" class="dialog dialog-wide">
+  <form method="dialog">
+    <header class="dialog-head">
+      <h2>导出文丘里压力</h2>
+      <button class="icon-btn" type="button" data-close="dlgExport" aria-label="关闭">✕</button>
+    </header>
+    <div class="dialog-body">
+      <p class="hint" id="exportHint"></p>
+      <pre class="export-preview" id="exportPreview" tabindex="-1" autofocus></pre>
+      <p class="hint" id="exportNote"></p>
+    </div>
+    <footer class="dialog-foot">
+      <button class="btn ghost left" type="button" id="btnOpenRatio">绝压比计算 ›</button>
+      <button class="btn" type="button" id="btnCopyExport">复制</button>
+      <button class="btn primary" type="button" id="btnDownloadExport">下载 .txt</button>
+    </footer>
+  </form>
+</dialog>
+
+<!-- 导出所有数据 -->
+<dialog id="dlgExportAll" class="dialog dialog-wide">
+  <form method="dialog">
+    <header class="dialog-head">
+      <h2>导出所有数据</h2>
+      <button class="icon-btn" type="button" data-close="dlgExportAll" aria-label="关闭">✕</button>
+    </header>
+    <div class="dialog-body">
+      <p class="hint">Excel 文件（.xlsx）：所有数据在一张表，每台炉一块、一组一行；组最高值加粗、剔除读数划线；每台炉附 A/B 集合管压力，最大绝压比注明第几组第几块。</p>
+      <div id="exportAllSummary" class="export-summary" tabindex="-1" autofocus></div>
+      <p class="hint" id="exportAllNote"></p>
+    </div>
+    <footer class="dialog-foot">
+      <button class="btn ghost left" type="button" id="btnExportAllRatio">绝压比计算 ›</button>
+      <button class="btn" type="button" data-close="dlgExportAll">关闭</button>
+      <button class="btn primary" type="button" id="btnDownloadExportAll">下载 .xlsx</button>
+    </footer>
+  </form>
+</dialog>
+
+<!-- 识别结果填入 -->
+<dialog id="dlgFill" class="dialog">
+  <form method="dialog">
+    <header class="dialog-head">
+      <h2 id="fillTitle">识别结果填入</h2>
+      <button class="icon-btn" type="button" data-close="dlgFill" aria-label="关闭">✕</button>
+    </header>
+    <div class="dialog-body">
+      <p class="hint">识别模块每识别到一个读数，会自动填入下一个空位。这里也可以手动粘贴一批识别结果：每行一个，或用空格 / 逗号分隔。</p>
+      <textarea id="fillText" class="textarea" rows="7" spellcheck="false" placeholder="0.170&#10;0.148&#10;0.148"></textarea>
+      <label class="check"><input type="checkbox" id="fillAdvance" checked> 本组填满后自动进入下一组</label>
+    </div>
+    <footer class="dialog-foot">
+      <button class="btn" type="button" data-close="dlgFill">取消</button>
+      <button class="btn primary" type="button" id="btnFill">填入</button>
+    </footer>
+  </form>
+</dialog>
+
+<!-- 说明 -->
+<dialog id="dlgHelp" class="dialog">
+  <form method="dialog">
+    <header class="dialog-head">
+      <h2>使用说明</h2>
+      <button class="icon-btn" type="button" data-close="dlgHelp" aria-label="关闭">✕</button>
+    </header>
+    <div class="dialog-body help-body">
+      <h3>流程</h3>
+      <ul>
+        <li>顶部填日期、时间、记录人；首页选炉子（2# / 3# / 4# / 5#）→ 逐组录入 → 「下一组」→「完成本炉」回主界面。</li>
+        <li>2#～5# 炉都录完后，回主界面点「<b>绝压比计算</b>」，填集合管压力生成方式2。</li>
+        <li>每台炉卡片左下角有「<b>清空</b>」，只清空这一台炉的读数。</li>
+        <li>每台炉 8 组：<b>第 1～4 组 = A 炉膛</b>，<b>第 5～8 组 = B 炉膛</b>。右上角可切换「整台 / A炉膛 / B炉膛」，只测半台时选 A 或 B。</li>
+        <li>2号炉每组 2 块表（每行一组）；3/4/5号炉每组 12 块表（每行 6 块，两行一组）。</li>
+      </ul>
+      <h3>录入</h3>
+      <ul>
+        <li>单炉页隐藏顶部栏：第一行只显示炉号和炉膛选择，第二行是加宽的返回主界面按钮；手机从页面中间向右划也能返回。</li>
+        <li>单炉页主区域是相机实时画面；手机浏览器需要 HTTPS，没权限时点「打开相机」重试。</li>
+        <li>进炉子页默认暂停，点中间大按钮「开始识别」后才接收识别读数；再点变成「暂停识别」。</li>
+        <li>指定起点：点下面组内任意一块表，再点「开始识别」，就从这块开始；识别中点击某格会自动暂停。</li>
+        <li>「上一组 / 下一组」在大按钮两侧；下一行是「跳过（送检）」和「剔除本块」。</li>
+        <li>点格子输入读数；<b>回车</b>跳到下一块，<b>方向键</b>按位置跳格，<b>X</b> 剔除当前读数，<b>Esc</b> 退出输入框。</li>
+        <li>读数支持全角数字、带单位（0.170 MPa）、逗号小数点。</li>
+        <li>识别模块识别到一个读数就调用一次 <code>GaugeApp.pushReading(0.170)</code>，会顺序填入当前识别位置；也可以点「识别填入」粘贴一批结果。</li>
+        <li>「剔除」的读数不参与最高值，原始值仍保留在本机 JSON 中。</li>
+        <li><b>表被送检</b>：点「跳过（送检）」或格子右下「送」，该表标记为送检，不参与最高值/绝压比；点「送」可恢复。</li>
+        <li><b>反向读取</b>：点底部的「方向：正序/倒序」，整台炉按 组8→1、组内 12#→1# 识别。</li>
+        <li><b>现场排表/换表</b>：点「暂停识别」，换好表后点下面那一块表，再点「开始识别」，就从这块开始。</li>
+      </ul>
+      <h3>绝压比计算</h3>
+      <ul>
+        <li>正常流程：先把所有炉子的文丘里读数录完，再去操作室看集合管压力。</li>
+        <li>主界面点「绝压比计算」，会自动载入当前读数；也可以粘贴方式1文本（老记录/别人发来的）。</li>
+        <li>粘贴的炉膛标题支持简写：<code>4号炉A</code>、<code>4号炉 A</code>、<code>4号炉A炉膛</code>、<code>4号炉B侧</code> 都能识别。</li>
+        <li>A、B 炉膛各填一个集合管压力（MPa）；绝压比 =（单炉膛最高 + 大气压）/（集合管压力 + 大气压），大气压取 <b>0.1 MPa</b>。</li>
+        <li>两个炉膛取较大者作为「最大绝压比」，并标出最高读数所在的组，生成方式2。</li>
+      </ul>
+      <h3>导出</h3>
+      <ul>
+        <li><b>导出文丘里压力（方式1）</b>：每台炉一个标题（半台带 A/B炉膛），每组一行「最高值表号 最高值」。</li>
+        <li><b>导出所有数据</b>（顶栏）：Excel（.xlsx），所有数据一张表，每台炉一块、一组一行；组最高值加粗、剔除划线、送检写「送检」；每台炉附 A/B 集合管压力，最大绝压比注明第几组第几块。</li>
+        <li><b>方式2</b>：在「绝压比计算」页面生成，①～⑧ 圈号 + &lt;表号&gt;读数 + A/B集合管压力，最后一行「最大绝压比 ⑤ 0.84375」。</li>
+        <li>只导出有读数的炉子；空组在方式1里显示为 <code>- -</code>。</li>
+      </ul>
+      <h3>手机打开</h3>
+      <ul>
+        <li>手机只传一个文件：用 <code>读表软件_手机版.html</code>，CSS/JS 已内联；只传 <code>index.html</code> 会缺 <code>js/</code>、<code>assets/</code>，页面会空白或没样式。</li>
+        <li>直接打开本地文件时，录入、导入导出、绝压比计算都能用；手机浏览器不允许 <code>file://</code> 调用摄像头。</li>
+        <li>要实时相机：页面必须在 <code>https://</code> 开头的网址下；<code>file://</code> 和 <code>http://192.168…</code> 都不允许调用摄像头。可把单文件放到 GitHub Pages / Netlify / 公司 HTTPS 服务器，或用 App 包壳；不要用微信/QQ 的文件预览打开。</li>
+      </ul>
+      <h3>数据</h3>
+      <ul>
+        <li>每次修改自动保存在本机浏览器；换电脑/清缓存前请「导出所有数据」Excel 或「导出文丘里压力」文本备份。</li>
+        <li>「导入 Excel」可把导出的 .xlsx 读回来，恢复读数、剔除、送检、集合管压力和日期时间；旧 JSON 备份也兼容。</li>
+        <li>整个页面离线运行，不上传任何数据。</li>
+      </ul>
+    </div>
+    <footer class="dialog-foot">
+      <button class="btn primary" type="button" data-close="dlgHelp">知道了</button>
+    </footer>
+  </form>
+</dialog>
+
+<input type="file" id="fileInput" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,.json,application/json" hidden>
+
+<script>
+/*!
+ * core.js — 加热炉文丘里压力 · 数据与导出核心
+ * 版本 2.0.0
+ *
+ * 业务模型
+ *   - 4 台加热炉：2号、3号、4号、5号；每台 8 组。
+ *   - 2号炉每组 2 块表；3/4/5号炉每组 12 块表。
+ *   - 第 1～4 组属于 A 炉膛，第 5～8 组属于 B 炉膛。
+ *   - 每台炉可选择测整台 / 只测 A 炉膛 / 只测 B 炉膛。
+ *   - 每台炉、每个炉膛各有一个集合管压力；绝压比 =
+ *       (单炉膛最高读数 + 大气压) / (该炉膛集合管压力 + 大气压)，大气压 0.1 MPa。
+ *     两个炉膛取较大者作为“最大绝压比”。
+ *
+ * 不依赖任何第三方库，浏览器与 Node 通用（UMD），便于单测和后续识别模块复用。
+ */
+(function (root, factory) {
+  'use strict';
+  if (typeof module === 'object' && module.exports) module.exports = factory();
+  else root.GaugeCore = factory();
+})(typeof globalThis !== 'undefined' ? globalThis : this, function () {
+  'use strict';
+
+  var VERSION = '2.0.0';
+
+  var ATM = 0.1; // 大气压，MPa
+
+  var CONFIG = {
+    min: 0,
+    max: 0.4,
+    unit: 'MPa',
+    decimals: 3,
+    atmosphere: ATM
+  };
+
+  /** 炉子定义：2号炉每组只有 2 块表 */
+  var FURNACE_DEFS = [
+    { id: '2', label: '2号炉', groups: 8, perGroup: 2 },
+    { id: '3', label: '3号炉', groups: 8, perGroup: 12 },
+    { id: '4', label: '4号炉', groups: 8, perGroup: 12 },
+    { id: '5', label: '5号炉', groups: 8, perGroup: 12 }
+  ];
+
+  var CIRCLED = ['①', '②', '③', '④', '⑤', '⑥', '⑦', '⑧', '⑨', '⑩'];
+
+  var SIDES = ['full', 'A', 'B'];
+
+  /* ------------------------------------------------------------------ *
+   * 一、基础工具
+   * ------------------------------------------------------------------ */
+
+  function isNum(v) {
+    return typeof v === 'number' && isFinite(v);
+  }
+
+  function clampInt(n, lo, hi) {
+    n = Math.round(Number(n));
+    if (!isFinite(n)) return lo;
+    return n < lo ? lo : n > hi ? hi : n;
+  }
+
+  function roundTo(v, decimals) {
+    var f = Math.pow(10, clampInt(decimals, 0, 6));
+    var r = Math.round((Number(v) + Number.EPSILON) * f) / f;
+    return r === 0 ? 0 : r;
+  }
+
+  function pad2(n) {
+    return (n < 10 ? '0' : '') + n;
+  }
+
+  function todayStr(d) {
+    d = d || new Date();
+    return d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate());
+  }
+
+  function nowStr(d) {
+    d = d || new Date();
+    return todayStr(d) + ' ' + pad2(d.getHours()) + ':' + pad2(d.getMinutes());
+  }
+
+  function nowTimeStr(d) {
+    d = d || new Date();
+    return pad2(d.getHours()) + ':' + pad2(d.getMinutes());
+  }
+
+  /** 第 g 组属于哪个炉膛（g 从 0 开始）：0～3 → A，4～7 → B */
+  function chamberOf(g) {
+    return g < 4 ? 'A' : 'B';
+  }
+
+  function sideLabel(side) {
+    return side === 'full' ? '整台' : side + '炉膛';
+  }
+
+  /* ------------------------------------------------------------------ *
+   * 二、结构
+   * ------------------------------------------------------------------ */
+
+  function emptyCell() {
+    return { v: null, ex: false, skip: false };
+  }
+
+  function createBatch(meta) {
+    var m = meta || {};
+    var furnaces = FURNACE_DEFS.map(function (def) {
+      var cells = [];
+      for (var g = 0; g < def.groups; g++) {
+        var row = [];
+        for (var i = 0; i < def.perGroup; i++) row.push(emptyCell());
+        cells.push(row);
+      }
+      return {
+        id: def.id,
+        label: def.label,
+        groups: def.groups,
+        perGroup: def.perGroup,
+        side: 'full',
+        headerA: null,
+        headerB: null,
+        cells: cells
+      };
+    });
+    return {
+      version: VERSION,
+      meta: {
+        date: /^\d{4}-\d{2}-\d{2}$/.test(m.date || '') ? m.date : todayStr(),
+        time: /^\d{1,2}:\d{2}/.test(m.time || '') ? String(m.time).slice(0, 5) : nowTimeStr(),
+        operator: String(m.operator || '').slice(0, 40),
+        note: String(m.note || '').slice(0, 200)
+      },
+      config: {
+        min: CONFIG.min,
+        max: CONFIG.max,
+        unit: CONFIG.unit,
+        decimals: CONFIG.decimals,
+        atmosphere: CONFIG.atmosphere
+      },
+      furnaces: furnaces
+    };
+  }
+
+  function furnaceById(batch, id) {
+    if (!batch || !Array.isArray(batch.furnaces)) return null;
+    for (var i = 0; i < batch.furnaces.length; i++) {
+      if (batch.furnaces[i].id === String(id)) return batch.furnaces[i];
+    }
+    return null;
+  }
+
+  function groupsInScope(f) {
+    var out = [];
+    for (var g = 0; g < f.groups; g++) {
+      if (f.side === 'full') out.push(g);
+      else if (f.side === 'A' && g < 4) out.push(g);
+      else if (f.side === 'B' && g >= 4) out.push(g);
+    }
+    return out;
+  }
+
+  function isGroupInScope(f, g) {
+    return groupsInScope(f).indexOf(g) >= 0;
+  }
+
+  function setSide(batch, id, side) {
+    var f = furnaceById(batch, id);
+    if (!f || SIDES.indexOf(side) < 0) return f;
+    f.side = side;
+    return f;
+  }
+
+  function nextInScopeGroup(f, g) {
+    var list = groupsInScope(f);
+    var idx = list.indexOf(g);
+    return idx >= 0 && idx < list.length - 1 ? list[idx + 1] : -1;
+  }
+
+  function prevInScopeGroup(f, g) {
+    var list = groupsInScope(f);
+    var idx = list.indexOf(g);
+    return idx > 0 ? list[idx - 1] : -1;
+  }
+
+  /* ------------------------------------------------------------------ *
+   * 三、读数解析 / 格式化
+   * ------------------------------------------------------------------ */
+
+  function normalizeText(text) {
+    return String(text)
+      .replace(/[０-９]/g, function (ch) { return String.fromCharCode(ch.charCodeAt(0) - 0xFEE0); })
+      .replace(/[．。]/g, '.')
+      .replace(/[－—–ー]/g, '-')
+      .replace(/＋/g, '+')
+      .replace(/[，、]/g, ',')
+      .replace(/\u00a0/g, ' ')
+      .trim();
+  }
+
+  /** 解析一个读数，支持 "0.12"、"0.12 MPa"、"０.１２"、"0,12" */
+  function parseValue(text) {
+    if (text == null) return { ok: true, empty: true, value: null };
+    var s = normalizeText(text);
+    if (!s) return { ok: true, empty: true, value: null };
+    if (s.indexOf(',') !== -1) {
+      s = s.indexOf('.') === -1 ? s.replace(/,/g, '.') : s.replace(/,/g, '');
+    }
+    s = s.replace(/[^0-9.+\-]/g, '');
+    if (!s) return { ok: false, empty: false, error: '未识别到数字' };
+    var neg = s.charAt(0) === '-';
+    s = s.replace(/[+\-]/g, '');
+    if (!s) return { ok: false, empty: false, error: '格式无效' };
+    if (s.indexOf('.') !== s.lastIndexOf('.')) return { ok: false, empty: false, error: '小数点过多' };
+    if (s === '.') return { ok: false, empty: false, error: '格式无效' };
+    var n = Number((neg ? '-' : '') + s);
+    if (!isFinite(n)) return { ok: false, empty: false, error: '格式无效' };
+    return { ok: true, empty: false, value: n };
+  }
+
+  /** 固定小数位，如 0.170（界面与方式2用） */
+  function formatFixed(v, decimals) {
+    if (v == null || v === '' || !isFinite(v)) return '';
+    return Number(v).toFixed(clampInt(decimals != null ? decimals : 3, 0, 4));
+  }
+
+  /** 去掉多余 0，如 0.400 → "0.4"（方式1用，贴近历史文本习惯） */
+  function formatReading(v, decimals) {
+    if (v == null || v === '' || !isFinite(v)) return '';
+    var s = Number(v).toFixed(clampInt(decimals != null ? decimals : 3, 0, 4));
+    if (s.indexOf('.') >= 0) s = s.replace(/0+$/, '').replace(/\.$/, '');
+    return s === '-0' ? '0' : s;
+  }
+
+  function formatRatio(r) {
+    if (r == null || !isFinite(r)) return '—';
+    return Number(r).toFixed(5);
+  }
+
+  /**
+   * 解析「导出文丘里压力」（方式1）的文本，供绝压比计算使用。
+   * 标题支持：4号炉 / 4号炉A / 4号炉 A / 4号炉Ａ / 4号炉A炉膛 / 4号炉B侧 …
+   * 返回 { furnaces:[{id,label,side,ambiguous,rawLines,groups,headerA,headerB}], issues:[...] }
+   * issues: { level:'error'|'warn', line?, msg }
+   */
+  function parseMode1(text) {
+    var src = String(text == null ? '' : text)
+      .replace(/^\ufeff/, '')
+      .replace(/\r\n?/g, '\n');
+    var lines = src.split('\n');
+    var furnaces = [];
+    var issues = [];
+    var current = null;
+
+    lines.forEach(function (raw, i) {
+      var line = raw.replace(/\u3000/g, ' ')
+        .replace(/[０-９]/g, function (ch) { return String.fromCharCode(ch.charCodeAt(0) - 0xFEE0); })
+        .replace(/[Ａａ]/g, 'A')
+        .replace(/[Ｂｂ]/g, 'B')
+        .trim();
+      if (!line) return;
+      if (line.indexOf('文丘里压力') === 0) return;
+
+      // 去掉空格后再认标题：4号炉A / 4号炉 A / 4号炉A炉膛 / 4号炉B侧 都行
+      var fm = line.replace(/\s+/g, '').match(/^(\d+)[#号]炉(?:([AB])(?:炉膛|膛|侧)?)?$/i);
+      if (fm) {
+        var label = fm[1] + '号炉';
+        var exist = null;
+        furnaces.forEach(function (f) { if (f.id === fm[1]) exist = f; });
+        if (exist) {
+          current = exist;
+          issues.push({ level: 'warn', line: i + 1, msg: label + ' 重复出现，已合并到前一处' });
+        } else {
+          current = { id: fm[1], label: label, side: fm[2] ? fm[2].toUpperCase() : null, rawLines: [] };
+          furnaces.push(current);
+        }
+        return;
+      }
+
+      if (!current) {
+        issues.push({ level: 'error', line: i + 1, msg: '读数行不在炉子标题下：' + line });
+        return;
+      }
+
+      if (/^[-—–]\s+[-—–]$/.test(line)) {
+        current.rawLines.push({ gauge: null, value: null });
+        return;
+      }
+
+      // 支持：3 0.170 / 3# 0.170 / 3#0.170 / 第3块 0.170 / 第3块0.170
+      var m = line.match(/^(?:第)?\s*(\d+)\s*(?:#|块)\s*(.+)$/);
+      if (!m) m = line.match(/^(?:第)?\s*(\d+)\s+(.+)$/);
+      if (!m) {
+        issues.push({ level: 'error', line: i + 1, msg: '无法解析：' + line });
+        return;
+      }
+      var p = parseValue(m[2]);
+      if (!p.ok || p.empty) {
+        issues.push({ level: 'error', line: i + 1, msg: '读数无法解析：' + line });
+        return;
+      }
+      current.rawLines.push({ gauge: Number(m[1]), value: p.value });
+    });
+
+    if (!furnaces.length) issues.push({ level: 'error', msg: '没有识别到「X号炉」标题' });
+
+    var out = [];
+    furnaces.forEach(function (f) {
+      var def = null;
+      FURNACE_DEFS.forEach(function (d) { if (d.id === f.id) def = d; });
+      if (!def) {
+        issues.push({ level: 'error', msg: '不认识的炉号：' + f.label });
+        return;
+      }
+
+      var side = f.side;
+      var ambiguous = false;
+      if (!side) {
+        if (f.rawLines.length === def.groups) {
+          side = 'full';
+        } else if (f.rawLines.length === 4) {
+          side = 'A';
+          ambiguous = true;
+          issues.push({ level: 'warn', msg: f.label + ' 有 4 行但没写 A/B 炉膛，暂按 A 炉膛；可在结果里切换' });
+        } else {
+          issues.push({ level: 'error', msg: f.label + ' 行数应为 8（整台）或 4（半台），实际 ' + f.rawLines.length });
+          return;
+        }
+      } else if (f.side && f.rawLines.length === def.groups) {
+        // 标题写了 A/B，但给了整台 8 行：按整台处理
+        issues.push({ level: 'warn', msg: f.label + ' 标注了 ' + sideLabel(side) + '，但给了 8 行，已按整台处理' });
+        side = 'full';
+        ambiguous = false;
+      }
+
+      var groups = side === 'full' ? [0, 1, 2, 3, 4, 5, 6, 7] : side === 'A' ? [0, 1, 2, 3] : [4, 5, 6, 7];
+      if (f.rawLines.length !== groups.length) {
+        issues.push({
+          level: 'error',
+          msg: f.label + ' 标注为 ' + sideLabel(side) + '，应有 ' + groups.length + ' 行，实际 ' + f.rawLines.length
+        });
+        return;
+      }
+
+      var bad = false;
+      var mapped = f.rawLines.map(function (ln, k) {
+        if (ln.value == null) return { index: groups[k], gauge: null, value: null };
+        if (!(ln.gauge >= 1 && ln.gauge <= def.perGroup)) {
+          issues.push({ level: 'error', msg: f.label + ' 第 ' + (k + 1) + ' 行表号 ' + ln.gauge + ' 超出 1~' + def.perGroup });
+          bad = true;
+        }
+        return { index: groups[k], gauge: ln.gauge, value: ln.value };
+      });
+      if (bad) return;
+
+      out.push({
+        id: f.id,
+        label: f.label,
+        side: side,
+        ambiguous: ambiguous,
+        rawLines: f.rawLines.slice(),
+        groups: mapped,
+        headerA: null,
+        headerB: null
+      });
+    });
+
+    return { furnaces: out, issues: issues };
+  }
+
+  /** 转换器里手动改半台炉的 A/B（只有 4 行的无标注炉才需要） */
+  function converterSetSide(item, side) {
+    var def = null;
+    FURNACE_DEFS.forEach(function (d) { if (d.id === item.id) def = d; });
+    if (!def) return false;
+    var groups = side === 'full' ? [0, 1, 2, 3, 4, 5, 6, 7] : side === 'A' ? [0, 1, 2, 3] : [4, 5, 6, 7];
+    if (item.rawLines.length !== groups.length) return false;
+    item.side = side;
+    item.ambiguous = false;
+    item.groups = item.rawLines.map(function (ln, k) {
+      return { index: groups[k], gauge: ln.gauge, value: ln.value };
+    });
+    return true;
+  }
+
+  /** 把解析结果还原成 batch（只还原每组最高值，足够生成方式2与绝压比） */
+  function converterToBatch(items) {
+    var b = createBatch();
+    items.forEach(function (it) {
+      var f = furnaceById(b, it.id);
+      if (!f) return;
+      setSide(b, it.id, it.side);
+      it.groups.forEach(function (g) {
+        if (g.value != null && g.gauge != null) setValue(b, it.id, g.index, g.gauge - 1, g.value);
+      });
+      if (it.headerA != null) setHeader(b, it.id, 'A', it.headerA);
+      if (it.headerB != null) setHeader(b, it.id, 'B', it.headerB);
+    });
+    return b;
+  }
+
+  /** 把一段文本解析成读数数组（识别结果批量填入用） */
+  function parseReadings(text) {
+    var t = String(text == null ? '' : text).trim();
+    if (!t) return [];
+    if (t.charAt(0) === '{' || t.charAt(0) === '[') {
+      try {
+        var obj = JSON.parse(t);
+        var rows = Array.isArray(obj) ? obj : (obj.readings || obj.cells || null);
+        if (Array.isArray(rows)) {
+          var flat = [];
+          rows.forEach(function (row) {
+            if (Array.isArray(row)) {
+              row.forEach(function (x) {
+                var p = parseValue(x);
+                flat.push(p.ok && !p.empty ? p.value : null);
+              });
+            } else {
+              var p2 = parseValue(row);
+              flat.push(p2.ok && !p2.empty ? p2.value : null);
+            }
+          });
+          return flat;
+        }
+      } catch (e) { /* 不是 JSON，按普通文本处理 */ }
+    }
+    var lines = t.split(/[\r\n]+/).filter(function (l) { return l.trim(); });
+    var out = [];
+    if (lines.length > 1) {
+      lines.forEach(function (line) {
+        var nums = line.match(/-?\d+(?:\.\d+)?/g) || [];
+        out.push(nums.length ? Number(nums[nums.length - 1]) : null);
+      });
+    } else {
+      var nums = t.match(/-?\d+(?:\.\d+)?/g) || [];
+      nums.forEach(function (n) { out.push(Number(n)); });
+    }
+    return out;
+  }
+
+  /* ------------------------------------------------------------------ *
+   * 四、写入
+   * ------------------------------------------------------------------ */
+
+  function setValue(batch, id, g, i, value) {
+    var f = furnaceById(batch, id);
+    if (!f || !f.cells[g] || !f.cells[g][i]) return null;
+    var cell = f.cells[g][i];
+    if (value == null || value === '') {
+      cell.v = null;
+      cell.skip = false;
+      return cell;
+    }
+    var n;
+    if (isNum(value)) n = value;
+    else {
+      var p = parseValue(value);
+      n = p.ok && !p.empty ? p.value : null;
+    }
+    cell.v = n == null ? null : roundTo(n, batch.config.decimals);
+    if (cell.v != null) cell.skip = false;
+    return cell;
+  }
+
+  function setExcluded(batch, id, g, i, ex) {
+    var f = furnaceById(batch, id);
+    if (!f || !f.cells[g] || !f.cells[g][i]) return null;
+    f.cells[g][i].ex = !!ex;
+    if (ex) f.cells[g][i].skip = false;
+    return f.cells[g][i];
+  }
+
+  /** 送检跳过：与「剔除」不同，表示这块表不在本次测量范围 */
+  function setSkipped(batch, id, g, i, skip) {
+    var f = furnaceById(batch, id);
+    if (!f || !f.cells[g] || !f.cells[g][i]) return null;
+    var cell = f.cells[g][i];
+    cell.skip = !!skip;
+    if (skip) {
+      cell.v = null;
+      cell.ex = false;
+    }
+    return cell;
+  }
+
+  function setHeader(batch, id, ch, value) {
+    var f = furnaceById(batch, id);
+    if (!f) return;
+    var n = null;
+    if (value != null && value !== '') {
+      if (isNum(value)) n = value;
+      else {
+        var p = parseValue(value);
+        n = p.ok && !p.empty ? p.value : null;
+      }
+    }
+    if (ch === 'A') f.headerA = n == null ? null : roundTo(n, batch.config.decimals);
+    else if (ch === 'B') f.headerB = n == null ? null : roundTo(n, batch.config.decimals);
+  }
+
+  function clearGroup(batch, id, g) {
+    var f = furnaceById(batch, id);
+    if (!f || !f.cells[g]) return;
+    for (var i = 0; i < f.cells[g].length; i++) f.cells[g][i] = emptyCell();
+  }
+
+  function clearFurnace(batch, id) {
+    var f = furnaceById(batch, id);
+    if (!f) return;
+    for (var g = 0; g < f.groups; g++) clearGroup(batch, id, g);
+    f.headerA = null;
+    f.headerB = null;
+  }
+
+  /** 当前组里第一个空位（没读数的格子），没有返回 -1 */
+  function nextEmptyIndex(f, g, reverse) {
+    var row = f.cells[g] || [];
+    if (reverse) {
+      for (var i = row.length - 1; i >= 0; i--) {
+        if (row[i].v == null && !row[i].skip) return i;
+      }
+      return -1;
+    }
+    for (var j = 0; j < row.length; j++) {
+      if (row[j].v == null && !row[j].skip) return j;
+    }
+    return -1;
+  }
+
+  /* ------------------------------------------------------------------ *
+   * 五、统计
+   * ------------------------------------------------------------------ */
+
+  function groupStat(f, g) {
+    var cells = f.cells[g] || [];
+    var st = {
+      group: g,
+      chamber: chamberOf(g),
+      count: cells.length,
+      filled: 0,
+      skipped: 0,
+      handled: 0,
+      valid: 0,
+      excluded: 0,
+      missing: 0,
+      complete: false,
+      max: null,
+      maxIndex: -1,
+      over: 0
+    };
+    for (var i = 0; i < cells.length; i++) {
+      var c = cells[i];
+      if (c && c.skip) { st.skipped++; continue; }
+      if (!c || !isNum(c.v)) { st.missing++; continue; }
+      st.filled++;
+      if (c.ex) { st.excluded++; continue; }
+      st.valid++;
+      if (st.max === null || c.v > st.max) { st.max = c.v; st.maxIndex = i; }
+      if (c.v > CONFIG.max) st.over++;
+    }
+    st.handled = st.filled + st.skipped;
+    st.complete = st.count > 0 && st.handled === st.count;
+    return st;
+  }
+
+  function chamberStat(f, ch) {
+    var groups = groupsInScope(f).filter(function (g) { return chamberOf(g) === ch; });
+    var out = {
+      chamber: ch,
+      groups: groups,
+      count: 0,
+      filled: 0,
+      skipped: 0,
+      handled: 0,
+      valid: 0,
+      excluded: 0,
+      missing: 0,
+      complete: false,
+      max: null,
+      maxGroup: -1,
+      maxIndex: -1
+    };
+    groups.forEach(function (g) {
+      var s = groupStat(f, g);
+      out.count += s.count;
+      out.filled += s.filled;
+      out.skipped += s.skipped;
+      out.handled += s.handled;
+      out.valid += s.valid;
+      out.excluded += s.excluded;
+      out.missing += s.missing;
+      if (s.max !== null && (out.max === null || s.max > out.max)) {
+        out.max = s.max;
+        out.maxGroup = g;
+        out.maxIndex = s.maxIndex;
+      }
+    });
+    out.complete = out.count > 0 && out.handled === out.count;
+    return out;
+  }
+
+  function headerOf(f, ch) {
+    return ch === 'A' ? f.headerA : ch === 'B' ? f.headerB : null;
+  }
+
+  /** 单个炉膛的绝压比；缺读数或缺集合管压力时 ratio = null */
+  function ratioOf(f, ch) {
+    var inScope = groupsInScope(f).some(function (g) { return chamberOf(g) === ch; });
+    if (!inScope) return { chamber: ch, inScope: false, ratio: null };
+    var cs = chamberStat(f, ch);
+    var h = headerOf(f, ch);
+    var atm = ATM;
+    var ratio = cs.max !== null && isNum(h) ? (cs.max + atm) / (h + atm) : null;
+    return {
+      chamber: ch,
+      inScope: true,
+      ratio: ratio,
+      max: cs.max,
+      maxGroup: cs.maxGroup,
+      maxIndex: cs.maxIndex,
+      header: isNum(h) ? h : null,
+      groups: cs.groups,
+      valid: cs.valid,
+      filled: cs.filled,
+      skipped: cs.skipped,
+      excluded: cs.excluded,
+      missing: cs.missing,
+      count: cs.count
+    };
+  }
+
+  /** 两个炉膛中较大的绝压比（含对应组号、表号） */
+  function bestRatioOf(f) {
+    var best = null;
+    ['A', 'B'].forEach(function (ch) {
+      var r = ratioOf(f, ch);
+      if (r.ratio !== null && (best === null || r.ratio > best.ratio)) best = r;
+    });
+    return best;
+  }
+
+  function furnaceStat(f) {
+    var groups = groupsInScope(f).map(function (g) { return groupStat(f, g); });
+    var total = 0;
+    var filled = 0;
+    var skipped = 0;
+    var handled = 0;
+    var valid = 0;
+    var excluded = 0;
+    var missing = 0;
+    var max = null;
+    var maxGroup = -1;
+    var maxIndex = -1;
+    groups.forEach(function (s) {
+      total += s.count;
+      filled += s.filled;
+      skipped += s.skipped;
+      handled += s.handled;
+      valid += s.valid;
+      excluded += s.excluded;
+      missing += s.missing;
+      if (s.max !== null && (max === null || s.max > max)) {
+        max = s.max;
+        maxGroup = s.group;
+        maxIndex = s.maxIndex;
+      }
+    });
+    var chambers = {
+      A: ratioOf(f, 'A'),
+      B: ratioOf(f, 'B')
+    };
+    var best = bestRatioOf(f);
+    return {
+      furnace: f,
+      groups: groups,
+      total: total,
+      filled: filled,
+      skipped: skipped,
+      handled: handled,
+      valid: valid,
+      excluded: excluded,
+      missing: missing,
+      complete: total > 0 && handled === total,
+      max: max,
+      maxGroup: maxGroup,
+      maxIndex: maxIndex,
+      chambers: chambers,
+      best: best
+    };
+  }
+
+  function batchStat(batch) {
+    var furnaces = batch.furnaces.map(function (f) { return furnaceStat(f); });
+    var total = 0;
+    var filled = 0;
+    var skipped = 0;
+    var handled = 0;
+    var measured = 0;
+    var complete = 0;
+    var best = null;
+    var bestFurnace = null;
+    furnaces.forEach(function (st) {
+      total += st.total;
+      filled += st.filled;
+      skipped += st.skipped;
+      handled += st.handled;
+      if (st.filled > 0) measured++;
+      if (st.complete) complete++;
+      if (st.best && (best === null || st.best.ratio > best.ratio)) {
+        best = st.best;
+        bestFurnace = st.furnace;
+      }
+    });
+    return {
+      furnaces: furnaces,
+      total: total,
+      filled: filled,
+      skipped: skipped,
+      handled: handled,
+      measured: measured,
+      complete: complete,
+      best: best,
+      bestFurnace: bestFurnace
+    };
+  }
+
+  function hasFurnaceData(f) {
+    for (var g = 0; g < f.groups; g++) {
+      var row = f.cells[g] || [];
+      for (var i = 0; i < row.length; i++) {
+        if (row[i] && row[i].v != null) return true;
+      }
+    }
+    return false;
+  }
+
+  /** 当前炉膛范围内是否有读数（导出只看这个范围） */
+  function hasScopeData(f) {
+    var groups = groupsInScope(f);
+    for (var k = 0; k < groups.length; k++) {
+      var row = f.cells[groups[k]] || [];
+      for (var i = 0; i < row.length; i++) {
+        if (row[i] && row[i].v != null) return true;
+      }
+    }
+    return false;
+  }
+
+  function hasBatchData(batch) {
+    return batch.furnaces.some(hasFurnaceData);
+  }
+
+  /* ------------------------------------------------------------------ *
+   * 六、文本快捷导出
+   * ------------------------------------------------------------------ */
+
+  function furnacesWithData(batch) {
+    return batch.furnaces.filter(hasScopeData);
+  }
+
+  /** 与 xlsx-lite.js 中 cellXfs 的顺序一一对应 */
+  var REPORT_STYLE = {
+    text: 0,
+    num: 1,
+    label: 2,
+    boldNum: 3,
+    strikeNum: 4,
+    title: 5,
+    header: 6,
+    ratio: 8,
+    boldRatio: 9,
+    plain: 10,
+    plainBold: 11
+  };
+
+  function colLetter(n) {
+    var s = '';
+    while (n > 0) {
+      var m = (n - 1) % 26;
+      s = String.fromCharCode(65 + m) + s;
+      n = Math.floor((n - 1) / 26);
+    }
+    return s;
+  }
+
+  function rcell(v, s) {
+    return { v: v == null ? null : v, s: s };
+  }
+
+  /**
+   * “导出所有数据”用的 Excel 工作簿：
+   *   所有数据一张表：每台炉一块，一组一行；组最高值加粗；剔除读数划线；
+   *   每台炉补充 A/B 集合管压力；最大绝压比注明第几组第几块。
+   */
+  function toReportWorkbook(batch) {
+    var cfg = batch.config;
+    var m = batch.meta;
+    var S = REPORT_STYLE;
+    var list = furnacesWithData(batch);
+
+    var maxCols = 15;
+    var rows = [];
+    var merges = [];
+    var add = function (row) { rows.push(row); return rows.length; };
+
+    add([rcell('加热炉文丘里压力', S.title)]);
+    merges.push('A1:' + colLetter(maxCols) + '1');
+    add([rcell('日期', S.plainBold), rcell(m.date, S.plain)]);
+    add([rcell('时间', S.plainBold), rcell(m.time || nowTimeStr(), S.plain)]);
+    add([rcell('记录人', S.plainBold), rcell(m.operator || '', S.plain)]);
+    add([rcell('导出时间', S.plainBold), rcell(nowStr(), S.plain)]);
+    add([rcell('A炉膛 = 第1～4组，B炉膛 = 第5～8组；送检的表写作“送检”，最大绝压比后注明第几组第几块', S.plain)]);
+    merges.push('A6:' + colLetter(maxCols) + '6');
+    add([]);
+
+    list.forEach(function (f) {
+      var width = f.perGroup + 3;
+      var titleRow = add([rcell(f.label + '（' + sideLabel(f.side) + '）', S.title)]);
+      merges.push('A' + titleRow + ':' + colLetter(width) + titleRow);
+
+      var header = [rcell('组', S.header)];
+      for (var i = 0; i < f.perGroup; i++) header.push(rcell((i + 1) + '#', S.header));
+      header.push(rcell('最高值', S.header), rcell('表号', S.header));
+      add(header);
+
+      groupsInScope(f).forEach(function (g) {
+        var st = groupStat(f, g);
+        var row = [rcell('第' + (g + 1) + '组', S.label)];
+        for (var i = 0; i < f.perGroup; i++) {
+          var c = f.cells[g][i];
+          if (c && c.skip) {
+            row.push(rcell('送检', S.text));
+          } else if (!c || c.v == null) {
+            row.push(rcell(null, S.num));
+          } else if (c.ex) {
+            row.push(rcell(c.v, S.strikeNum));
+          } else if (i === st.maxIndex) {
+            row.push(rcell(c.v, S.boldNum));
+          } else {
+            row.push(rcell(c.v, S.num));
+          }
+        }
+        row.push(st.max == null ? rcell(null, S.boldNum) : rcell(st.max, S.boldNum));
+        row.push(st.maxIndex >= 0 ? rcell((st.maxIndex + 1) + '#', S.text) : rcell(null, S.text));
+        add(row);
+      });
+
+      var a = ratioOf(f, 'A');
+      var b = ratioOf(f, 'B');
+      var best = bestRatioOf(f);
+
+      // 每台炉补充 A/B 集合管压力
+      var headerRow = [];
+      if (a.inScope) {
+        headerRow.push(rcell('A集合管压力', S.label));
+        headerRow.push(a.header == null ? rcell(null, S.num) : rcell(a.header, S.num));
+      }
+      if (b.inScope) {
+        if (a.inScope) {
+          headerRow.push(rcell('B集合管压力', S.label));
+          headerRow.push(rcell(null, S.text));
+          headerRow.push(b.header == null ? rcell(null, S.num) : rcell(b.header, S.num));
+        } else {
+          headerRow.push(rcell('B集合管压力', S.label));
+          headerRow.push(b.header == null ? rcell(null, S.num) : rcell(b.header, S.num));
+        }
+      }
+      var hdrRow = add(headerRow);
+      if (a.inScope && b.inScope) merges.push('C' + hdrRow + ':D' + hdrRow);
+
+      // 最大绝压比 + 位置（第5组第4块）
+      var pos = best ? '第' + (best.maxGroup + 1) + '组第' + (best.maxIndex + 1) + '块' : '';
+      var maxRow = add([
+        rcell('最大绝压比', S.label),
+        best ? rcell(best.ratio, S.boldRatio) : rcell(null, S.boldRatio),
+        best ? rcell(pos, S.text) : rcell(null, S.text)
+      ]);
+      merges.push('C' + maxRow + ':E' + maxRow);
+      add([]);
+    });
+
+    var sheetCols = [12];
+    for (var ci = 0; ci < 12; ci++) sheetCols.push(8);
+    sheetCols.push(10, 8);
+
+    return {
+      sheets: [
+        {
+          name: '读数',
+          cols: sheetCols,
+          merges: merges,
+          rows: rows
+        }
+      ]
+    };
+  }
+
+  function furnaceTitle(f) {
+    return f.label + (f.side === 'full' ? '' : ' ' + sideLabel(f.side));
+  }
+
+  /* ------------------------------------------------------------------ *
+   * 导出的 Excel 再读回来
+   * ------------------------------------------------------------------ */
+
+  function readCellText(c) {
+    return c && c.v != null ? String(c.v).trim() : '';
+  }
+
+  function readCellNum(c) {
+    if (!c || c.v == null) return null;
+    if (typeof c.v === 'number' && isFinite(c.v)) return c.v;
+    var p = parseValue(String(c.v));
+    return p.ok && !p.empty ? p.value : null;
+  }
+
+  function normalizeExcelDate(v) {
+    if (typeof v === 'number' && v > 0) {
+      var d = new Date(Math.round((v - 25569) * 86400000));
+      return d.getUTCFullYear() + '-' + pad2(d.getUTCMonth() + 1) + '-' + pad2(d.getUTCDate());
+    }
+    var s = String(v == null ? '' : v).trim();
+    var dm = s.match(/^(\d{4}-\d{2}-\d{2})/);
+    return dm ? dm[1] : null;
+  }
+
+  function normalizeExcelTime(v) {
+    if (typeof v === 'number' && v >= 0 && v < 1) {
+      var mins = Math.round(v * 1440);
+      return pad2(Math.floor(mins / 60) % 24) + ':' + pad2(mins % 60);
+    }
+    var s = String(v == null ? '' : v).trim();
+    var m = s.match(/^(\d{1,2}):(\d{2})/);
+    return m ? pad2(Number(m[1])) + ':' + m[2] : null;
+  }
+
+  /**
+   * 解析「导出所有数据」的 Excel（也兼容旧的两表格式）。
+   * 返回新的 batch；失败时 throw Error，消息可直接展示给用户。
+   */
+  function parseReportWorkbook(wb) {
+    var sheets = (wb && wb.sheets) || [];
+    if (!sheets.length) throw new Error('Excel 里没有工作表');
+
+    var sheet = null;
+    sheets.forEach(function (s) { if (s.name === '读数') sheet = s; });
+    if (!sheet) sheet = sheets[0];
+    var rows = sheet.rows || [];
+
+    var meta = { date: null, time: null, operator: '' };
+    rows.forEach(function (row) {
+      if (!row) return;
+      var key = readCellText(row[0]);
+      if (key === '日期') meta.date = normalizeExcelDate(row[1] && row[1].v);
+      else if (key === '时间') meta.time = normalizeExcelTime(row[1] && row[1].v);
+      else if (key === '记录人') meta.operator = readCellText(row[1]);
+    });
+
+    var b = createBatch({
+      date: meta.date || todayStr(),
+      time: meta.time || nowTimeStr(),
+      operator: meta.operator || ''
+    });
+
+    var blocks = 0;
+
+    for (var i = 0; i < rows.length; i++) {
+      var row = rows[i];
+      if (!row) continue;
+      var title = readCellText(row[0]);
+      var tm = title.match(/^(\d+)号炉(?:[（(](整台|A炉膛|B炉膛)[）)])?$/);
+      if (!tm) continue;
+
+      var id = tm[1];
+      var f = furnaceById(b, id);
+      if (!f) throw new Error('不认识的炉号：' + title);
+      var side = !tm[2] || tm[2] === '整台' ? 'full' : tm[2].charAt(0);
+
+      var h = i + 1;
+      while (h < rows.length && !rows[h]) h++;
+      if (h >= rows.length || readCellText(rows[h][0]) !== '组') {
+        throw new Error(title + ' 下面没有找到表头行');
+      }
+
+      var per = 0;
+      var hr = rows[h];
+      for (var c = 1; c < hr.length; c++) {
+        if (/^\d+#$/.test(readCellText(hr[c]))) per++;
+      }
+      if (per !== f.perGroup) {
+        throw new Error(title + ' 的表数应为 ' + f.perGroup + '，Excel 里是 ' + per);
+      }
+
+      var startGroups = [];
+      var j = h + 1;
+      for (; j < rows.length; j++) {
+        var gr = rows[j];
+        if (!gr) break;
+        var gm = readCellText(gr[0]).match(/^第(\d+)组$/);
+        if (!gm) break;
+        var g = Number(gm[1]) - 1;
+        if (g < 0 || g >= f.groups) throw new Error(title + ' 组号超出范围：第' + gm[1] + '组');
+        if (side === 'A' && g > 3) throw new Error(title + ' 是 A 炉膛，不应出现第' + gm[1] + '组');
+        if (side === 'B' && g < 4) throw new Error(title + ' 是 B 炉膛，不应出现第' + gm[1] + '组');
+        startGroups.push({ g: g, row: gr });
+      }
+      if (!startGroups.length) throw new Error(title + ' 下面没有组数据');
+
+      setSide(b, id, side);
+      startGroups.forEach(function (item) {
+        for (var k = 0; k < per; k++) {
+          var c = item.row[k + 1];
+          if (!c || c.v == null) continue;
+          if (readCellText(c) === '送检') {
+            setSkipped(b, id, item.g, k, true);
+            continue;
+          }
+          var v = readCellNum(c);
+          if (v == null) throw new Error(title + ' 第' + (item.g + 1) + '组第' + (k + 1) + '块读数无法识别');
+          setValue(b, id, item.g, k, v);
+          if (c.strike) setExcluded(b, id, item.g, k, true);
+        }
+      });
+
+      // 集合管压力（A/B 标签后面的第一个有值单元格）
+      for (; j < rows.length; j++) {
+        var rr = rows[j];
+        if (!rr) continue;
+        if (/^\d+号炉/.test(readCellText(rr[0]))) break;
+        for (var q = 0; q < rr.length; q++) {
+          var label = readCellText(rr[q]);
+          var hm = label.match(/^([AB])集合管压力$/);
+          if (!hm) continue;
+          var val = null;
+          for (var d = q + 1; d < rr.length; d++) {
+            if (rr[d] && rr[d].v != null) { val = readCellNum(rr[d]); break; }
+          }
+          setHeader(b, id, hm[1], val);
+        }
+      }
+
+      blocks++;
+      i = j - 1;
+    }
+
+    // 兼容旧版两张表：从「绝压比」表补集合管压力
+    var ratioSheet = null;
+    sheets.forEach(function (s) { if (s.name === '绝压比') ratioSheet = s; });
+    if (ratioSheet) {
+      var rrows = ratioSheet.rows || [];
+      var aCol = -1, bCol = -1;
+      var headerIdx = -1;
+      for (var r = 0; r < rrows.length; r++) {
+        var row2 = rrows[r];
+        if (!row2 || readCellText(row2[0]) !== '炉号') continue;
+        headerIdx = r;
+        for (var c2 = 0; c2 < row2.length; c2++) {
+          var lab = readCellText(row2[c2]);
+          if (lab === 'A集合管压力') aCol = c2;
+          if (lab === 'B集合管压力') bCol = c2;
+        }
+        break;
+      }
+      if (headerIdx >= 0) {
+        for (var r2 = headerIdx + 1; r2 < rrows.length; r2++) {
+          var row3 = rrows[r2];
+          if (!row3) continue;
+          var idm = readCellText(row3[0]).match(/^(\d+)号炉$/);
+          if (!idm || !furnaceById(b, idm[1])) continue;
+          if (aCol >= 0) setHeader(b, idm[1], 'A', readCellNum(row3[aCol]));
+          if (bCol >= 0) setHeader(b, idm[1], 'B', readCellNum(row3[bCol]));
+        }
+      }
+    }
+
+    if (!hasBatchData(b)) throw new Error('Excel 里没有读到任何读数');
+    if (!blocks) throw new Error('Excel 里没有找到炉子数据');
+    return b;
+  }
+
+  /**
+   * 方式1：纯文本
+   *   文丘里压力
+   *
+   *   2号炉
+   *   1 0.183
+   *   ...
+   * 每个组一行：最高值表号 + 空格 + 最高值（固定 3 位小数，与方式2一致）。
+   */
+  function exportMode1(batch) {
+    var lines = ['文丘里压力', ''];
+    var list = furnacesWithData(batch);
+    if (!list.length) {
+      lines.push('（暂无读数）');
+      return lines.join('\n');
+    }
+    list.forEach(function (f, idx) {
+      lines.push(furnaceTitle(f));
+      groupsInScope(f).forEach(function (g) {
+        var s = groupStat(f, g);
+        if (s.max === null) lines.push('- -');
+        else lines.push((s.maxIndex + 1) + ' ' + formatFixed(s.max, batch.config.decimals));
+      });
+      if (idx < list.length - 1) lines.push('');
+    });
+    return lines.join('\n');
+  }
+
+  /**
+   * 方式2：带圈号与绝压比
+   *   3号炉
+   *   ①<3>0.170 ②<3>0.148 ③<3>0.148 ④<3>0.148 A集合管 0.230
+   *   ⑤<4>0.170 ⑥<3>0.134 ⑦<3>0.148 ⑧<3>0.148 B集合管 0.220
+   *   最大绝压比 ⑤ 0.84375
+   */
+  function exportMode2(batch) {
+    var lines = [];
+    var list = furnacesWithData(batch);
+    if (!list.length) return '（暂无读数）\n';
+    list.forEach(function (f, idx) {
+      if (idx > 0) lines.push('');
+      lines.push(furnaceTitle(f));
+      ['A', 'B'].forEach(function (ch) {
+        var groups = groupsInScope(f).filter(function (g) { return chamberOf(g) === ch; });
+        if (!groups.length) return;
+        var parts = groups.map(function (g) {
+          var s = groupStat(f, g);
+          var num = CIRCLED[g];
+          if (s.max === null) return num + '<->-';
+          return num + '<' + (s.maxIndex + 1) + '>' + formatFixed(s.max, batch.config.decimals);
+        });
+        var h = headerOf(f, ch);
+        parts.push(ch + '集合管 ' + (isNum(h) ? formatFixed(h, batch.config.decimals) : '—'));
+        lines.push(parts.join(' '));
+      });
+      var best = bestRatioOf(f);
+      lines.push('最大绝压比 ' + (best ? CIRCLED[best.maxGroup] + ' ' + formatRatio(best.ratio) : '— —'));
+    });
+    return lines.join('\n');
+  }
+
+  /* ------------------------------------------------------------------ *
+   * 七、JSON 备份 / 恢复
+   * ------------------------------------------------------------------ */
+
+  function toJSON(batch) {
+    return {
+      format: 'heater-venturi-batch',
+      version: VERSION,
+      savedAt: new Date().toISOString(),
+      meta: batch.meta,
+      config: batch.config,
+      furnaces: batch.furnaces.map(function (f) {
+        return {
+          id: f.id,
+          label: f.label,
+          groups: f.groups,
+          perGroup: f.perGroup,
+          side: f.side,
+          headerA: f.headerA,
+          headerB: f.headerB,
+          cells: f.cells.map(function (row) {
+            return row.map(function (c) { return { v: c.v == null ? null : c.v, ex: !!c.ex, skip: !!c.skip }; });
+          })
+        };
+      })
+    };
+  }
+
+  /** 把任意来源的 JSON 整理成标准 batch（容错） */
+  function normalizeBatch(input) {
+    var src = input && typeof input === 'object' ? input : {};
+    var batch = createBatch(src.meta);
+    if (src.config) {
+      if (isNum(src.config.decimals)) batch.config.decimals = clampInt(src.config.decimals, 0, 4);
+      if (isNum(src.config.atmosphere)) batch.config.atmosphere = src.config.atmosphere;
+    }
+    var list = Array.isArray(src.furnaces) ? src.furnaces : [];
+    FURNACE_DEFS.forEach(function (def) {
+      var s = list.filter(function (x) { return x && String(x.id) === def.id; })[0];
+      if (!s) return;
+      var f = furnaceById(batch, def.id);
+      if (SIDES.indexOf(s.side) >= 0) f.side = s.side;
+      var pa = parseValue(s.headerA);
+      var pb = parseValue(s.headerB);
+      f.headerA = pa.ok && !pa.empty ? pa.value : null;
+      f.headerB = pb.ok && !pb.empty ? pb.value : null;
+      if (!Array.isArray(s.cells)) return;
+      for (var g = 0; g < f.groups; g++) {
+        var srcRow = s.cells[g];
+        if (!Array.isArray(srcRow)) continue;
+        for (var i = 0; i < f.perGroup; i++) {
+          var c = srcRow[i];
+          if (c == null) continue;
+          var cell = { v: null, ex: false, skip: false };
+          if (isNum(c)) {
+            cell.v = roundTo(c, batch.config.decimals);
+          } else if (typeof c === 'object') {
+            cell.skip = !!c.skip;
+            if (!cell.skip) {
+              if (isNum(c.v)) cell.v = roundTo(c.v, batch.config.decimals);
+              else if (c.v != null && c.v !== '') {
+                var p = parseValue(c.v);
+                if (p.ok && !p.empty) cell.v = roundTo(p.value, batch.config.decimals);
+              }
+              cell.ex = !!c.ex;
+            }
+          }
+          f.cells[g][i] = cell;
+        }
+      }
+    });
+    return batch;
+  }
+
+  /* ------------------------------------------------------------------ *
+   * 导出 API
+   * ------------------------------------------------------------------ */
+
+  return {
+    VERSION: VERSION,
+    ATM: ATM,
+    CONFIG: CONFIG,
+    FURNACE_DEFS: FURNACE_DEFS,
+    CIRCLED: CIRCLED,
+
+    todayStr: todayStr,
+    nowStr: nowStr,
+    nowTimeStr: nowTimeStr,
+    chamberOf: chamberOf,
+    sideLabel: sideLabel,
+    roundTo: roundTo,
+
+    createBatch: createBatch,
+    normalizeBatch: normalizeBatch,
+    toJSON: toJSON,
+    furnaceById: furnaceById,
+    groupsInScope: groupsInScope,
+    isGroupInScope: isGroupInScope,
+    setSide: setSide,
+    nextInScopeGroup: nextInScopeGroup,
+    prevInScopeGroup: prevInScopeGroup,
+
+    parseValue: parseValue,
+    parseReadings: parseReadings,
+    parseMode1: parseMode1,
+    converterSetSide: converterSetSide,
+    converterToBatch: converterToBatch,
+    formatFixed: formatFixed,
+    formatReading: formatReading,
+    formatRatio: formatRatio,
+
+    setValue: setValue,
+    setExcluded: setExcluded,
+    setSkipped: setSkipped,
+    setHeader: setHeader,
+    clearGroup: clearGroup,
+    clearFurnace: clearFurnace,
+    nextEmptyIndex: nextEmptyIndex,
+
+    groupStat: groupStat,
+    chamberStat: chamberStat,
+    ratioOf: ratioOf,
+    bestRatioOf: bestRatioOf,
+    furnaceStat: furnaceStat,
+    batchStat: batchStat,
+    hasFurnaceData: hasFurnaceData,
+    hasScopeData: hasScopeData,
+    hasBatchData: hasBatchData,
+    headerOf: headerOf,
+
+    exportMode1: exportMode1,
+    exportMode2: exportMode2,
+    toReportWorkbook: toReportWorkbook,
+    parseReportWorkbook: parseReportWorkbook,
+    REPORT_STYLE: REPORT_STYLE
+  };
+});
+
+</script>
+<script>
+/*!
+ * xlsx-lite.js — 极简 XLSX 生成器（带单元格样式）
+ * 版本 2.0.0
+ *
+ * 只做本软件需要的事：数字/文本、列宽、合并单元格、加粗/划线/边框、数字格式。
+ * 生成标准 OOXML 包（ZIP 存储法），Excel / WPS / LibreOffice 均可打开。
+ *
+ * 样式索引与 js/core.js 中的 REPORT_STYLE 一一对应：
+ *   0 普通文本（边框、居中）      1 普通数字 0.000
+ *   2 加粗标签（边框、左对齐）      3 加粗数字 0.000
+ *   4 划线数字 0.000               5 标题（14pt 加粗）
+ *   6 表头（加粗、浅灰底、边框）    7 加粗数字 0.00000（备用）
+ *   8 普通数字 0.00000             9 加粗数字 0.00000
+ *  10 无边框文本                   11 无边框加粗文本
+ */
+(function (root, factory) {
+  'use strict';
+  if (typeof module === 'object' && module.exports) module.exports = factory();
+  else root.XlsxLite = factory();
+})(typeof globalThis !== 'undefined' ? globalThis : this, function () {
+  'use strict';
+
+  /* ---------------- CRC32 ---------------- */
+
+  var CRC_TABLE = (function () {
+    var table = new Uint32Array(256);
+    for (var n = 0; n < 256; n++) {
+      var c = n;
+      for (var k = 0; k < 8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1;
+      table[n] = c >>> 0;
+    }
+    return table;
+  })();
+
+  function crc32(bytes) {
+    var c = 0xFFFFFFFF;
+    for (var i = 0; i < bytes.length; i++) c = CRC_TABLE[(c ^ bytes[i]) & 0xFF] ^ (c >>> 8);
+    return (c ^ 0xFFFFFFFF) >>> 0;
+  }
+
+  /* ---------------- 编码 / 转义 ---------------- */
+
+  function utf8(str) {
+    if (typeof TextEncoder !== 'undefined') return new TextEncoder().encode(str);
+    if (typeof Buffer !== 'undefined') return new Uint8Array(Buffer.from(str, 'utf8'));
+    throw new Error('当前环境不支持 UTF-8 编码');
+  }
+
+  function xmlEscape(str) {
+    return String(str)
+      .replace(/[&<>"']/g, function (ch) {
+        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&apos;' }[ch];
+      })
+      .replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f]/g, '');
+  }
+
+  function colName(n) {
+    var s = '';
+    while (n > 0) {
+      var m = (n - 1) % 26;
+      s = String.fromCharCode(65 + m) + s;
+      n = Math.floor((n - 1) / 26);
+    }
+    return s;
+  }
+
+  function sheetName(name, idx) {
+    var s = String(name || 'Sheet' + (idx + 1)).replace(/[\[\]\*\?\/\\:]/g, ' ').trim().slice(0, 31);
+    return s || 'Sheet' + (idx + 1);
+  }
+
+  /* ---------------- 样式 ---------------- */
+
+  function stylesXml() {
+    return '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
+      '<styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">' +
+      '<numFmts count="2">' +
+      '<numFmt numFmtId="164" formatCode="0.000"/>' +
+      '<numFmt numFmtId="165" formatCode="0.00000"/>' +
+      '</numFmts>' +
+      '<fonts count="4">' +
+      '<font><sz val="11"/><name val="等线"/><charset val="134"/></font>' +
+      '<font><b/><sz val="11"/><name val="等线"/><charset val="134"/></font>' +
+      '<font><strike/><sz val="11"/><name val="等线"/><charset val="134"/></font>' +
+      '<font><b/><sz val="14"/><name val="等线"/><charset val="134"/></font>' +
+      '</fonts>' +
+      '<fills count="3">' +
+      '<fill><patternFill patternType="none"/></fill>' +
+      '<fill><patternFill patternType="gray125"/></fill>' +
+      '<fill><patternFill patternType="solid"><fgColor rgb="FFEDF2F7"/><bgColor indexed="64"/></patternFill></fill>' +
+      '</fills>' +
+      '<borders count="2">' +
+      '<border><left/><right/><top/><bottom/><diagonal/></border>' +
+      '<border>' +
+      '<left style="thin"><color rgb="FFBFBFBF"/></left>' +
+      '<right style="thin"><color rgb="FFBFBFBF"/></right>' +
+      '<top style="thin"><color rgb="FFBFBFBF"/></top>' +
+      '<bottom style="thin"><color rgb="FFBFBFBF"/></bottom>' +
+      '<diagonal/>' +
+      '</border>' +
+      '</borders>' +
+      '<cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs>' +
+      '<cellXfs count="12">' +
+      '<xf numFmtId="0" fontId="0" fillId="0" borderId="1" xfId="0" applyBorder="1" applyAlignment="1">' +
+      '<alignment horizontal="center" vertical="center"/></xf>' +
+      '<xf numFmtId="164" fontId="0" fillId="0" borderId="1" xfId="0" applyNumberFormat="1" applyBorder="1" applyAlignment="1">' +
+      '<alignment horizontal="center" vertical="center"/></xf>' +
+      '<xf numFmtId="0" fontId="1" fillId="0" borderId="1" xfId="0" applyFont="1" applyBorder="1" applyAlignment="1">' +
+      '<alignment horizontal="left" vertical="center"/></xf>' +
+      '<xf numFmtId="164" fontId="1" fillId="0" borderId="1" xfId="0" applyNumberFormat="1" applyFont="1" applyBorder="1" applyAlignment="1">' +
+      '<alignment horizontal="center" vertical="center"/></xf>' +
+      '<xf numFmtId="164" fontId="2" fillId="0" borderId="1" xfId="0" applyNumberFormat="1" applyFont="1" applyBorder="1" applyAlignment="1">' +
+      '<alignment horizontal="center" vertical="center"/></xf>' +
+      '<xf numFmtId="0" fontId="3" fillId="0" borderId="0" xfId="0" applyFont="1" applyAlignment="1">' +
+      '<alignment horizontal="left" vertical="center"/></xf>' +
+      '<xf numFmtId="0" fontId="1" fillId="2" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1">' +
+      '<alignment horizontal="center" vertical="center"/></xf>' +
+      '<xf numFmtId="165" fontId="1" fillId="0" borderId="1" xfId="0" applyNumberFormat="1" applyFont="1" applyBorder="1" applyAlignment="1">' +
+      '<alignment horizontal="center" vertical="center"/></xf>' +
+      '<xf numFmtId="165" fontId="0" fillId="0" borderId="1" xfId="0" applyNumberFormat="1" applyBorder="1" applyAlignment="1">' +
+      '<alignment horizontal="center" vertical="center"/></xf>' +
+      '<xf numFmtId="165" fontId="1" fillId="0" borderId="1" xfId="0" applyNumberFormat="1" applyFont="1" applyBorder="1" applyAlignment="1">' +
+      '<alignment horizontal="center" vertical="center"/></xf>' +
+      '<xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0" applyAlignment="1">' +
+      '<alignment horizontal="left" vertical="center"/></xf>' +
+      '<xf numFmtId="0" fontId="1" fillId="0" borderId="0" xfId="0" applyFont="1" applyAlignment="1">' +
+      '<alignment horizontal="left" vertical="center"/></xf>' +
+      '</cellXfs>' +
+      '<cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles>' +
+      '</styleSheet>';
+  }
+
+  /* ---------------- 工作表 ---------------- */
+
+  function cellXml(rowNum, colNum, cell) {
+    if (cell == null) return '';
+    var ref = colName(colNum) + rowNum;
+    var v = cell;
+    var s = 0;
+    if (typeof cell === 'object') {
+      v = cell.v;
+      s = Number(cell.s) || 0;
+    }
+    var sAttr = s ? ' s="' + s + '"' : '';
+    if (v == null || v === '') {
+      return s ? '<c r="' + ref + '" s="' + s + '"/>' : '';
+    }
+    if (typeof v === 'number' && isFinite(v)) {
+      return '<c r="' + ref + '"' + sAttr + '><v>' + v + '</v></c>';
+    }
+    return '<c r="' + ref + '"' + sAttr + ' t="inlineStr"><is><t xml:space="preserve">' +
+      xmlEscape(String(v)) + '</t></is></c>';
+  }
+
+  function sheetXml(sheet) {
+    var rows = sheet.rows || [];
+    var cols = sheet.cols || [];
+    var merges = sheet.merges || [];
+    var out = [];
+    out.push('<?xml version="1.0" encoding="UTF-8" standalone="yes"?>');
+    out.push('<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">');
+    out.push('<sheetViews><sheetView workbookViewId="0"/></sheetViews>');
+    if (cols.length) {
+      out.push('<cols>');
+      for (var ci = 0; ci < cols.length; ci++) {
+        out.push('<col min="' + (ci + 1) + '" max="' + (ci + 1) + '" width="' +
+          (Number(cols[ci]) || 10) + '" customWidth="1"/>');
+      }
+      out.push('</cols>');
+    }
+    out.push('<sheetData>');
+    for (var ri = 0; ri < rows.length; ri++) {
+      var row = rows[ri] || [];
+      var cells = [];
+      for (var cj = 0; cj < row.length; cj++) {
+        var xml = cellXml(ri + 1, cj + 1, row[cj]);
+        if (xml) cells.push(xml);
+      }
+      out.push('<row r="' + (ri + 1) + '">' + cells.join('') + '</row>');
+    }
+    out.push('</sheetData>');
+    if (merges.length) {
+      out.push('<mergeCells count="' + merges.length + '">');
+      merges.forEach(function (ref) { out.push('<mergeCell ref="' + xmlEscape(ref) + '"/>'); });
+      out.push('</mergeCells>');
+    }
+    out.push('</worksheet>');
+    return out.join('');
+  }
+
+  /* ---------------- 工作簿 / 关系 ---------------- */
+
+  function workbookXml(sheets) {
+    var out = ['<?xml version="1.0" encoding="UTF-8" standalone="yes"?>',
+      '<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" ' +
+      'xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets>'];
+    for (var i = 0; i < sheets.length; i++) {
+      out.push('<sheet name="' + xmlEscape(sheetName(sheets[i].name, i)) + '" sheetId="' + (i + 1) +
+        '" r:id="rId' + (i + 1) + '"/>');
+    }
+    out.push('</sheets></workbook>');
+    return out.join('');
+  }
+
+  function workbookRels(count) {
+    var out = ['<?xml version="1.0" encoding="UTF-8" standalone="yes"?>',
+      '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'];
+    for (var i = 0; i < count; i++) {
+      out.push('<Relationship Id="rId' + (i + 1) +
+        '" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet' +
+        (i + 1) + '.xml"/>');
+    }
+    out.push('<Relationship Id="rId' + (count + 1) +
+      '" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/>');
+    out.push('</Relationships>');
+    return out.join('');
+  }
+
+  function contentTypes(count) {
+    var out = ['<?xml version="1.0" encoding="UTF-8" standalone="yes"?>',
+      '<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">',
+      '<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>',
+      '<Default Extension="xml" ContentType="application/xml"/>',
+      '<Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>'];
+    for (var i = 0; i < count; i++) {
+      out.push('<Override PartName="/xl/worksheets/sheet' + (i + 1) +
+        '.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>');
+    }
+    out.push('<Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>');
+    out.push('</Types>');
+    return out.join('');
+  }
+
+  function rootRels() {
+    return '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
+      '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">' +
+      '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/>' +
+      '</Relationships>';
+  }
+
+  /* ---------------- ZIP（仅存储） ---------------- */
+
+  function dosDateTime(d) {
+    d = d || new Date(2026, 0, 1, 8, 0, 0);
+    return {
+      time: (d.getHours() << 11) | (d.getMinutes() << 5) | (d.getSeconds() >> 1),
+      date: ((d.getFullYear() - 1980) << 9) | ((d.getMonth() + 1) << 5) | d.getDate()
+    };
+  }
+
+  function zip(files) {
+    var locals = [];
+    var centrals = [];
+    var offset = 0;
+    var dt = dosDateTime();
+
+    for (var i = 0; i < files.length; i++) {
+      var f = files[i];
+      var nameBytes = utf8(f.name);
+      var data = f.data;
+      var crc = crc32(data);
+
+      var local = new Uint8Array(30 + nameBytes.length);
+      var dv = new DataView(local.buffer);
+      dv.setUint32(0, 0x04034b50, true);
+      dv.setUint16(4, 20, true);
+      dv.setUint16(6, 0x0800, true);
+      dv.setUint16(8, 0, true);
+      dv.setUint16(10, dt.time, true);
+      dv.setUint16(12, dt.date, true);
+      dv.setUint32(14, crc, true);
+      dv.setUint32(18, data.length, true);
+      dv.setUint32(22, data.length, true);
+      dv.setUint16(26, nameBytes.length, true);
+      dv.setUint16(28, 0, true);
+      local.set(nameBytes, 30);
+      locals.push(local, data);
+
+      var central = new Uint8Array(46 + nameBytes.length);
+      var cv = new DataView(central.buffer);
+      cv.setUint32(0, 0x02014b50, true);
+      cv.setUint16(4, 20, true);
+      cv.setUint16(6, 20, true);
+      cv.setUint16(8, 0x0800, true);
+      cv.setUint16(10, 0, true);
+      cv.setUint16(12, dt.time, true);
+      cv.setUint16(14, dt.date, true);
+      cv.setUint32(16, crc, true);
+      cv.setUint32(20, data.length, true);
+      cv.setUint32(24, data.length, true);
+      cv.setUint16(28, nameBytes.length, true);
+      cv.setUint16(30, 0, true);
+      cv.setUint16(32, 0, true);
+      cv.setUint16(34, 0, true);
+      cv.setUint16(36, 0, true);
+      cv.setUint32(38, 0, true);
+      cv.setUint32(42, offset, true);
+      central.set(nameBytes, 46);
+      centrals.push(central);
+
+      offset += local.length + data.length;
+    }
+
+    var centralSize = centrals.reduce(function (a, b) { return a + b.length; }, 0);
+    var eocd = new Uint8Array(22);
+    var ev = new DataView(eocd.buffer);
+    ev.setUint32(0, 0x06054b50, true);
+    ev.setUint16(4, 0, true);
+    ev.setUint16(6, 0, true);
+    ev.setUint16(8, files.length, true);
+    ev.setUint16(10, files.length, true);
+    ev.setUint32(12, centralSize, true);
+    ev.setUint32(16, offset, true);
+    ev.setUint16(20, 0, true);
+
+    var total = offset + centralSize + 22;
+    var out = new Uint8Array(total);
+    var pos = 0;
+    locals.forEach(function (p) { out.set(p, pos); pos += p.length; });
+    centrals.forEach(function (p) { out.set(p, pos); pos += p.length; });
+    out.set(eocd, pos);
+    return out;
+  }
+
+  /* ---------------- 对外接口 ---------------- */
+
+  function build(workbook) {
+    var sheets = (workbook && workbook.sheets) || [];
+    if (!sheets.length) throw new Error('工作簿至少需要一个工作表');
+    var files = [
+      { name: '[Content_Types].xml', data: utf8(contentTypes(sheets.length)) },
+      { name: '_rels/.rels', data: utf8(rootRels()) },
+      { name: 'xl/workbook.xml', data: utf8(workbookXml(sheets)) },
+      { name: 'xl/_rels/workbook.xml.rels', data: utf8(workbookRels(sheets.length)) },
+      { name: 'xl/styles.xml', data: utf8(stylesXml()) }
+    ];
+    for (var i = 0; i < sheets.length; i++) {
+      files.push({ name: 'xl/worksheets/sheet' + (i + 1) + '.xml', data: utf8(sheetXml(sheets[i])) });
+    }
+    return zip(files);
+  }
+
+  return { build: build, colName: colName, crc32: crc32 };
+});
+
+</script>
+<script>
+/*!
+ * xlsx-read.js — 极简 XLSX 读取器（浏览器离线）
+ * 版本 1.0.0
+ *
+ * 只读取本软件需要的内容：单元格值、单元格样式（是否删除线/加粗）、合并单元格由首个单元格承载。
+ * 支持：
+ *   - ZIP 存储（method 0）和 deflate（method 8，需浏览器 DecompressionStream）
+ *   - inlineStr / sharedStrings / 数字
+ *   - styles.xml 中 font 的 strike、bold
+ *
+ * 用法：
+ *   const wb = await XlsxRead.readWorkbook(arrayBuffer);
+ *   // wb.sheets = [{ name, rows: [[{ v, s, strike, bold }]] }]
+ */
+(function (root, factory) {
+  'use strict';
+  if (typeof module === 'object' && module.exports) module.exports = factory();
+  else root.XlsxRead = factory();
+})(typeof globalThis !== 'undefined' ? globalThis : this, function () {
+  'use strict';
+
+  var R_NS = 'http://schemas.openxmlformats.org/officeDocument/2006/relationships';
+  var decoder = typeof TextDecoder !== 'undefined' ? new TextDecoder('utf-8') : null;
+
+  function u16(a, i) { return a[i] | (a[i + 1] << 8); }
+  function u32(a, i) { return (a[i] | (a[i + 1] << 8) | (a[i + 2] << 16) | (a[i + 3] << 24)) >>> 0; }
+
+  function text(bytes) {
+    if (!decoder) throw new Error('当前浏览器不支持 UTF-8 解码');
+    return decoder.decode(bytes);
+  }
+
+  function parseXml(str) {
+    if (typeof DOMParser === 'undefined') throw new Error('当前浏览器不支持 Excel 解析');
+    var doc = new DOMParser().parseFromString(str, 'application/xml');
+    if (!doc || doc.getElementsByTagName('parsererror').length) {
+      throw new Error('Excel 内部 XML 解析失败');
+    }
+    return doc;
+  }
+
+  async function inflateRaw(data) {
+    if (typeof DecompressionStream === 'undefined') {
+      throw new Error('当前浏览器不支持解压，请在 Chrome / Edge 新版本中导入');
+    }
+    var ds;
+    try {
+      ds = new DecompressionStream('deflate-raw');
+    } catch (e) {
+      ds = new DecompressionStream('deflate');
+    }
+    var stream = new Blob([data]).stream().pipeThrough(ds);
+    var buf = await new Response(stream).arrayBuffer();
+    return new Uint8Array(buf);
+  }
+
+  async function unzip(buffer) {
+    var arr = new Uint8Array(buffer);
+    var eocd = -1;
+    var min = Math.max(0, arr.length - 65557);
+    for (var i = arr.length - 22; i >= min; i--) {
+      if (u32(arr, i) === 0x06054b50) { eocd = i; break; }
+    }
+    if (eocd < 0) throw new Error('不是有效的 .xlsx 文件');
+
+    var count = u16(arr, eocd + 10);
+    var cdOff = u32(arr, eocd + 16);
+    var files = {};
+    var p = cdOff;
+
+    for (var n = 0; n < count; n++) {
+      if (u32(arr, p) !== 0x02014b50) throw new Error('Excel 压缩包目录损坏');
+      var method = u16(arr, p + 10);
+      var compSize = u32(arr, p + 20);
+      var nameLen = u16(arr, p + 28);
+      var extraLen = u16(arr, p + 30);
+      var commentLen = u16(arr, p + 32);
+      var localOff = u32(arr, p + 42);
+      var name = text(arr.subarray(p + 46, p + 46 + nameLen));
+
+      if (u32(arr, localOff) !== 0x04034b50) throw new Error('Excel 文件头损坏');
+      var lNameLen = u16(arr, localOff + 26);
+      var lExtraLen = u16(arr, localOff + 28);
+      var dataStart = localOff + 30 + lNameLen + lExtraLen;
+      var comp = arr.subarray(dataStart, dataStart + compSize);
+
+      if (method === 0) files[name] = comp;
+      else if (method === 8) files[name] = await inflateRaw(comp);
+      else throw new Error('Excel 使用了不支持的压缩方式');
+
+      p += 46 + nameLen + extraLen + commentLen;
+    }
+    return files;
+  }
+
+  function parseStyles(files) {
+    var data = files['xl/styles.xml'];
+    if (!data) return [];
+    var doc = parseXml(text(data));
+    var fonts = [];
+    var fontEls = doc.getElementsByTagName('fonts');
+    if (fontEls.length) {
+      var fs = fontEls[0].getElementsByTagName('font');
+      for (var i = 0; i < fs.length; i++) {
+        fonts.push({
+          strike: fs[i].getElementsByTagName('strike').length > 0,
+          bold: fs[i].getElementsByTagName('b').length > 0
+        });
+      }
+    }
+    var styles = [];
+    var xfsEls = doc.getElementsByTagName('cellXfs');
+    if (xfsEls.length) {
+      var xfs = xfsEls[0].getElementsByTagName('xf');
+      for (var j = 0; j < xfs.length; j++) {
+        var fid = Number(xfs[j].getAttribute('fontId') || 0);
+        var f = fonts[fid] || { strike: false, bold: false };
+        styles.push({ strike: !!f.strike, bold: !!f.bold });
+      }
+    }
+    return styles;
+  }
+
+  function parseShared(files) {
+    var data = files['xl/sharedStrings.xml'];
+    if (!data) return [];
+    var doc = parseXml(text(data));
+    var sis = doc.getElementsByTagName('si');
+    var out = [];
+    for (var i = 0; i < sis.length; i++) {
+      var ts = sis[i].getElementsByTagName('t');
+      var s = '';
+      for (var j = 0; j < ts.length; j++) s += ts[j].textContent || '';
+      out.push(s);
+    }
+    return out;
+  }
+
+  function colIndex(ref) {
+    var m = String(ref).match(/^([A-Z]+)/);
+    if (!m) return -1;
+    var s = m[1];
+    var n = 0;
+    for (var i = 0; i < s.length; i++) n = n * 26 + (s.charCodeAt(i) - 64);
+    return n - 1;
+  }
+
+  function cellText(c) {
+    var v = c.getElementsByTagName('v');
+    if (!v.length) return '';
+    return v[0].textContent || '';
+  }
+
+  function parseSheet(xml, shared, styles) {
+    var doc = parseXml(xml);
+    var rowEls = doc.getElementsByTagName('row');
+    var rows = [];
+    for (var i = 0; i < rowEls.length; i++) {
+      var rowEl = rowEls[i];
+      var rowNum = Number(rowEl.getAttribute('r')) || rows.length + 1;
+      var row = [];
+      var cells = rowEl.getElementsByTagName('c');
+      for (var j = 0; j < cells.length; j++) {
+        var c = cells[j];
+        var ref = c.getAttribute('r') || '';
+        var ci = colIndex(ref);
+        if (ci < 0) ci = row.length;
+        var t = c.getAttribute('t');
+        var s = Number(c.getAttribute('s') || 0);
+        var st = styles[s] || { strike: false, bold: false };
+        var v = null;
+
+        if (t === 'inlineStr') {
+          var ts = c.getElementsByTagName('t');
+          var str = '';
+          for (var k = 0; k < ts.length; k++) str += ts[k].textContent || '';
+          v = str;
+        } else if (t === 's') {
+          var idx = Number(cellText(c));
+          v = shared[idx] == null ? '' : shared[idx];
+        } else {
+          var raw = cellText(c);
+          if (raw !== '') {
+            var num = Number(raw);
+            v = isFinite(num) ? num : raw;
+          }
+        }
+        row[ci] = { v: v, s: s, strike: !!st.strike, bold: !!st.bold };
+      }
+      rows[rowNum - 1] = row;
+    }
+    return rows;
+  }
+
+  function sheetList(files) {
+    var wbData = files['xl/workbook.xml'];
+    if (!wbData) throw new Error('Excel 缺少 workbook.xml');
+    var wbDoc = parseXml(text(wbData));
+    var rels = {};
+    var relData = files['xl/_rels/workbook.xml.rels'];
+    if (relData) {
+      var relDoc = parseXml(text(relData));
+      var rs = relDoc.getElementsByTagName('Relationship');
+      for (var i = 0; i < rs.length; i++) rels[rs[i].getAttribute('Id')] = rs[i].getAttribute('Target');
+    }
+    var els = wbDoc.getElementsByTagName('sheet');
+    var out = [];
+    for (var j = 0; j < els.length; j++) {
+      var name = els[j].getAttribute('name') || ('Sheet' + (j + 1));
+      var rid = els[j].getAttribute('r:id') || els[j].getAttributeNS(R_NS, 'id');
+      var target = rels[rid] || ('worksheets/sheet' + (j + 1) + '.xml');
+      var path = target.charAt(0) === '/' ? target.slice(1) : 'xl/' + target;
+      if (path.indexOf('xl/') !== 0) path = 'xl/' + path;
+      out.push({ name: name, path: path });
+    }
+    return out;
+  }
+
+  async function readWorkbook(buffer) {
+    var files = await unzip(buffer);
+    var styles = parseStyles(files);
+    var shared = parseShared(files);
+    var list = sheetList(files);
+    var sheets = [];
+    for (var i = 0; i < list.length; i++) {
+      var data = files[list[i].path];
+      if (!data) continue;
+      sheets.push({ name: list[i].name, rows: parseSheet(text(data), shared, styles) });
+    }
+    if (!sheets.length) throw new Error('Excel 里没有工作表');
+    return { sheets: sheets };
+  }
+
+  return { readWorkbook: readWorkbook };
+});
+
+</script>
+<script>
+/*!
+ * app.js — 加热炉文丘里压力 · 界面逻辑
+ * 版本 2.0.0
+ *
+ * 页面结构：首页选炉 → 单炉页面（组步进 + 6 列读数格 + 集合管压力/绝压比 + 汇总）。
+ * 识别模块通过 window.GaugeApp.pushReading(value) 顺序填入下一个空位。
+ */
+(function () {
+  'use strict';
+
+  var C = window.GaugeCore;
+
+  var KEYS = { batch: 'hvp.batch.v1', theme: 'hvp.theme' };
+
+  var batch = null;
+  var ui = { view: 'home', furnaceId: null, group: 0, reverse: false, paused: true, started: false, cursor: null };
+  var cameraStream = null;
+  var cameraTried = false;
+  var convText = '';
+  var conv = null;
+  var saveTimer = null;
+  var storageOk = true;
+  var warnedStorage = false;
+
+  /* ================================================================== *
+   * 一、通用工具
+   * ================================================================== */
+
+  function $(sel, root) { return (root || document).querySelector(sel); }
+  function $$(sel, root) { return Array.prototype.slice.call((root || document).querySelectorAll(sel)); }
+
+  function el(tag, attrs, children) {
+    var node = document.createElement(tag);
+    if (attrs) {
+      Object.keys(attrs).forEach(function (k) {
+        var v = attrs[k];
+        if (v == null) return;
+        if (k === 'class') node.className = v;
+        else if (k === 'text') node.textContent = v;
+        else if (k === 'html') node.innerHTML = v;
+        else if (k === 'dataset') { Object.keys(v).forEach(function (dk) { node.dataset[dk] = v[dk]; }); }
+        else if (k.slice(0, 2) === 'on' && typeof v === 'function') node.addEventListener(k.slice(2), v);
+        else if (k === 'value') node.value = v;
+        else if (k === 'style') node.setAttribute('style', v);
+        else if (v === true) node.setAttribute(k, '');
+        else if (v !== false) node.setAttribute(k, v);
+      });
+    }
+    (children || []).forEach(function (c) {
+      if (c == null) return;
+      node.appendChild(typeof c === 'string' || typeof c === 'number' ? document.createTextNode(String(c)) : c);
+    });
+    return node;
+  }
+
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function (ch) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch];
+    });
+  }
+
+  function pad2(n) { return (n < 10 ? '0' : '') + n; }
+  function clockStr() {
+    var d = new Date();
+    return pad2(d.getHours()) + ':' + pad2(d.getMinutes()) + ':' + pad2(d.getSeconds());
+  }
+
+  function readStore(key) {
+    try { return window.localStorage.getItem(key); }
+    catch (e) { storageOk = false; return null; }
+  }
+
+  function writeStore(key, value) {
+    try { window.localStorage.setItem(key, value); return true; }
+    catch (e) { storageOk = false; return false; }
+  }
+
+  function toast(msg, kind, ms) {
+    var host = $('#toasts');
+    var t = el('div', { class: 'toast' + (kind ? ' ' + kind : ''), role: 'status' }, [msg]);
+    host.appendChild(t);
+    setTimeout(function () {
+      t.classList.add('out');
+      setTimeout(function () { if (t.parentNode) t.parentNode.removeChild(t); }, 260);
+    }, ms || 2400);
+  }
+
+  function scrollTop() {
+    try { window.scrollTo({ top: 0, behavior: 'auto' }); } catch (e) { window.scrollTo(0, 0); }
+  }
+
+  /* ================================================================== *
+   * 二、持久化 / 启动
+   * ================================================================== */
+
+  function persist() {
+    if (saveTimer) clearTimeout(saveTimer);
+    saveTimer = setTimeout(function () {
+      saveTimer = null;
+      var ok = writeStore(KEYS.batch, JSON.stringify(C.toJSON(batch)));
+      if (!ok && !warnedStorage) {
+        warnedStorage = true;
+        toast('浏览器禁止了本地存储，请及时导出备份', 'error', 6000);
+      }
+      var hint = $('#saveHint');
+      if (hint) hint.textContent = '已自动保存 ' + clockStr();
+    }, 300);
+  }
+
+  function loadBatch() {
+    var raw = readStore(KEYS.batch);
+    if (raw) {
+      try {
+        var b = C.normalizeBatch(JSON.parse(raw));
+        if (C.hasBatchData(b) || b.meta.operator) return { batch: b, restored: true };
+      } catch (e) { /* 缓存损坏则忽略 */ }
+    }
+    return { batch: C.createBatch(), restored: false };
+  }
+
+  function currentFurnace() {
+    return ui.furnaceId ? C.furnaceById(batch, ui.furnaceId) : null;
+  }
+
+  function syncMeta() {
+    $('#metaDate').value = batch.meta.date;
+    $('#metaTime').value = batch.meta.time || C.nowTimeStr();
+    $('#metaOperator').value = batch.meta.operator;
+  }
+
+  /* ================================================================== *
+   * 三、首页
+   * ================================================================== */
+
+  function render() {
+    if (ui.view === 'convert') {
+      renderConverter();
+    } else if (ui.view === 'furnace' && currentFurnace()) {
+      renderFurnace();
+    } else {
+      ui.view = 'home';
+      ui.furnaceId = null;
+      renderHome();
+    }
+    syncMeta();
+    document.body.classList.toggle('furnace-mode', ui.view === 'furnace' && !!currentFurnace());
+  }
+
+  function renderHome() {
+    var st = C.batchStat(batch);
+    var host = $('#view');
+    host.innerHTML = '';
+
+    if (location.protocol === 'file:') {
+      host.appendChild(el('div', { class: 'file-warning' }, [
+        el('strong', { text: '当前是本地文件模式' }),
+        el('span', { text: '录入、导入导出、绝压比计算都能用；手机浏览器只在 HTTPS 网址（https:// 开头）下允许摄像头，file:// 和 http://192.168… 都不行。需要实时相机，请把单文件放到 HTTPS 网站，或打包成 App。' })
+      ]));
+    }
+
+    host.appendChild(el('div', { class: 'page-head' }, [
+      el('div', {}, [
+        el('h2', { class: 'page-title', text: '选择加热炉' }),
+        el('p', { class: 'page-sub', text: 'A 炉膛 = 1～4 组，B 炉膛 = 5～8 组；点炉子进入录入。' })
+      ]),
+      el('div', { class: 'page-actions' }, [
+        el('button', { class: 'btn', type: 'button', text: '导出文丘里压力', onclick: openExport }),
+        el('button', { class: 'btn primary', type: 'button', id: 'btnRatioHome', text: '绝压比计算', onclick: openRatioCalc })
+      ])
+    ]));
+
+    var grid = el('div', { class: 'furnace-grid' });
+    st.furnaces.forEach(function (fs) { grid.appendChild(furnaceCard(fs)); });
+    host.appendChild(grid);
+  }
+
+  function clearFurnaceFromHome(f) {
+    if (!confirm('清空 ' + f.label + ' 的全部读数？')) return;
+    C.clearFurnace(batch, f.id);
+    persist();
+    renderHome();
+    toast('已清空 ' + f.label, 'ok', 1500);
+  }
+
+  function furnaceCard(st) {
+    var f = st.furnace;
+    var pct = st.total ? Math.round((st.handled / st.total) * 100) : 0;
+    var card = el('article', {
+      class: 'furnace-card' + (st.complete ? ' done' : '') + (st.handled ? ' started' : ''),
+      tabindex: '0',
+      role: 'button',
+      'aria-label': f.label + ' 进入录入',
+      onclick: function (e) {
+        if (e.target.closest && e.target.closest('.fc-clear')) return;
+        openFurnace(f.id);
+      },
+      onkeydown: function (e) {
+        if (e.target !== e.currentTarget) return;
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openFurnace(f.id); }
+      }
+    }, [
+      el('div', { class: 'fc-top' }, [
+        el('strong', { class: 'fc-title', text: f.label }),
+        el('span', { class: 'tag', text: f.perGroup === 2 ? '8 组 × 2 块' : '8 组 × 12 块' }),
+        f.side !== 'full' ? el('span', { class: 'tag side', text: C.sideLabel(f.side) }) : null,
+        st.complete ? el('span', { class: 'tag ok', text: '已完成' }) : null
+      ]),
+      el('div', { class: 'fc-bar' }, [el('span', { style: 'width:' + pct + '%' })]),
+      el('div', { class: 'fc-stats' }, [
+        el('span', {}, ['已处理 ', el('b', { text: st.handled + '/' + st.total })]),
+        el('span', {}, ['最高 ', el('b', { text: st.max == null ? '—' : C.formatFixed(st.max, batch.config.decimals) })]),
+        el('span', { text: '有效 ' + st.valid + (st.excluded ? ' · 剔除 ' + st.excluded : '') + (st.skipped ? ' · 送检 ' + st.skipped : '') })
+      ]),
+      el('div', { class: 'fc-actions' }, [
+        el('button', {
+          class: 'btn sm ghost danger-text fc-clear', type: 'button', text: '清空',
+          title: '清空这台炉子的全部读数',
+          onclick: function (e) { e.stopPropagation(); clearFurnaceFromHome(f); }
+        }),
+        el('span', { class: 'fc-go', text: st.handled ? '继续录入 ›' : '开始录入 ›' })
+      ])
+    ]);
+    return card;
+  }
+
+  function openFurnace(id) {
+    var f = C.furnaceById(batch, id);
+    if (!f) return;
+    ui.view = 'furnace';
+    ui.furnaceId = id;
+    var list = C.groupsInScope(f);
+    ui.group = list.length ? list[0] : 0;
+    ui.reverse = false;
+    ui.paused = true;
+    ui.started = false;
+    ui.cursor = null;
+    render();
+    scrollTop();
+  }
+
+  function goHome() {
+    stopCamera();
+    ui.view = 'home';
+    ui.furnaceId = null;
+    render();
+    scrollTop();
+  }
+
+  /* ================================================================== *
+   * 四、绝压比计算（方式1 → 方式2）
+   * ================================================================== */
+
+  function openRatioCalc() {
+    stopCamera();
+    ui.view = 'convert';
+    if (C.hasBatchData(batch)) {
+      convText = C.exportMode1(batch);
+      conv = C.parseMode1(convText);
+      conv.fromCurrent = true;
+      syncConvHeaders();
+    }
+    render();
+    scrollTop();
+  }
+
+  function syncConvHeaders() {
+    if (!conv) return;
+    conv.furnaces.forEach(function (it) {
+      var f = C.furnaceById(batch, it.id);
+      if (!f) return;
+      it.headerA = f.headerA;
+      it.headerB = f.headerB;
+    });
+  }
+
+  function renderConverter() {
+    var host = $('#view');
+    host.innerHTML = '';
+
+    host.appendChild(el('div', { class: 'page-head' }, [
+      el('div', {}, [
+        el('h2', { class: 'page-title', text: '绝压比计算' }),
+        el('p', { class: 'page-sub', text: '所有炉子的文丘里读数录完后，在这里填集合管压力，生成方式2。打开时会自动载入当前读数；也可以粘贴方式1文本（老记录 / 别人发来的）。' })
+      ]),
+      el('div', { class: 'page-actions' }, [
+        el('button', { class: 'btn', type: 'button', text: '‹ 返回炉子列表', onclick: goHome })
+      ])
+    ]));
+
+    host.appendChild(convPastePanel());
+    if (conv && conv.furnaces.length) {
+      host.appendChild(convResultPanel());
+      host.appendChild(convOutputPanel());
+    }
+    updateConvIssues();
+    if (conv && conv.furnaces.length) updateConvPreview();
+  }
+
+  function convPastePanel() {
+    var sec = el('section', { class: 'panel' });
+    sec.appendChild(el('div', { class: 'panel-head' }, [
+      el('h2', { class: 'panel-title', text: '方式1 文本' }),
+      el('span', { class: 'panel-note', text: '已自动载入当前读数；也可整段替换成老记录后重新解析' })
+    ]));
+    var body = el('div', { class: 'panel-body' });
+    var ta = el('textarea', {
+      class: 'textarea conv-textarea', id: 'convText', rows: '10',
+      spellcheck: 'false',
+      placeholder: '文丘里压力 ... 整段粘贴到这里'
+    });
+    ta.value = convText;
+    ta.addEventListener('input', function () { convText = ta.value; });
+    body.appendChild(ta);
+    body.appendChild(el('div', { class: 'conv-actions' }, [
+      el('button', { class: 'btn primary', type: 'button', id: 'btnConvParse', text: '解析文本', onclick: parseConv }),
+      el('button', { class: 'btn', type: 'button', id: 'btnLoadCurrent', text: '载入当前读数', onclick: loadCurrentConv }),
+      el('button', {
+        class: 'btn ghost', type: 'button', id: 'btnConvClear', text: '清空',
+        onclick: function () { convText = ''; conv = null; renderConverter(); }
+      })
+    ]));
+    body.appendChild(el('div', { class: 'conv-issues', id: 'convIssues' }));
+    sec.appendChild(body);
+    return sec;
+  }
+
+  function parseConv(isCurrent) {
+    var ta = $('#convText');
+    if (ta) convText = ta.value;
+    conv = C.parseMode1(convText);
+    conv.fromCurrent = !!isCurrent;
+    if (conv.fromCurrent) syncConvHeaders();
+    renderConverter();
+    if (conv.furnaces.length) toast('解析到 ' + conv.furnaces.length + ' 台炉', 'ok', 1800);
+    else toast('没有解析到可用炉子，请检查格式', 'error', 3200);
+  }
+
+  function loadCurrentConv() {
+    if (!C.hasBatchData(batch)) {
+      toast('当前还没有录入任何炉子读数', 'warn', 2600);
+      return;
+    }
+    convText = C.exportMode1(batch);
+    var ta = $('#convText');
+    if (ta) ta.value = convText;
+    parseConv(true);
+  }
+
+  function updateConvIssues() {
+    var host = $('#convIssues');
+    if (!host || !conv) return;
+    host.innerHTML = '';
+    var errors = conv.issues.filter(function (x) { return x.level === 'error'; });
+    var warns = conv.issues.filter(function (x) { return x.level === 'warn'; });
+    if (conv.furnaces.length && !errors.length && !warns.length) {
+      var groups = 0;
+      conv.furnaces.forEach(function (it) { groups += it.groups.length; });
+      host.appendChild(el('div', { class: 'conv-msg ok', text: '解析成功：' + conv.furnaces.length + ' 台炉，共 ' + groups + ' 组' }));
+      return;
+    }
+    conv.issues.forEach(function (issue) {
+      host.appendChild(el('div', { class: 'conv-msg ' + (issue.level === 'error' ? 'error' : 'warn') }, [
+        (issue.line ? '第 ' + issue.line + ' 行：' : '') + issue.msg
+      ]));
+    });
+  }
+
+  function convResultPanel() {
+    var sec = el('section', { class: 'panel' });
+    sec.appendChild(el('div', { class: 'panel-head' }, [
+      el('h2', { class: 'panel-title', text: '解析结果' }),
+      el('span', { class: 'panel-note', text: '填集合管压力后，下方实时生成方式2' })
+    ]));
+    var body = el('div', { class: 'panel-body conv-furnaces', id: 'convFurnaces' });
+    conv.furnaces.forEach(function (it) { body.appendChild(convFurnaceCard(it)); });
+    sec.appendChild(body);
+    return sec;
+  }
+
+  function convFurnaceCard(it) {
+    var head = el('div', { class: 'cf-head' }, [
+      el('strong', { class: 'cf-title', text: it.label }),
+      el('span', { class: 'tag', text: C.sideLabel(it.side) }),
+      el('span', { class: 'tag', text: it.groups.length + ' 组' }),
+      it.ambiguous ? convSideSeg(it) : null
+    ]);
+
+    var groups = el('div', { class: 'cf-groups' });
+    it.groups.forEach(function (g) {
+      groups.appendChild(el('span', { class: 'cf-group' }, [
+        el('i', { text: C.CIRCLED[g.index] }),
+        el('b', { text: g.value == null ? '—' : C.formatFixed(g.value, 3) }),
+        g.gauge ? el('em', { text: g.gauge + '#' }) : null
+      ]));
+    });
+
+    var headers = el('div', { class: 'cf-headers' });
+    ['A', 'B'].forEach(function (ch) {
+      if (it.side !== 'full' && it.side !== ch) return;
+      var input = el('input', {
+        class: 'ratio-input', type: 'text', inputmode: 'decimal',
+        placeholder: '如 0.230', value: headerText(it, ch),
+        'aria-label': it.label + ' ' + ch + ' 集合管压力'
+      });
+      input.addEventListener('input', function () {
+        var p = C.parseValue(input.value);
+        var v = p.ok && !p.empty ? C.roundTo(p.value, batch.config.decimals) : null;
+        if (ch === 'A') it.headerA = v;
+        else it.headerB = v;
+        if (conv.fromCurrent) {
+          C.setHeader(batch, it.id, ch, v);
+          persist();
+        }
+        refreshConvRatio(it);
+        updateConvPreview();
+      });
+      input.addEventListener('blur', function () { input.value = headerText(it, ch); });
+      headers.appendChild(el('label', { class: 'cf-header' }, [
+        el('span', { text: ch + ' 集合管压力' }),
+        input
+      ]));
+    });
+
+    return el('div', { class: 'conv-furnace', dataset: { id: it.id } }, [
+      head,
+      groups,
+      headers,
+      el('div', { class: 'cf-ratio', dataset: { ratioFor: it.id }, text: convItemRatioText(it) })
+    ]);
+  }
+
+  function convSideSeg(it) {
+    var wrap = el('div', { class: 'seg seg-sm', role: 'group', 'aria-label': '这 4 行属于哪个炉膛' });
+    ['A', 'B'].forEach(function (ch) {
+      wrap.appendChild(el('button', {
+        class: 'seg-btn' + (it.side === ch ? ' active' : ''),
+        type: 'button',
+        text: ch + '炉膛',
+        onclick: function () {
+          if (C.converterSetSide(it, ch)) {
+            renderConverter();
+            toast('已按 ' + ch + ' 炉膛重新对应', 'ok', 1500);
+          }
+        }
+      }));
+    });
+    return wrap;
+  }
+
+  function headerText(it, ch) {
+    var v = ch === 'A' ? it.headerA : it.headerB;
+    return v == null ? '' : C.formatFixed(v, batch.config.decimals);
+  }
+
+  function convItemRatioText(it) {
+    var b = C.converterToBatch([it]);
+    var f = C.furnaceById(b, it.id);
+    var parts = [];
+    ['A', 'B'].forEach(function (ch) {
+      var r = C.ratioOf(f, ch);
+      if (!r.inScope) return;
+      parts.push(ch + ' ' + (r.ratio == null ? '—' : C.formatRatio(r.ratio)));
+    });
+    var best = C.bestRatioOf(f);
+    if (best) parts.push('最大 ' + C.formatRatio(best.ratio) + '（' + C.CIRCLED[best.maxGroup] + '）');
+    return parts.join(' · ');
+  }
+
+  function refreshConvRatio(it) {
+    var el2 = $('[data-ratio-for="' + it.id + '"]');
+    if (el2) el2.textContent = convItemRatioText(it);
+  }
+
+  function convOutputPanel() {
+    var sec = el('section', { class: 'panel' });
+    sec.appendChild(el('div', { class: 'panel-head' }, [
+      el('h2', { class: 'panel-title', text: '方式2 预览' }),
+      el('span', { class: 'panel-note', text: '可直接复制或下载' })
+    ]));
+    var body = el('div', { class: 'panel-body' });
+    body.appendChild(el('pre', { class: 'export-preview', id: 'convPreview', text: '' }));
+    body.appendChild(el('p', { class: 'hint', id: 'convMissing', text: '' }));
+    body.appendChild(el('div', { class: 'conv-actions' }, [
+      el('button', {
+        class: 'btn', type: 'button', id: 'btnConvCopy', text: '复制',
+        onclick: function () {
+          copyText($('#convPreview').textContent).then(function (ok) {
+            toast(ok ? '已复制到剪贴板' : '复制失败，请手动选择文本', ok ? 'ok' : 'error', 2200);
+          });
+        }
+      }),
+      el('button', {
+        class: 'btn primary', type: 'button', id: 'btnConvDownload', text: '下载 .txt',
+        onclick: function () {
+          var name = '文丘里压力_方式2_转换_' + C.todayStr().replace(/-/g, '') + '.txt';
+          downloadText(name, $('#convPreview').textContent);
+          toast('已下载 ' + name, 'ok');
+        }
+      })
+    ]));
+    sec.appendChild(body);
+    return sec;
+  }
+
+  function updateConvPreview() {
+    if (!conv || !conv.furnaces.length) return;
+    var pre = $('#convPreview');
+    if (!pre) return;
+    pre.textContent = C.exportMode2(C.converterToBatch(conv.furnaces));
+    var missing = [];
+    conv.furnaces.forEach(function (it) {
+      var chs = it.side === 'full' ? ['A', 'B'] : [it.side];
+      chs.forEach(function (ch) {
+        var h = ch === 'A' ? it.headerA : it.headerB;
+        if (h == null) missing.push(it.label + ' ' + ch);
+      });
+    });
+    var note = $('#convMissing');
+    if (note) {
+      note.textContent = missing.length
+        ? '未填集合管压力：' + missing.join('、') + '（这些炉膛的绝压比显示为 —）'
+        : '';
+    }
+  }
+
+  /* ================================================================== *
+   * 四、单炉页面
+   * ================================================================== */
+
+  function renderFurnace() {
+    var f = currentFurnace();
+    if (!f) { goHome(); return; }
+    document.body.classList.add('furnace-mode');
+    if (!C.isGroupInScope(f, ui.group)) {
+      var list = C.groupsInScope(f);
+      ui.group = list.length ? list[0] : 0;
+    }
+    var host = $('#view');
+    host.innerHTML = '';
+
+    host.appendChild(furnaceHeader(f));
+    host.appendChild(cameraPanel(f));
+    host.appendChild(controlPanel(f));
+    host.appendChild(groupSection(f));
+    host.appendChild(el('div', { class: 'furnace-foot-tools' }, [
+      el('button', {
+        class: 'btn sm ghost', type: 'button', id: 'btnReverse',
+        text: '方向：' + (ui.reverse ? '倒序' : '正序'),
+        onclick: toggleDirection
+      })
+    ]));
+    host.appendChild(stepper(f));
+    host.appendChild(summaryPanel(f));
+
+    refreshCurrentGroup(f);
+    ensureCamera();
+  }
+
+  function furnaceHeader(f) {
+    return el('div', { class: 'furnace-head compact' }, [
+      el('div', { class: 'fh-line1' }, [
+        el('h2', { class: 'fh-name', text: f.label }),
+        sideSeg(f)
+      ]),
+      el('div', { class: 'fh-line2' }, [
+        el('button', {
+          class: 'btn back', type: 'button', text: '‹ 返回主界面',
+          title: '返回主界面；手机可从页面中间向右划',
+          onclick: goHome
+        }),
+        el('span', { class: 'swipe-hint', text: '手机右划也可返回' })
+      ])
+    ]);
+  }
+
+  function cameraPanel(f) {
+    var target = targetIndex(f, ui.group);
+    var targetLabel = target < 0 ? '本组已处理完' : '第 ' + (ui.group + 1) + ' 组 · 第 ' + (target + 1) + ' 块';
+    return el('section', { class: 'camera-panel', id: 'cameraPanel' }, [
+      el('video', { id: 'cameraFeed', autoplay: 'autoplay', playsinline: 'playsinline', muted: 'muted' }),
+      el('div', { class: 'camera-placeholder', id: 'cameraPlaceholder' }, [
+        el('span', { class: 'cam-icon', text: '◎' }),
+        el('strong', { text: '相机实时画面' }),
+        el('span', { id: 'cameraMsg', text: '需要摄像头权限；手机需 https:// 网址' }),
+        el('button', { class: 'btn sm', type: 'button', text: '打开相机', onclick: function () { ensureCamera(true); } })
+      ]),
+      el('div', { class: 'camera-overlay' }, [
+        el('span', { class: 'cam-target', id: 'camTarget', text: targetLabel }),
+        el('span', { class: 'cam-state', id: 'camState', text: ui.paused ? (ui.started ? '已暂停' : '未开始') : '识别中' })
+      ]),
+      el('div', { class: 'scan-frame' })
+    ]);
+  }
+
+  function ensureCamera(force) {
+    var video = $('#cameraFeed');
+    if (cameraStream) {
+      if (video) {
+        video.srcObject = cameraStream;
+        var p = video.play();
+        if (p && p.catch) p.catch(function () {});
+      }
+      var ph0 = $('#cameraPlaceholder');
+      if (ph0) ph0.classList.add('hidden');
+      return;
+    }
+    if (cameraTried && !force) return;
+    cameraTried = true;
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      setCameraError('当前浏览器不支持相机');
+      return;
+    }
+    navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: 'environment' } }, audio: false })
+      .then(function (stream) {
+        cameraStream = stream;
+        var v = $('#cameraFeed');
+        if (v) {
+          v.srcObject = stream;
+          var play = v.play();
+          if (play && play.catch) play.catch(function () {});
+        }
+        var ph = $('#cameraPlaceholder');
+        if (ph) ph.classList.add('hidden');
+        var s = $('#camState');
+        if (s) s.textContent = ui.paused ? (ui.started ? '已暂停' : '未开始') : '识别中';
+      })
+      .catch(function (err) {
+        setCameraError('无法打开相机：' + (err && (err.message || err.name) ? (err.message || err.name) : '权限被拒绝'));
+      });
+  }
+
+  function setCameraError(msg) {
+    var ph = $('#cameraPlaceholder');
+    if (ph) ph.classList.remove('hidden');
+    var m = $('#cameraMsg');
+    if (m) m.textContent = msg;
+    var s = $('#camState');
+    if (s) s.textContent = '相机不可用';
+  }
+
+  function stopCamera() {
+    if (cameraStream) {
+      cameraStream.getTracks().forEach(function (t) { try { t.stop(); } catch (e) { /* ignore */ } });
+      cameraStream = null;
+    }
+    var v = $('#cameraFeed');
+    if (v) v.srcObject = null;
+    var ph = $('#cameraPlaceholder');
+    if (ph) ph.classList.remove('hidden');
+    cameraTried = false;
+  }
+
+  function controlPanel(f) {
+    var g = ui.group;
+    var nextG = nextGroupInDirection(f, g);
+    var prevG = prevGroupInDirection(f, g);
+    return el('div', { class: 'control-panel' }, [
+      el('div', { class: 'nav-big' }, [
+        el('button', {
+          class: 'btn nav-side', type: 'button', text: '‹ 上一组',
+          disabled: prevG < 0, onclick: prevGroup
+        }),
+        el('button', {
+          class: 'btn primary btn-recognize', type: 'button', id: 'btnRecognize',
+          text: ui.paused ? '开始识别' : '暂停识别',
+          onclick: togglePause
+        }),
+        el('button', {
+          class: 'btn nav-side', type: 'button',
+          text: nextG < 0 ? '完成本炉' : '下一组 ›',
+          onclick: nextGroup
+        })
+      ]),
+      el('div', { class: 'action-row' }, [
+        el('button', { class: 'btn', type: 'button', id: 'btnSkip', text: '跳过（送检）', onclick: skipCurrent }),
+        el('button', { class: 'btn danger-text', type: 'button', id: 'btnExclude', text: '剔除本块', onclick: excludeCurrent })
+      ])
+    ]);
+  }
+
+  function sideSeg(f) {
+    var wrap = el('div', { class: 'seg', role: 'group', 'aria-label': '测量范围' });
+    [['full', '整台'], ['A', 'A炉膛'], ['B', 'B炉膛']].forEach(function (pair) {
+      wrap.appendChild(el('button', {
+        class: 'seg-btn' + (f.side === pair[0] ? ' active' : ''),
+        type: 'button',
+        text: pair[1],
+        onclick: function () { changeSide(pair[0]); }
+      }));
+    });
+    return wrap;
+  }
+
+  function groupsForSide(f, side) {
+    var out = [];
+    for (var g = 0; g < f.groups; g++) {
+      if (side === 'full' || (side === 'A' && g < 4) || (side === 'B' && g >= 4)) out.push(g);
+    }
+    return out;
+  }
+
+  function changeSide(side) {
+    var f = currentFurnace();
+    if (!f || f.side === side) return;
+    var newGroups = groupsForSide(f, side);
+    var hidden = 0;
+    for (var g = 0; g < f.groups; g++) {
+      if (newGroups.indexOf(g) >= 0) continue;
+      f.cells[g].forEach(function (c) { if (c.v != null) hidden++; });
+    }
+    if (hidden > 0 && !confirm('切到「' + C.sideLabel(side) + '」后，另半个炉膛的 ' + hidden +
+      ' 个读数不参与统计和导出（数据仍保留在本机）。继续？')) return;
+    C.setSide(batch, f.id, side);
+    ui.group = C.groupsInScope(f)[0];
+    ui.cursor = null;
+    persist();
+    renderFurnace();
+    toast('已切换到 ' + C.sideLabel(side), 'ok', 1600);
+  }
+
+  function stepper(f) {
+    var wrap = el('div', { class: 'stepper' });
+    ['A', 'B'].forEach(function (ch) {
+      var groups = C.groupsInScope(f).filter(function (g) { return C.chamberOf(g) === ch; });
+      if (!groups.length) return;
+      var band = el('div', { class: 'band' }, [
+        el('span', { class: 'band-label', text: ch + '炉膛' }),
+        el('div', { class: 'band-groups' })
+      ]);
+      var host = $('.band-groups', band);
+      groups.forEach(function (g) {
+        var s = C.groupStat(f, g);
+        host.appendChild(el('button', {
+          class: 'group-chip' + (g === ui.group ? ' active' : '') + (s.filled === s.count ? ' full' : ''),
+          type: 'button',
+          dataset: { g: g },
+          title: '第 ' + (g + 1) + ' 组',
+          onclick: function () { selectGroup(g); }
+        }, [
+          el('span', { class: 'gc-num', text: C.CIRCLED[g] }),
+          el('span', { class: 'gc-max', text: s.max == null ? '—' : C.formatFixed(s.max, 3) })
+        ]));
+      });
+      wrap.appendChild(band);
+    });
+    return wrap;
+  }
+
+  function groupChips(f, g) {
+    var s = C.groupStat(f, g);
+    var list = [];
+    list.push(chip('已处理 ' + s.handled + '/' + s.count, s.complete ? 'ok' : (s.handled ? '' : 'muted')));
+    list.push(chip('有效 ' + s.valid, s.valid ? '' : 'muted'));
+    if (s.excluded) list.push(chip('剔除 ' + s.excluded, 'warn'));
+    if (s.skipped) list.push(chip('送检 ' + s.skipped, 'warn'));
+    list.push(chip('最高 ' + (s.max == null ? '—' : C.formatFixed(s.max, 3) + ' · ' + (s.maxIndex + 1) + '#'),
+      s.max == null ? 'muted' : 'max'));
+    return list;
+  }
+
+  function chip(text, kind) {
+    return el('span', { class: 'chip' + (kind ? ' ' + kind : ''), text: text });
+  }
+
+  function scanEmpty(f, g, start, reverse) {
+    var row = f.cells[g] || [];
+    for (var i = start; reverse ? i >= 0 : i < row.length; i += reverse ? -1 : 1) {
+      if (row[i] && row[i].v == null && !row[i].skip) return i;
+    }
+    return -1;
+  }
+
+  function targetIndex(f, g) {
+    if (ui.cursor && ui.cursor.group === g) {
+      var c = f.cells[g] && f.cells[g][ui.cursor.index];
+      // 指定起点即使已有旧读数也返回该格，便于换表后重读覆盖
+      if (c && !c.skip) return ui.cursor.index;
+      return scanEmpty(f, g, ui.cursor.index + (ui.reverse ? -1 : 1), ui.reverse);
+    }
+    return C.nextEmptyIndex(f, g, ui.reverse);
+  }
+
+  function nextGroupInDirection(f, g) {
+    return ui.reverse ? C.prevInScopeGroup(f, g) : C.nextInScopeGroup(f, g);
+  }
+
+  function prevGroupInDirection(f, g) {
+    return ui.reverse ? C.nextInScopeGroup(f, g) : C.prevInScopeGroup(f, g);
+  }
+
+  function targetText(f, g) {
+    var dir = ui.reverse ? ' · 倒序' : '';
+    if (ui.paused) {
+      var head = ui.started ? '识别已暂停' : '识别未开始';
+      if (ui.cursor) return head + '：起点为第 ' + (ui.cursor.index + 1) + ' 块；点「开始识别」从这里开始' + dir;
+      return head + '：点下面任意一块表选起点，再点「开始识别」' + dir;
+    }
+    var i = targetIndex(f, g);
+    if (i < 0) return '本组已处理完，点「下一组」继续' + dir;
+    return '待录入：第 ' + (i + 1) + ' 块' + dir + (ui.cursor ? '（指定起点）' : '') + '（识别到读数会自动填入）';
+  }
+
+  function groupSection(f) {
+    var g = ui.group;
+    var sec = el('section', { class: 'group-card' });
+
+    sec.appendChild(el('div', { class: 'group-head' }, [
+      el('div', { class: 'gh-title' }, [
+        el('span', { class: 'circled', text: C.CIRCLED[g] }),
+        el('h3', { text: '第 ' + (g + 1) + ' 组' }),
+        el('span', { class: 'tag', text: C.chamberOf(g) + '炉膛' })
+      ]),
+      el('div', { class: 'gh-chips', id: 'groupChips' }, groupChips(f, g)),
+      el('div', { class: 'gh-actions' }, [
+        el('button', { class: 'btn sm', type: 'button', text: '识别填入', onclick: openFill }),
+        el('button', { class: 'btn sm ghost', type: 'button', text: '清空本组', onclick: clearGroupConfirm })
+      ])
+    ]));
+
+    sec.appendChild(el('div', { class: 'target-line', id: 'targetLine', text: targetText(f, g) }));
+
+    var grid = el('div', { class: 'cell-grid' + (f.perGroup <= 2 ? ' cols-2' : '') });
+    for (var i = 0; i < f.perGroup; i++) grid.appendChild(cellView(f, g, i));
+    sec.appendChild(grid);
+
+    return sec;
+  }
+
+  function cellView(f, g, i) {
+    var c = f.cells[g][i];
+    var input = el('input', {
+      class: 'cell-input', type: 'text', inputmode: 'decimal', autocomplete: 'off',
+      spellcheck: 'false', placeholder: '—',
+      value: c.v == null ? '' : C.formatFixed(c.v, batch.config.decimals),
+      'aria-label': f.label + ' 第' + (g + 1) + '组 第' + (i + 1) + '块读数'
+    });
+    var exBtn = el('button', {
+      class: 'cell-ex', type: 'button', tabindex: '-1',
+      title: '剔除 / 恢复该读数', text: '剔'
+    });
+    var skipBtn = el('button', {
+      class: 'cell-skip', type: 'button', tabindex: '-1',
+      title: '送检 / 恢复该表', text: '送'
+    });
+    var actions = el('div', { class: 'cell-actions' }, [
+      el('span', { class: 'cell-idx', text: (i + 1) + '#' }),
+      exBtn,
+      skipBtn
+    ]);
+    var box = el('div', { class: 'cell', dataset: { i: i } }, [input, actions]);
+
+    input.addEventListener('input', function () { onCellInput(g, i, input); });
+    input.addEventListener('blur', function () { flushCell(g, i, input, false); });
+    input.addEventListener('keydown', onCellKeydown);
+    exBtn.addEventListener('click', function () { toggleExclude(g, i); });
+    skipBtn.addEventListener('click', function () { toggleSkip(g, i); });
+    box.addEventListener('click', function (e) {
+      if (e.target.closest && (e.target.closest('.cell-ex') || e.target.closest('.cell-skip'))) return;
+      selectStartCell(g, i);
+    });
+
+    patchCell(f, g, i);
+    return box;
+  }
+
+  function summaryPanel(f) {
+    var sec = el('section', { class: 'panel summary-panel' });
+    sec.appendChild(el('div', { class: 'panel-head' }, [
+      el('h2', { class: 'panel-title', text: '本炉分组汇总' }),
+      el('span', { class: 'panel-note', text: '剔除和送检的表都不参与最高值' })
+    ]));
+    var table = el('table', { class: 'data-table summary-table' });
+    var thead = el('thead');
+    var tr = el('tr');
+    ['组', '炉膛', '最高值', '表号', '有效', '剔除', '送检'].forEach(function (h, idx) {
+      tr.appendChild(el('th', { text: h, class: idx >= 2 ? 'num' : '' }));
+    });
+    thead.appendChild(tr);
+    table.appendChild(thead);
+    var tbody = el('tbody');
+    C.groupsInScope(f).forEach(function (g) {
+      var s = C.groupStat(f, g);
+      var row = el('tr', { dataset: { g: g } });
+      row.appendChild(el('td', { text: C.CIRCLED[g] + ' 第' + (g + 1) + '组' }));
+      row.appendChild(el('td', { text: C.chamberOf(g) + '炉膛' }));
+      row.appendChild(el('td', { class: 'num strong', 'data-field': 'max', text: s.max == null ? '—' : C.formatFixed(s.max, 3) }));
+      row.appendChild(el('td', { class: 'num', 'data-field': 'gauge', text: s.maxIndex >= 0 ? (s.maxIndex + 1) + '#' : '—' }));
+      row.appendChild(el('td', { class: 'num', 'data-field': 'valid', text: String(s.valid) }));
+      row.appendChild(el('td', { class: 'num' + (s.excluded ? ' warn-text' : ''), 'data-field': 'excluded', text: String(s.excluded) }));
+      row.appendChild(el('td', { class: 'num' + (s.skipped ? ' warn-text' : ''), 'data-field': 'skipped', text: String(s.skipped) }));
+      tbody.appendChild(row);
+    });
+    table.appendChild(tbody);
+    sec.appendChild(el('div', { class: 'table-wrap' }, [table]));
+    return sec;
+  }
+
+  /* ================================================================== *
+   * 五、单元格交互
+   * ================================================================== */
+
+  function onCellInput(g, i, input) {
+    var f = currentFurnace();
+    if (f.cells[g][i].skip) return;
+    var r = C.parseValue(input.value);
+    if (r.empty) {
+      f.cells[g][i].v = null;
+      f.cells[g][i].skip = false;
+      input.classList.remove('invalid');
+      afterEdit(f, g, i);
+    } else if (r.ok) {
+      f.cells[g][i].v = C.roundTo(r.value, batch.config.decimals);
+      f.cells[g][i].skip = false;
+      input.classList.remove('invalid');
+      afterEdit(f, g, i);
+    } else {
+      input.classList.add('invalid');
+    }
+  }
+
+  /** 把输入框内容写回数据；格式无效时还原，返回是否有效 */
+  function flushCell(g, i, input, warn) {
+    var f = currentFurnace();
+    var cell = f.cells[g][i];
+    if (cell.skip) {
+      input.value = '';
+      input.classList.remove('invalid');
+      return true;
+    }
+    var r = C.parseValue(input.value);
+    var ok = true;
+    if (r.empty) {
+      cell.v = null;
+      cell.skip = false;
+      input.value = '';
+      input.classList.remove('invalid');
+    } else if (r.ok) {
+      cell.v = C.roundTo(r.value, batch.config.decimals);
+      cell.skip = false;
+      input.value = C.formatFixed(cell.v, batch.config.decimals);
+      input.classList.remove('invalid');
+    } else {
+      ok = false;
+      input.value = cell.v == null ? '' : C.formatFixed(cell.v, batch.config.decimals);
+      input.classList.add('invalid');
+      setTimeout(function () { input.classList.remove('invalid'); }, 1200);
+      if (warn) toast('读数格式无法识别，已还原', 'error');
+    }
+    afterEdit(f, g, i);
+    return ok;
+  }
+
+  function toggleExclude(g, i) {
+    var f = currentFurnace();
+    var cell = f.cells[g][i];
+    if (cell.skip) C.setSkipped(batch, f.id, g, i, false);
+    C.setExcluded(batch, f.id, g, i, !cell.ex);
+    ui.cursor = null;
+    afterEdit(f, g, i);
+    toast((cell.ex ? '已剔除 ' : '已恢复 ') + '第' + (i + 1) + '块', cell.ex ? 'warn' : 'ok', 1400);
+  }
+
+  function toggleSkip(g, i) {
+    var f = currentFurnace();
+    var cell = f.cells[g][i];
+    if (!cell.skip && cell.v != null && !confirm('第 ' + (i + 1) + ' 块已有读数，标记送检会清空该读数，是否继续？')) return;
+    C.setSkipped(batch, f.id, g, i, !cell.skip);
+    ui.cursor = null;
+    afterEdit(f, g, i);
+    toast(cell.skip ? '第' + (i + 1) + '块标记送检，已跳过' : '第' + (i + 1) + '块已恢复', cell.skip ? 'warn' : 'ok', 1600);
+  }
+
+  function selectStartCell(g, i) {
+    var f = currentFurnace();
+    if (!f) return;
+    var cell = f.cells[g][i];
+    if (cell.skip) {
+      toast('该块已送检，不能作为起点', 'warn', 1800);
+      return;
+    }
+    ui.cursor = { group: g, index: i };
+    if (!ui.paused) ui.paused = true;
+    $$('.cell').forEach(function (node) { node.classList.remove('is-start'); });
+    var node = $('.cell[data-i="' + i + '"]');
+    if (node) node.classList.add('is-start');
+    var btn = $('#btnRecognize');
+    if (btn) btn.textContent = ui.paused ? '开始识别' : '暂停识别';
+    updateTarget(f, g);
+  }
+
+  function onCellKeydown(e) {
+    var input = e.target;
+    var cell = input.closest('.cell');
+    if (!cell) return;
+    var i = parseInt(cell.dataset.i, 10);
+    var g = ui.group;
+    var fnow = currentFurnace();
+    if (fnow && fnow.cells[g][i].skip) return;
+
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      if (!flushCell(g, i, input, true)) return;
+      var next = $('.cell[data-i="' + (i + 1) + '"] .cell-input');
+      if (next) focusInput(next);
+      else toast('本组最后一格，点「下一组」继续', 'warn', 1600);
+      return;
+    }
+
+    if (e.key === 'ArrowDown' || e.key === 'ArrowUp' || e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+      e.preventDefault();
+      flushCell(g, i, input, false);
+      var target = spatialNeighbor(input, e.key);
+      if (target) focusInput(target);
+      return;
+    }
+
+    if (e.key === 'x' || e.key === 'X') {
+      e.preventDefault();
+      toggleExclude(g, i);
+      return;
+    }
+
+    if (e.key === 'Escape') input.blur();
+  }
+
+  function spatialNeighbor(cur, key) {
+    var inputs = $$('.cell-input');
+    var cr = cur.getBoundingClientRect();
+    var cx = cr.left + cr.width / 2;
+    var cy = cr.top + cr.height / 2;
+    var best = null;
+    var bestScore = Infinity;
+    inputs.forEach(function (node) {
+      if (node === cur) return;
+      var r = node.getBoundingClientRect();
+      var dx = (r.left + r.width / 2) - cx;
+      var dy = (r.top + r.height / 2) - cy;
+      if (key === 'ArrowDown' && dy < 8) return;
+      if (key === 'ArrowUp' && dy > -8) return;
+      if (key === 'ArrowRight' && dx < 8) return;
+      if (key === 'ArrowLeft' && dx > -8) return;
+      var vertical = key === 'ArrowDown' || key === 'ArrowUp';
+      var primary = vertical ? Math.abs(dy) : Math.abs(dx);
+      var secondary = vertical ? Math.abs(dx) : Math.abs(dy);
+      var score = primary * 4 + secondary;
+      if (score < bestScore) { bestScore = score; best = node; }
+    });
+    return best;
+  }
+
+  function focusInput(input) {
+    if (!input) return;
+    input.focus();
+    try { input.select(); } catch (e) { /* ignore */ }
+    if (input.scrollIntoView) input.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+  }
+
+  /* ================================================================== *
+   * 六、局部刷新
+   * ================================================================== */
+
+  function patchCell(f, g, i) {
+    var cell = $('.cell[data-i="' + i + '"]');
+    if (!cell) return;
+    var c = f.cells[g][i];
+    var input = $('.cell-input', cell);
+    input.readOnly = !!c.skip;
+    input.placeholder = c.skip ? '送检' : '—';
+    if (c.skip) {
+      input.value = '';
+    } else if (document.activeElement !== input) {
+      input.value = c.v == null ? '' : C.formatFixed(c.v, batch.config.decimals);
+    }
+    cell.classList.toggle('is-excluded', c.ex);
+    cell.classList.toggle('is-skipped', !!c.skip);
+    cell.classList.toggle('is-start', !!(ui.cursor && ui.cursor.group === g && ui.cursor.index === i));
+    cell.classList.toggle('is-over', !c.skip && c.v != null && c.v > batch.config.max);
+    var ex = $('.cell-ex', cell);
+    if (ex) ex.classList.toggle('active', c.ex);
+    var sk = $('.cell-skip', cell);
+    if (sk) sk.classList.toggle('active', !!c.skip);
+  }
+
+  function updateMaxHighlight(f, g) {
+    $$('.cell').forEach(function (c) { c.classList.remove('is-max'); });
+    var s = C.groupStat(f, g);
+    if (s.max == null) return;
+    var cell = $('.cell[data-i="' + s.maxIndex + '"]');
+    if (cell) cell.classList.add('is-max');
+  }
+
+  function updateGroupStats(f, g) {
+    var host = $('#groupChips');
+    if (!host) return;
+    host.innerHTML = '';
+    groupChips(f, g).forEach(function (c) { host.appendChild(c); });
+  }
+
+  function updateTarget(f, g) {
+    var line = $('#targetLine');
+    if (line) line.textContent = targetText(f, g);
+    var ct = $('#camTarget');
+    if (ct) {
+      var ci = targetIndex(f, g);
+      ct.textContent = ci < 0 ? '本组已处理完' : '第 ' + (g + 1) + ' 组 · 第 ' + (ci + 1) + ' 块';
+    }
+    var cs = $('#camState');
+    if (cs) cs.textContent = ui.paused ? (ui.started ? '已暂停' : '未开始') : '识别中';
+  }
+
+  function updateStepperChip(f, g) {
+    var chip = $('.group-chip[data-g="' + g + '"]');
+    if (!chip) return;
+    var s = C.groupStat(f, g);
+    var max = $('.gc-max', chip);
+    if (max) max.textContent = s.max == null ? '—' : C.formatFixed(s.max, 3);
+    chip.classList.toggle('full', s.complete);
+  }
+
+  function updateSummaryRow(f, g) {
+    var tr = $('.summary-table tr[data-g="' + g + '"]');
+    if (!tr) return;
+    var s = C.groupStat(f, g);
+    setField(tr, 'max', s.max == null ? '—' : C.formatFixed(s.max, batch.config.decimals));
+    setField(tr, 'gauge', s.maxIndex >= 0 ? (s.maxIndex + 1) + '#' : '—');
+    setField(tr, 'valid', String(s.valid));
+    setField(tr, 'excluded', String(s.excluded));
+    setField(tr, 'skipped', String(s.skipped));
+  }
+
+  function setField(tr, name, text) {
+    var td = $('[data-field="' + name + '"]', tr);
+    if (td) td.textContent = text;
+  }
+
+  function afterEdit(f, g, i) {
+    patchCell(f, g, i);
+    updateMaxHighlight(f, g);
+    updateGroupStats(f, g);
+    updateTarget(f, g);
+    updateStepperChip(f, g);
+    updateSummaryRow(f, g);
+    persist();
+  }
+
+  function refreshCurrentGroup(f) {
+    var g = ui.group;
+    for (var i = 0; i < f.perGroup; i++) patchCell(f, g, i);
+    updateMaxHighlight(f, g);
+    updateGroupStats(f, g);
+    updateTarget(f, g);
+    updateStepperChip(f, g);
+    updateSummaryRow(f, g);
+  }
+
+  /* ================================================================== *
+   * 七、组 / 炉切换
+   * ================================================================== */
+
+  function selectGroup(g) {
+    var f = currentFurnace();
+    if (!f || !C.isGroupInScope(f, g)) return;
+    ui.group = g;
+    ui.cursor = null;
+    renderFurnace();
+    scrollTop();
+  }
+
+  function prevGroup() {
+    var f = currentFurnace();
+    var g = prevGroupInDirection(f, ui.group);
+    if (g >= 0) selectGroup(g);
+  }
+
+  function nextGroup() {
+    var f = currentFurnace();
+    var g = nextGroupInDirection(f, ui.group);
+    if (g >= 0) { selectGroup(g); return; }
+    var st = C.furnaceStat(f);
+    if (!st.complete && !confirm('本炉还有 ' + (st.total - st.handled) + ' 块未录，仍返回炉子列表？')) return;
+    goHome();
+    toast(st.complete ? f.label + ' 已全部处理完' : '已返回炉子列表', st.complete ? 'ok' : '', 1800);
+  }
+
+  function clearGroupConfirm() {
+    var f = currentFurnace();
+    var s = C.groupStat(f, ui.group);
+    if ((s.filled || s.skipped) && !confirm('清空第 ' + (ui.group + 1) + ' 组的全部读数/送检标记？')) return;
+    C.clearGroup(batch, f.id, ui.group);
+    renderFurnace();
+    persist();
+    toast('已清空第 ' + (ui.group + 1) + ' 组', 'ok', 1500);
+  }
+
+  function clearFurnaceConfirm() {
+    var f = currentFurnace();
+    if (!confirm('清空 ' + f.label + ' 的全部读数与集合管压力？')) return;
+    C.clearFurnace(batch, f.id);
+    persist();
+    renderFurnace();
+    toast('已清空 ' + f.label, 'ok', 1500);
+  }
+
+  /* ================================================================== *
+   * 八、识别 / 顺序填入
+   * ================================================================== */
+
+  function openFill() {
+    var f = currentFurnace();
+    if (!f) return;
+    $('#fillTitle').textContent = '识别填入 · ' + f.label + ' 第 ' + (ui.group + 1) + ' 组';
+    $('#fillText').value = '';
+    $('#fillAdvance').checked = true;
+    $('#dlgFill').showModal();
+    setTimeout(function () { $('#fillText').focus(); }, 40);
+  }
+
+  function doFill() {
+    var values = C.parseReadings($('#fillText').value);
+    if (!values.length) { toast('没有解析到读数', 'error'); return; }
+    var filled = pushReadings(values, { advance: $('#fillAdvance').checked, manual: true });
+    $('#dlgFill').close();
+    if (!filled) toast('本组已录满，未填入', 'warn');
+    else toast('已填入 ' + filled + ' 个读数', 'ok');
+  }
+
+  function toggleDirection() {
+    var f = currentFurnace();
+    if (!f) return;
+    ui.reverse = !ui.reverse;
+    var list = C.groupsInScope(f);
+    ui.group = ui.reverse ? list[list.length - 1] : list[0];
+    ui.cursor = null;
+    renderFurnace();
+    toast('已切换为' + (ui.reverse ? '倒序' : '正序') + '读取', 'ok', 1600);
+  }
+
+  function togglePause() {
+    var f = currentFurnace();
+    if (!f) return;
+    ui.paused = !ui.paused;
+    if (!ui.paused) {
+      ui.started = true;
+      ensureCamera();
+    }
+    renderFurnace();
+    toast(ui.paused ? '识别已暂停' : '识别已开始', ui.paused ? 'warn' : 'ok', 1600);
+  }
+
+  function skipCurrent() {
+    var f = currentFurnace();
+    if (!f) return;
+    var g = ui.group;
+    var i = targetIndex(f, g);
+    if (i < 0) {
+      toast('本组已处理完；先切到要跳过的那组，再点跳过', 'warn', 2400);
+      return;
+    }
+    C.setSkipped(batch, f.id, g, i, true);
+    ui.cursor = null;
+    persist();
+    renderFurnace();
+    toast('第 ' + (g + 1) + ' 组第 ' + (i + 1) + ' 块已标记送检', 'warn', 1800);
+  }
+
+  function excludeCurrent() {
+    var f = currentFurnace();
+    if (!f) return;
+    var g = ui.group;
+    var i = targetIndex(f, g);
+    if (i < 0) {
+      toast('本组已处理完；先切到要剔除的那组', 'warn', 2200);
+      return;
+    }
+    if (f.cells[g][i].v == null) {
+      toast('该块还没有读数；要跳过请用「跳过（送检）」', 'warn', 2400);
+      return;
+    }
+    toggleExclude(g, i);
+  }
+
+  /**
+   * 顺序填入：从当前组第一个空位开始，填满后按需进入下一组。
+   * 摄像头识别模块每识别到一个读数调用一次即可。
+   */
+  function pushReadings(values, opts) {
+    var f = currentFurnace();
+    if (!f || (ui.paused && !(opts && opts.manual))) return 0;
+    var advance = !opts || opts.advance !== false;
+    var filled = 0;
+    var switched = false;
+
+    for (var k = 0; k < values.length; k++) {
+      var v = values[k];
+      if (v == null || !isFinite(v)) continue;
+      var g = ui.group;
+      var i = targetIndex(f, g);
+      if (i < 0) {
+        if (!advance) break;
+        var ng = nextGroupInDirection(f, g);
+        if (ng < 0) break;
+        g = ng;
+        ui.group = ng;
+        ui.cursor = null;
+        switched = true;
+        i = targetIndex(f, ng);
+        if (i < 0) break;
+      }
+      C.setValue(batch, f.id, g, i, v);
+      ui.cursor = null;
+      filled++;
+    }
+
+    if (filled) {
+      persist();
+      if (switched) renderFurnace();
+      else refreshCurrentGroup(f);
+    }
+    return filled;
+  }
+
+  function pushReading(value) {
+    var f = currentFurnace();
+    if (!f || ui.paused) return null;
+    var g0 = ui.group;
+    var i0 = targetIndex(f, g0);
+    if (i0 < 0) {
+      var ng = nextGroupInDirection(f, g0);
+      if (ng < 0) return null;
+      g0 = ng;
+      ui.group = ng;
+      ui.cursor = null;
+      i0 = targetIndex(f, ng);
+      if (i0 < 0) return null;
+    }
+    var n = pushReadings([value], { advance: true });
+    if (!n) return null;
+    if (targetIndex(f, ui.group) < 0) {
+      toast('第 ' + (ui.group + 1) + ' 组已录/送检完，点「下一组」继续', 'ok', 2000);
+    }
+    return { furnace: f.id, group: g0, index: i0 };
+  }
+
+  window.GaugeApp = {
+    version: C.VERSION,
+    pushReading: pushReading,
+    pushReadings: function (list, opts) { return pushReadings(list, opts || {}); },
+    getTarget: function () {
+      var f = currentFurnace();
+      if (!f) return null;
+      return {
+        furnace: f.id,
+        group: ui.group,
+        index: targetIndex(f, ui.group),
+        reverse: !!ui.reverse,
+        paused: !!ui.paused
+      };
+    },
+    setDirection: function (reverse) {
+      if (!!reverse !== !!ui.reverse) toggleDirection();
+      return !!ui.reverse;
+    },
+    pauseRecognition: function () {
+      if (!ui.paused) { ui.paused = true; renderFurnace(); }
+      return true;
+    },
+    resumeRecognition: function (index) {
+      var f = currentFurnace();
+      if (!f) return false;
+      if (typeof index === 'number' && !(index >= 0 && index < f.perGroup)) return false;
+      ui.paused = false;
+      ui.started = true;
+      ui.cursor = typeof index === 'number' ? { group: ui.group, index: index } : null;
+      ensureCamera();
+      renderFurnace();
+      return true;
+    },
+    isPaused: function () { return !!ui.paused; },
+    skipGauge: function (group, index) {
+      var f = currentFurnace();
+      if (!f) return false;
+      var g = typeof group === 'number' ? group : ui.group;
+      var i = typeof index === 'number' ? index : targetIndex(f, g);
+      if (i < 0) return false;
+      C.setSkipped(batch, f.id, g, i, true);
+      ui.cursor = null;
+      persist();
+      renderFurnace();
+      return true;
+    },
+    skipCurrent: function () { skipCurrent(); return true; },
+    getVideo: function () { return $('#cameraFeed'); },
+    getStream: function () { return cameraStream; },
+    startCamera: function () { ensureCamera(true); return true; },
+    stopCamera: stopCamera,
+    openFurnace: openFurnace,
+    getBatch: function () { return C.toJSON(batch); }
+  };
+
+  /* ================================================================== *
+   * 九、导出文丘里压力（方式1）
+   * ================================================================== */
+
+  function openExport() {
+    var hasScope = batch.furnaces.some(function (f) { return C.hasScopeData(f); });
+    if (!hasScope) {
+      toast(C.hasBatchData(batch) ? '当前炉膛范围内还没有读数（可切回整台）' : '还没有录入任何读数', 'warn', 3200);
+      return;
+    }
+    renderExportPreview();
+    $('#dlgExport').showModal();
+  }
+
+  function renderExportPreview() {
+    $('#exportPreview').textContent = C.exportMode1(batch);
+    $('#exportHint').textContent = '每台炉一个标题（半台带 A/B炉膛），每组一行：最高值表号 最高值（3 位小数）。';
+
+    var outside = [];
+    batch.furnaces.forEach(function (f) {
+      if (!C.hasFurnaceData(f)) return;
+      var scope = C.groupsInScope(f);
+      var hidden = 0;
+      for (var g = 0; g < f.groups; g++) {
+        if (scope.indexOf(g) >= 0) continue;
+        f.cells[g].forEach(function (c) { if (c.v != null) hidden++; });
+      }
+      if (hidden) outside.push(f.label + ' ' + C.sideLabel(f.side) + '范围外 ' + hidden + ' 个读数');
+    });
+    $('#exportNote').textContent = outside.length
+      ? '未参与本次导出：' + outside.join('；')
+      : '只导出有读数的炉子；空组显示为 - -。';
+  }
+
+  function copyText(text) {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      return navigator.clipboard.writeText(text).then(function () { return true; }, function () {
+        return fallbackCopy(text);
+      });
+    }
+    return Promise.resolve(fallbackCopy(text));
+  }
+
+  function fallbackCopy(text) {
+    var ta = el('textarea', { style: 'position:fixed;left:-9999px;top:0;opacity:0' });
+    ta.value = text;
+    document.body.appendChild(ta);
+    ta.select();
+    var ok = false;
+    try { ok = document.execCommand('copy'); } catch (e) { ok = false; }
+    document.body.removeChild(ta);
+    return ok;
+  }
+
+  function openExportAll() {
+    var hasScope = batch.furnaces.some(function (f) { return C.hasScopeData(f); });
+    if (!hasScope) {
+      toast(C.hasBatchData(batch) ? '当前炉膛范围内还没有读数（可切回整台）' : '还没有录入任何读数', 'warn', 3200);
+      return;
+    }
+
+    var list = batch.furnaces.filter(function (f) { return C.hasScopeData(f); });
+
+    var html = '<div class="es-meta">' + esc(batch.meta.date) + ' ' + esc(batch.meta.time || C.nowTimeStr()) +
+      (batch.meta.operator ? ' · ' + esc(batch.meta.operator) : '') + '</div>';
+    html += '<table class="es-table"><thead><tr><th>炉号</th><th>范围</th><th>已处理</th><th>最高</th><th>最大绝压比</th></tr></thead><tbody>';
+    list.forEach(function (f) {
+      var st = C.furnaceStat(f);
+      var best = C.bestRatioOf(f);
+      var pos = best ? '第' + (best.maxGroup + 1) + '组第' + (best.maxIndex + 1) + '块' : '';
+      html += '<tr><td><b>' + esc(f.label) + '</b></td><td>' + esc(C.sideLabel(f.side)) + '</td><td>' +
+        st.handled + '/' + st.total + (st.skipped ? '（送检' + st.skipped + '）' : '') + '</td><td>' + (st.max == null ? '—' : C.formatFixed(st.max, batch.config.decimals)) + '</td><td>' +
+        (best
+          ? '<span class="es-ratio es-max">' + C.formatRatio(best.ratio) + ' ' + pos + '</span>'
+          : '—') +
+        '</td></tr>';
+    });
+    html += '</tbody></table>';
+    $('#exportAllSummary').innerHTML = html;
+
+    var missing = [];
+    list.forEach(function (f) {
+      ['A', 'B'].forEach(function (ch) {
+        var hasGroup = C.groupsInScope(f).some(function (g) { return C.chamberOf(g) === ch; });
+        if (hasGroup && C.headerOf(f, ch) == null) missing.push(f.label + ' ' + ch);
+      });
+    });
+    $('#exportAllNote').textContent = missing.length
+      ? '未填集合管压力：' + missing.join('、') + '（这些炉膛的绝压比为空，可在「绝压比计算」里补）'
+      : '每台炉会附 A/B 集合管压力；最大绝压比后面注明第几组第几块。';
+    $('#dlgExportAll').showModal();
+  }
+
+  function downloadBlob(filename, blob) {
+    var url = URL.createObjectURL(blob);
+    var a = el('a', { href: url, download: filename });
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(function () {
+      if (a.parentNode) a.parentNode.removeChild(a);
+      URL.revokeObjectURL(url);
+    }, 1500);
+  }
+
+  function downloadText(filename, text, mime) {
+    var blob = new Blob(['\ufeff' + text], { type: (mime || 'text/plain') + ';charset=utf-8' });
+    var url = URL.createObjectURL(blob);
+    var a = el('a', { href: url, download: filename });
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(function () {
+      if (a.parentNode) a.parentNode.removeChild(a);
+      URL.revokeObjectURL(url);
+    }, 1500);
+  }
+
+  /* ================================================================== *
+   * 十、导入 / 新建 / 主题
+   * ================================================================== */
+
+  function newBatch() {
+    if (C.hasBatchData(batch) && !confirm('新建会清空当前所有炉子的读数，是否继续？')) return;
+    stopCamera();
+    batch = C.createBatch({ date: C.todayStr(), operator: batch.meta.operator });
+    ui = { view: 'home', furnaceId: null, group: 0, reverse: false, paused: true, started: false, cursor: null };
+    persist();
+    render();
+    toast('已新建空白任务', 'ok');
+  }
+
+  function readImportFile(file) {
+    var name = String(file.name || '').toLowerCase();
+    var type = String(file.type || '');
+    if (name.slice(-5) === '.xlsx' || type.indexOf('spreadsheet') >= 0) {
+      readExcelFile(file);
+      return;
+    }
+    readJsonFile(file);
+  }
+
+  function readJsonFile(file) {
+    var reader = new FileReader();
+    reader.onload = function () {
+      var obj;
+      try { obj = JSON.parse(String(reader.result)); }
+      catch (e) { toast('导入失败：不是有效的 JSON', 'error', 4000); return; }
+      if (C.hasBatchData(batch) && !confirm('导入会覆盖当前数据，是否继续？')) return;
+      stopCamera();
+      batch = C.normalizeBatch(obj);
+      ui = { view: 'home', furnaceId: null, group: 0, reverse: false, paused: true, started: false, cursor: null };
+      persist();
+      render();
+      toast('已导入：' + (file.name || 'JSON'), 'ok');
+    };
+    reader.onerror = function () { toast('读取文件失败', 'error'); };
+    reader.readAsText(file, 'utf-8');
+  }
+
+  function readExcelFile(file) {
+    if (!window.XlsxRead) {
+      toast('Excel 读取组件未加载，请刷新页面', 'error', 3200);
+      return;
+    }
+    var reader = new FileReader();
+    reader.onload = function () {
+      window.XlsxRead.readWorkbook(reader.result).then(function (wb) {
+        var next;
+        try { next = C.parseReportWorkbook(wb); }
+        catch (e) { toast('导入 Excel 失败：' + e.message, 'error', 5000); return; }
+        if (C.hasBatchData(batch) && !confirm('导入会覆盖当前数据，是否继续？')) return;
+        stopCamera();
+        batch = next;
+        ui = { view: 'home', furnaceId: null, group: 0, reverse: false, paused: true, started: false, cursor: null };
+        persist();
+        render();
+        toast('已导入 Excel：' + (file.name || ''), 'ok', 2600);
+      }).catch(function (e) {
+        toast('读取 Excel 失败：' + (e && e.message ? e.message : e), 'error', 5000);
+      });
+    };
+    reader.onerror = function () { toast('读取文件失败', 'error'); };
+    reader.readAsArrayBuffer(file);
+  }
+
+  function applyTheme(theme) {
+    var t = theme === 'dark' ? 'dark' : 'light';
+    document.documentElement.setAttribute('data-theme', t);
+    writeStore(KEYS.theme, t);
+    var b = $('#btnTheme');
+    if (b) {
+      b.textContent = t === 'dark' ? '☀' : '☾';
+      b.title = t === 'dark' ? '切换到浅色' : '切换到深色';
+      b.setAttribute('aria-label', b.title);
+    }
+  }
+
+  /* ================================================================== *
+   * 十一、事件绑定与启动
+   * ================================================================== */
+
+  function bindSwipeBack() {
+    var start = null;
+    document.addEventListener('touchstart', function (e) {
+      start = null;
+      if (ui.view !== 'furnace') return;
+      if (document.querySelector('dialog[open]')) return;
+      if (!e.touches || e.touches.length !== 1) return;
+      var target = e.target;
+      if (target && target.closest && target.closest('input,textarea,select,button,a,.table-wrap')) return;
+      var t = e.touches[0];
+      start = { x: t.clientX, y: t.clientY, t: Date.now() };
+    }, { passive: true });
+
+    document.addEventListener('touchend', function (e) {
+      if (!start || ui.view !== 'furnace') { start = null; return; }
+      var t = e.changedTouches && e.changedTouches[0];
+      var s = start;
+      start = null;
+      if (!t) return;
+      var dx = t.clientX - s.x;
+      var dy = t.clientY - s.y;
+      if (dx >= 80 && Math.abs(dy) <= 60 && Date.now() - s.t <= 900) goHome();
+    }, { passive: true });
+
+    document.addEventListener('touchcancel', function () { start = null; }, { passive: true });
+  }
+
+  function bind() {
+    $('#metaDate').addEventListener('change', function (e) {
+      batch.meta.date = /^\d{4}-\d{2}-\d{2}$/.test(e.target.value) ? e.target.value : C.todayStr();
+      e.target.value = batch.meta.date;
+      persist();
+    });
+    $('#metaTime').addEventListener('change', function (e) {
+      var t = e.target.value;
+      batch.meta.time = /^\d{1,2}:\d{2}/.test(t) ? t.slice(0, 5) : C.nowTimeStr();
+      e.target.value = batch.meta.time;
+      persist();
+    });
+    $('#metaOperator').addEventListener('input', function (e) {
+      batch.meta.operator = e.target.value.slice(0, 40);
+      persist();
+    });
+
+    $('#btnNew').addEventListener('click', newBatch);
+    $('#btnImport').addEventListener('click', function () { $('#fileInput').click(); });
+    $('#btnExport').addEventListener('click', openExportAll);
+    $('#btnExportAllRatio').addEventListener('click', function () {
+      $('#dlgExportAll').close();
+      openRatioCalc();
+    });
+    $('#btnDownloadExportAll').addEventListener('click', function () {
+      if (!window.XlsxLite) {
+        toast('Excel 组件未加载，请刷新页面', 'error', 2600);
+        return;
+      }
+      var bytes = window.XlsxLite.build(C.toReportWorkbook(batch));
+      var blob = new Blob([bytes], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+      var t = batch.meta.time || C.nowTimeStr();
+      var name = '加热炉文丘里压力_' + batch.meta.date.replace(/-/g, '') + '_' + t.replace(':', '') + '.xlsx';
+      downloadBlob(name, blob);
+      toast('已下载 ' + name, 'ok');
+    });
+    $('#btnHelp').addEventListener('click', function () { $('#dlgHelp').showModal(); });
+    $('#btnTheme').addEventListener('click', function () {
+      applyTheme(document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+    });
+
+    $('#fileInput').addEventListener('change', function (e) {
+      var f = e.target.files && e.target.files[0];
+      if (f) readImportFile(f);
+      e.target.value = '';
+    });
+
+    $('#btnCopyExport').addEventListener('click', function () {
+      copyText($('#exportPreview').textContent).then(function (ok) {
+        toast(ok ? '已复制到剪贴板' : '复制失败，请手动选择文本', ok ? 'ok' : 'error', 2200);
+      });
+    });
+    $('#btnDownloadExport').addEventListener('click', function () {
+      var text = $('#exportPreview').textContent;
+      var name = '文丘里压力_' + batch.meta.date.replace(/-/g, '') + '.txt';
+      downloadText(name, text);
+      toast('已下载 ' + name, 'ok');
+    });
+
+    $('#btnFill').addEventListener('click', doFill);
+
+    $('#btnOpenRatio').addEventListener('click', function () {
+      $('#dlgExport').close();
+      openRatioCalc();
+    });
+
+    document.addEventListener('click', function (e) {
+      var closer = e.target.closest && e.target.closest('[data-close]');
+      if (closer) {
+        var dlg = document.getElementById(closer.dataset.close);
+        if (dlg) dlg.close('cancel');
+      }
+    });
+
+    window.addEventListener('dragover', function (e) { e.preventDefault(); });
+    window.addEventListener('drop', function (e) {
+      e.preventDefault();
+      var f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+      if (f) readImportFile(f);
+    });
+  }
+
+  function init() {
+    var loaded = loadBatch();
+    batch = loaded.batch;
+    applyTheme(readStore(KEYS.theme) || 'light');
+    bind();
+    bindSwipeBack();
+    render();
+    if (loaded.restored) toast('已恢复上次自动保存的数据', 'ok', 2600);
+    if (!storageOk) toast('当前环境无法使用本地存储，请及时导出备份', 'error', 6000);
+    var hint = $('#saveHint');
+    if (hint) hint.textContent = '自动保存已开启';
+  }
+
+  init();
+})();
+
+</script>
+</body>
+</html>

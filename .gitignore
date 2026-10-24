@@ -1,0 +1,8 @@
+tests/pf-*
+tests/dom-*.html
+tests/demo.html
+tests/selftest.html
+tests/_*
+*.log
+.DS_Store
+Thumbs.db
