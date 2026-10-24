@@ -2,6 +2,10 @@
 
 按现场实际流程做的前端：**逐台录完 2#～5# 炉的文丘里读数 → 回主界面 → 去操作室看集合管压力 → 点「绝压比计算」填压力，生成方式2**。
 
+**在线使用（手机推荐，HTTPS，可开相机）：** <https://hanhaicangnan99.github.io/heater-venturi-reader/>
+
+**代码仓库：** <https://github.com/hanhaicangnan99/heater-venturi-reader>
+
 - 2号炉：8 组 × **2 块**（每行一组）
 - 3/4/5号炉：8 组 × **12 块**（每行 6 块、两行一组）
 - 第 1～4 组 = **A 炉膛**，第 5～8 组 = **B 炉膛**；可只测半台
@@ -10,7 +14,7 @@
 - 录入页只录文丘里读数，不填集合管压力、不算绝压比
 - 导出「文丘里压力」纯文本，或「导出所有数据」带格式的 Excel
 - 「导入 Excel」可把导出的 `.xlsx` 读回来
-- 手机直接打开本地文件时相机被浏览器限制；录入/导出可用，实时相机需 HTTPS
+- 线上 HTTPS 地址手机可直接用相机；直接打开本地文件时相机被浏览器限制，录入/导出仍可用
 
 ![首页](docs/screenshot-home.png)
 
@@ -234,16 +238,19 @@ GaugeApp.pushReading(0.170);   // 识别到一个读数 → 填入当前识别�
 
 ## 六、手机怎么打开
 
-手机直接打开 `index.html` 常见两个问题：
+**直接用线上地址（推荐）：** <https://hanhaicangnan99.github.io/heater-venturi-reader/>
+
+手机 Chrome / Safari 打开即可，HTTPS 安全上下文，能正常申请摄像头。代码推送到 GitHub 后，Pages 会自动更新。
+
+如果不用线上地址、直接打开本地文件，常见两个问题：
 
 1. **只传了 index.html**：页面缺 `js/`、`assets/`，会空白或没样式。用 [读表软件_手机版.html](读表软件_手机版.html)，CSS/JS 已内联，只传一个文件即可。
 2. **`file://` 不能调摄像头**：手机浏览器本地 HTML 不允许 `getUserMedia`。录入、导入导出、绝压比计算仍可用；实时相机需要 HTTPS。
 
-推荐做法：
+其他做法：
 
 - **只录入/导出**：把 `读表软件_手机版.html` 发到手机，用 Chrome（Android）或 Safari（iOS）打开。
-- **要实时相机**：页面必须放在 `https://` 开头的网址下；`file://` 和 `http://192.168…` 手机浏览器都不允许调用摄像头。可把单文件放到 HTTPS 静态托管（GitHub Pages / Netlify / Vercel / 公司 HTTPS 服务器），或后续用 Capacitor 打包成 App。
-  - 最快：打开 Netlify Drop，把 `读表软件_手机版.html` 拖进去，会得到一个 `https://…` 网址，手机访问即可。
+- **自己部署 HTTPS**：把单文件放到 GitHub Pages / Netlify / Vercel / 公司 HTTPS 服务器；`file://` 和 `http://192.168…` 都不允许摄像头。
 - 不要在微信/QQ 的文件预览里打开，脚本常被限制；用系统浏览器。
 - 本地文件模式下 `localStorage` 可能受限，重要数据及时「导出所有数据」Excel 备份。
 
@@ -380,6 +387,12 @@ chrome --headless=new --no-sandbox --disable-gpu --user-data-dir=tests/prof ^
 ---
 
 ## 十二、版本
+
+**v2.13.0（2026-10-24）**
+
+- 部署 GitHub Pages：<https://hanhaicangnan99.github.io/heater-venturi-reader/>
+- 手机通过 HTTPS 打开可直接申请摄像头
+- 仓库：<https://github.com/hanhaicangnan99/heater-venturi-reader>
 
 **v2.12.0（2026-10-24）**
 
