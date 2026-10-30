@@ -392,7 +392,11 @@
     row.placeholder = false;
     var pg = f.perGroup;
     if (row.gauge == null) row.gauge = delta > 0 ? 1 : pg;
-    else row.gauge = Math.max(1, Math.min(pg, row.gauge + delta));
+    else {
+      row.gauge += delta;
+      if (row.gauge < 1) row.gauge = pg;
+      if (row.gauge > pg) row.gauge = 1;
+    }
     var hadNotice = quick.message || (quick.applyIssues && quick.applyIssues.length);
     quick.message = '';
     quick.applyIssues = [];
@@ -410,8 +414,15 @@
     if (row.gauge == null) row.gauge = 1;
     var milli = row.value == null ? 0 : Math.round(row.value * 1000);
     var step = pos === 0 ? 100 : pos === 1 ? 10 : 1;
-    milli = Math.max(0, Math.min(400, milli + delta * step));
-    row.value = milli / 1000;
+    var next = milli + delta * step;
+    if (delta > 0) {
+      if (next > 400) next = 0;
+    } else if (next < 0) {
+      if (pos === 0) next = 400;
+      else if (pos === 1) next = 90 + (milli % 10);
+      else next = (milli - (milli % 10)) + 9;
+    }
+    row.value = next / 1000;
     if (!f.imported && rowIndex === source) {
       quickFurnaceGroups(f).forEach(function (g) {
         if (g !== source && f.rows[g].synced) f.rows[g].value = row.value;
@@ -749,7 +760,7 @@
       })
     ]);
     host.appendChild(nav);
-    host.appendChild(el('div', { class: 'quick-nav-hint', text: reverse ? '反向输入：组 8→1，下一组往编号小的方向走。' : '正序输入：组 1→8，下一组往编号大的方向走。' }));
+    host.appendChild(el('div', { class: 'quick-nav-hint', text: (reverse ? '反向输入：组 8→1，下一组往编号小的方向走。' : '正序输入：组 1→8，下一组往编号大的方向走。') + ' 位号/读数箭头循环。' }));
 
     host.appendChild(el('div', { class: 'quick-furnace-apply' }, [
       el('div', { class: 'quick-apply-hint', text: '先改完本炉各组，再应用；其他表读数保留。' }),

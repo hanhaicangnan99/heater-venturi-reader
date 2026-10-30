@@ -376,6 +376,20 @@ const driver = `
     await sleep(30);
     ok('快捷切回整台第 1 组', q('.quick-progress strong').textContent === '第 1 组', q('.quick-progress strong').textContent);
 
+    qa('.quick-group-single .quick-gauge .qstep')[1].click();
+    await sleep(10);
+    qa('.quick-group-single .quick-gauge .qstep')[1].click();
+    await sleep(10);
+    qa('.quick-group-single .quick-gauge .qstep')[1].click();
+    await sleep(20);
+    ok('3号炉位号 1# 按下循环到 12#', q('.quick-group-single .quick-gauge-value').textContent === '12#', q('.quick-group-single .quick-gauge-value').textContent);
+    qa('.quick-group-single .quick-gauge .qstep')[0].click();
+    await sleep(10);
+    qa('.quick-group-single .quick-gauge .qstep')[0].click();
+    await sleep(10);
+    qa('.quick-group-single .quick-gauge .qstep')[0].click();
+    await sleep(20);
+
     q('.quick-group-single .quick-gauge .qstep').click();
     await sleep(20);
     ok('快捷位号可增加到 4#', q('.quick-group-single .quick-gauge-value').textContent === '4#', q('.quick-group-single .quick-gauge-value').textContent);
@@ -434,6 +448,21 @@ const driver = `
     ok('未导入 2号炉也可进入', q('.page-title').textContent.indexOf('2号炉') >= 0, q('.page-title').textContent);
     ok('未导入 2号炉默认 1#', q('.quick-group-single .quick-gauge-value').textContent === '1#', q('.quick-group-single .quick-gauge-value').textContent);
     ok('未导入 2号炉首组默认 0.000', qa('.quick-group-single .quick-field')[1].title.indexOf('0.000') >= 0, qa('.quick-group-single .quick-field')[1].title);
+    qa('.quick-group-single .quick-gauge .qstep')[1].click();
+    await sleep(20);
+    ok('2号炉位号 1# 按下循环到 2#', q('.quick-group-single .quick-gauge-value').textContent === '2#', q('.quick-group-single .quick-gauge-value').textContent);
+    qa('.quick-group-single .quick-gauge .qstep')[0].click();
+    await sleep(20);
+    ok('2号炉位号 2# 按上回到 1#', q('.quick-group-single .quick-gauge-value').textContent === '1#', q('.quick-group-single .quick-gauge-value').textContent);
+    qa('.quick-group-single .q-digit')[2].querySelectorAll('.qstep')[1].click();
+    await sleep(20);
+    ok('读数 0.000 千分位按下 0→9', qa('.quick-group-single .quick-field')[1].title.indexOf('0.009') >= 0, qa('.quick-group-single .quick-field')[1].title);
+    qa('.quick-group-single .q-digit')[0].querySelectorAll('.qstep')[1].click();
+    await sleep(20);
+    ok('读数 0.009 十分位按下循环到 0.400', qa('.quick-group-single .quick-field')[1].title.indexOf('0.400') >= 0, qa('.quick-group-single .quick-field')[1].title);
+    qa('.quick-group-single .q-digit')[2].querySelectorAll('.qstep')[0].click();
+    await sleep(20);
+    ok('读数 0.400 千分位按上循环到 0.000', qa('.quick-group-single .quick-field')[1].title.indexOf('0.000') >= 0, qa('.quick-group-single .quick-field')[1].title);
     qa('.quick-group-single .q-digit')[2].querySelectorAll('.qstep')[0].click();
     await sleep(20);
     ok('未导入首组可改为 0.001', qa('.quick-group-single .quick-field')[1].title.indexOf('0.001') >= 0, qa('.quick-group-single .quick-field')[1].title);
