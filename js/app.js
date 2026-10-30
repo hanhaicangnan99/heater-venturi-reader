@@ -961,6 +961,7 @@
     if (!skipConfirm && C.hasBatchData(batch) && !confirm('用勾选炉子的快捷数据更新最高表？其他表读数保留。')) return false;
 
     var updates = picked.map(quickUpdateFor);
+    batch.meta.exportScope = picked.map(function (f) { return f.id; });
     var res = C.applyQuickUpdate(batch, updates);
     persist();
     quick.message = res.updated
@@ -2291,7 +2292,7 @@
    * ================================================================== */
 
   function openExport() {
-    var hasScope = batch.furnaces.some(function (f) { return C.hasScopeData(f); });
+    var hasScope = C.furnacesWithData(batch).length > 0;
     if (!hasScope) {
       toast(C.hasBatchData(batch) ? '当前炉膛范围内还没有读数（可切回整台）' : '还没有录入任何读数', 'warn', 3200);
       return;
@@ -2341,13 +2342,11 @@
   }
 
   function openExportAll() {
-    var hasScope = batch.furnaces.some(function (f) { return C.hasScopeData(f); });
-    if (!hasScope) {
+    var list = C.furnacesWithData(batch);
+    if (!list.length) {
       toast(C.hasBatchData(batch) ? '当前炉膛范围内还没有读数（可切回整台）' : '还没有录入任何读数', 'warn', 3200);
       return;
     }
-
-    var list = batch.furnaces.filter(function (f) { return C.hasScopeData(f); });
 
     var html = '<div class="es-meta">' + esc(batch.meta.date) + ' ' + esc(batch.meta.time || C.nowTimeStr()) +
       (batch.meta.operator ? ' · ' + esc(batch.meta.operator) : '') + '</div>';

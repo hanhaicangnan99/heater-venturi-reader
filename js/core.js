@@ -793,7 +793,12 @@
    * ------------------------------------------------------------------ */
 
   function furnacesWithData(batch) {
-    return batch.furnaces.filter(hasScopeData);
+    var scope = batch.meta && batch.meta.exportScope;
+    var limited = Array.isArray(scope) && scope.length;
+    return batch.furnaces.filter(function (f) {
+      if (limited && scope.indexOf(f.id) < 0) return false;
+      return hasScopeData(f);
+    });
   }
 
   /** 与 xlsx-lite.js 中 cellXfs 的顺序一一对应 */
@@ -1306,6 +1311,7 @@
     hasFurnaceData: hasFurnaceData,
     hasScopeData: hasScopeData,
     hasBatchData: hasBatchData,
+    furnacesWithData: furnacesWithData,
     headerOf: headerOf,
 
     exportMode1: exportMode1,

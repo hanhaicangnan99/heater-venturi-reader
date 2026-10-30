@@ -4,7 +4,7 @@
 
 **在线使用（手机推荐，HTTPS，可开相机）：** <https://hanhaicangnan99.github.io/heater-venturi-reader/>
 
-> 如果手机/电脑还显示旧界面，打开 <https://hanhaicangnan99.github.io/heater-venturi-reader/?v=2.27.0> 一次；页脚会显示当前版本 `v2.27.0`。
+> 如果手机/电脑还显示旧界面，打开 <https://hanhaicangnan99.github.io/heater-venturi-reader/?v=2.28.0> 一次；页脚会显示当前版本 `v2.28.0`。
 
 **代码仓库：** <https://github.com/hanhaicangnan99/heater-venturi-reader>
 
@@ -413,7 +413,7 @@ tests/                   单元测试、浏览器自测、示例/单文件生成
 ## 十、测试
 
 ```bash
-# 核心逻辑（36 项）
+# 核心逻辑（37 项）
 node tests/core.test.cjs
 
 # 生成示例文本 / Excel
@@ -425,13 +425,13 @@ node tests/make_singlefile.cjs
 # HTML/JS/CSS 静态一致性
 python tests/check_ui.py
 
-# 真实浏览器交互自测（148 项）
+# 真实浏览器交互自测（149 项）
 node tests/make_selftest.cjs
 chrome --headless=new --no-sandbox --disable-gpu --user-data-dir=tests/prof ^
   --window-size=1440,1200 --virtual-time-budget=25000 --dump-dom "file:///.../tests/selftest.html"
 ```
 
-当前结果：**36 项单元测试 + 148 项浏览器交互测试全部通过，0 个 JS 错误**；方式2 的数值、圈号、组号/表号、集合管压力和 0.84375 与 `导出文件示例/快捷导出方式2.txt` 一致。
+当前结果：**37 项单元测试 + 149 项浏览器交互测试全部通过，0 个 JS 错误**；方式2 的数值、圈号、组号/表号、集合管压力和 0.84375 与 `导出文件示例/快捷导出方式2.txt` 一致。
 
 单文件版另做了冒烟检查：file:// 打开能正常渲染 4 台炉并显示本地文件提示。
 
@@ -452,6 +452,13 @@ chrome --headless=new --no-sandbox --disable-gpu --user-data-dir=tests/prof ^
 ---
 
 ## 十二、版本
+
+**v2.28.0（2026-10-30）**
+
+- 修复：导入 5号炉但未勾选时，应用勾选炉子后导出/绝压比仍包含 5号炉
+- 应用勾选炉子时记录 `meta.exportScope`，导出方式1/方式2、Excel 报表、绝压比都只使用勾选炉子
+- 未勾选的炉子数据仍保留在本机，只是不进入本次导出/计算
+- 新增 1 项核心测试、1 项浏览器测试（合计 37 + 149）
 
 **v2.27.0（2026-10-30）**
 

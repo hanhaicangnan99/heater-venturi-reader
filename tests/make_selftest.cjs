@@ -373,6 +373,8 @@ const driver = `
     q('#btnQuickApply').click();
     await sleep(50);
     var qbSel = window.GaugeApp.getBatch();
+    var scSel = qbSel.meta.exportScope || [];
+    ok('应用后导出范围只含勾选炉', scSel.indexOf('3') >= 0 && scSel.indexOf('2') >= 0 && scSel.indexOf('5') < 0, JSON.stringify(scSel));
     ok('未输入的 2号炉不写默认 1#/0.000', qbSel.furnaces[0].cells[0][0].v === before2, qbSel.furnaces[0].cells[0][0].v + ' vs ' + before2);
     ok('勾选的 3号炉写回快捷数据', qbSel.furnaces[1].cells[0][2].v === 0.199, qbSel.furnaces[1].cells[0][2].v);
 

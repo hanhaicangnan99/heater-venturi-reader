@@ -19,7 +19,7 @@ window.addEventListener('beforeinstallprompt', function (e) {
   window.__hvpInstallPrompt = e;
 });
 </script>
-<link rel="stylesheet" href="assets/styles.css?v=2.27.0">
+<link rel="stylesheet" href="assets/styles.css?v=2.28.0">
 </head>
 <body>
 
@@ -67,7 +67,7 @@ window.addEventListener('beforeinstallprompt', function (e) {
 
   <footer class="foot">
     <span id="saveHint">自动保存已开启</span>
-    <span class="foot-version" id="appVersion">v2.27.0</span>
+    <span class="foot-version" id="appVersion">v2.28.0</span>
     <span class="foot-note">数据只存本机浏览器，请定期导出备份 · 识别模块接口：GaugeApp.pushReading(读数)</span>
   </footer>
 
@@ -157,7 +157,7 @@ window.addEventListener('beforeinstallprompt', function (e) {
         <li>进炉子页默认暂停，点中间大按钮「开始识别」后才接收识别读数；再点变成「暂停识别」。</li>
         <li>指定起点：点下面组内任意一块表，再点「开始识别」，就从这块开始；识别中点击某格会自动暂停。</li>
         <li>「上一组 / 下一组」在大按钮两侧；下一行是「跳过（送检）」和「剔除本块」。</li>
-        <li><b>日常快捷更新（视觉识别备用）</b>：首页「手动快捷输入」→ 导入页粘贴方式1并解析，或「不导入，直接手动」→ 选炉页始终显示全部 2/3/4/5 号炉，每台有「导出/算绝压比」勾选框和整台/A/B 范围，未勾选不应用、没输入行不写入；已导入的正常显示、未导入的虚线显示但也能点 → 单炉页一次改一组，顶部始终可选「整台/A炉膛/B炉膛」，点「下一组」；选炉页应用按钮下方有「导出文丘里压力」「返回主界面」「计算绝压比」；未导入的每组默认 1#、第一组 0.000，没改过的组跟随最近改过的那组；导入半台切整台时，空白组也跟随最近改过的组，被跟随的组会写回；位号和读数用大箭头调，位号旁有滑杆可快速拖动，位号到 1# 按↓回最大，读数到 0.000 按↓按位循环（千分位 0→9 等）；可开「反向输入」；最后「应用到本炉」。只更新最高表，其他表读数保留。</li>
+        <li><b>日常快捷更新（视觉识别备用）</b>：首页「手动快捷输入」→ 导入页粘贴方式1并解析，或「不导入，直接手动」→ 选炉页始终显示全部 2/3/4/5 号炉，每台有「导出/算绝压比」勾选框和整台/A/B 范围，未勾选不应用、不导出、不进绝压比，没输入行不写入；已导入的正常显示、未导入的虚线显示但也能点 → 单炉页一次改一组，顶部始终可选「整台/A炉膛/B炉膛」，点「下一组」；选炉页应用按钮下方有「导出文丘里压力」「返回主界面」「计算绝压比」；未导入的每组默认 1#、第一组 0.000，没改过的组跟随最近改过的那组；导入半台切整台时，空白组也跟随最近改过的组，被跟随的组会写回；位号和读数用大箭头调，位号旁有滑杆可快速拖动，位号到 1# 按↓回最大，读数到 0.000 按↓按位循环（千分位 0→9 等）；可开「反向输入」；最后「应用到本炉」。只更新最高表，其他表读数保留。</li>
         <li>点格子输入读数；<b>回车</b>跳到下一块，<b>方向键</b>按位置跳格，<b>X</b> 剔除当前读数，<b>Esc</b> 退出输入框。</li>
         <li>读数支持全角数字、带单位（0.170 MPa）、逗号小数点。</li>
         <li>识别模块识别到一个读数就调用一次 <code>GaugeApp.pushReading(0.170)</code>，会顺序填入当前识别位置；也可以点「识别填入」粘贴一批结果。</li>
@@ -192,7 +192,7 @@ window.addEventListener('beforeinstallprompt', function (e) {
         <li>手机只传一个文件：用 <code>读表软件_手机版.html</code>，CSS/JS 已内联；只传 <code>index.html</code> 会缺 <code>js/</code>、<code>assets/</code>，页面会空白或没样式。</li>
         <li>直接打开本地文件时，录入、导入导出、绝压比计算都能用；手机浏览器不允许 <code>file://</code> 调用摄像头。</li>
         <li>要实时相机：页面必须在 <code>https://</code> 开头的网址下；<code>file://</code> 和 <code>http://192.168…</code> 都不允许调用摄像头。可把单文件放到 GitHub Pages / Netlify / 公司 HTTPS 服务器，或用 App 包壳；不要用微信/QQ 的文件预览打开。</li>
-        <li>如果还显示旧界面：打开 <code>https://hanhaicangnan99.github.io/heater-venturi-reader/?v=2.27.0</code> 一次，或清除站点缓存；页脚会显示当前版本 <code>v2.27.0</code>。</li>
+        <li>如果还显示旧界面：打开 <code>https://hanhaicangnan99.github.io/heater-venturi-reader/?v=2.28.0</code> 一次，或清除站点缓存；页脚会显示当前版本 <code>v2.28.0</code>。</li>
       </ul>
       <h3>数据</h3>
       <ul>
@@ -209,9 +209,9 @@ window.addEventListener('beforeinstallprompt', function (e) {
 
 <input type="file" id="fileInput" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,.json,application/json" hidden>
 
-<script src="js/core.js?v=2.27.0"></script>
-<script src="js/xlsx-lite.js?v=2.27.0"></script>
-<script src="js/xlsx-read.js?v=2.27.0"></script>
-<script src="js/app.js?v=2.27.0"></script>
+<script src="js/core.js?v=2.28.0"></script>
+<script src="js/xlsx-lite.js?v=2.28.0"></script>
+<script src="js/xlsx-read.js?v=2.28.0"></script>
+<script src="js/app.js?v=2.28.0"></script>
 </body>
 </html>
