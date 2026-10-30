@@ -838,6 +838,7 @@
     var side = f.side === 'full' ? '整台' : f.side + '炉膛';
     var count = quickFurnaceGroups(f).length;
     var done = quickActiveGroups(f);
+    var pct = count ? Math.round((done / count) * 100) : 0;
     var seg = el('div', { class: 'seg', role: 'group', 'aria-label': '录入炉膛范围' }, [
       ['full', '整台'], ['A', 'A炉膛'], ['B', 'B炉膛']
     ].map(function (pair) {
@@ -859,7 +860,7 @@
     ]);
 
     return el('article', {
-      class: 'quick-select-card' + (f.imported ? '' : ' is-empty'),
+      class: 'quick-select-card' + (done ? '' : ' is-empty'),
       tabindex: 0, role: 'button',
       'data-quick-furnace': f.id,
       'aria-label': f.label + ' 手动快捷输入',
@@ -868,10 +869,11 @@
       el('div', { class: 'quick-select-head' }, [
         el('h3', { text: f.label }),
         el('span', { class: 'tag', text: side }),
-        el('span', { class: 'tag' + (f.imported ? ' ok' : ''), text: f.imported ? '已导入' : '未导入 · 手动' }),
+        el('span', { class: 'tag' + (done ? ' ok' : ''), text: done ? '已有数据' : '未录入' }),
         f.ambiguous ? el('span', { class: 'tag', text: '文本未写炉膛' }) : null
       ]),
       el('p', { class: 'quick-select-sub', text: '已录 ' + done + '/' + count + ' 组 · 每组只改最高表' }),
+      el('div', { class: 'fc-bar' }, [el('span', { style: 'width:' + pct + '%' })]),
       controls,
       el('span', { class: 'fc-go', text: f.imported ? '进入 ›' : '手动录入 ›' })
     ]);
@@ -1304,6 +1306,8 @@
       var p = pick[def.id];
       var f = C.furnaceById(batch, def.id);
       var hasData = !!(f && C.hasFurnaceData(f));
+      var scopeGroups = f ? C.groupsInScope(f) : [];
+      var doneGroups = f ? scopeGroups.filter(function (g) { return C.groupStat(f, g).max !== null; }).length : 0;
       var cb = el('input', { type: 'checkbox', class: 'pick-check' });
       cb.checked = p.checked;
       cb.addEventListener('change', function () {
@@ -1323,7 +1327,8 @@
         el('label', { class: 'pick-main' }, [
           cb,
           el('strong', { text: def.label }),
-          el('span', { class: 'tag' + (hasData ? ' ok' : ''), text: hasData ? '有数据' : '无数据' })
+          el('span', { class: 'tag' + (hasData ? ' ok' : ''), text: hasData ? '有数据' : '无数据' }),
+          el('span', { class: 'pick-progress', text: '已录 ' + doneGroups + '/' + scopeGroups.length + ' 组' })
         ]),
         seg
       ]));

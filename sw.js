@@ -1,13 +1,13 @@
 /* 加热炉文丘里压力 · PWA Service Worker */
-const CACHE = 'hvp-pwa-v20';
+const CACHE = 'hvp-pwa-v21';
 const CORE = [
   './',
   './index.html',
-  './assets/styles.css?v=2.32.0',
-  './js/core.js?v=2.32.0',
-  './js/xlsx-lite.js?v=2.32.0',
-  './js/xlsx-read.js?v=2.32.0',
-  './js/app.js?v=2.32.0',
+  './assets/styles.css?v=2.33.0',
+  './js/core.js?v=2.33.0',
+  './js/xlsx-lite.js?v=2.33.0',
+  './js/xlsx-read.js?v=2.33.0',
+  './js/app.js?v=2.33.0',
   './manifest.webmanifest',
   './icons/icon-192.png',
   './icons/icon-512.png',

@@ -1744,6 +1744,11 @@ body.furnace-mode .app-shell { padding-top: 8px; }
   cursor: pointer;
 }
 
+.pick-progress {
+  color: var(--muted);
+  font-size: 12px;
+}
+
 .pick-actions {
   display: flex;
   justify-content: flex-end;
@@ -2252,7 +2257,7 @@ body.furnace-mode .app-shell { padding-top: 8px; }
 
   <footer class="foot">
     <span id="saveHint">自动保存已开启</span>
-    <span class="foot-version" id="appVersion">v2.32.0</span>
+    <span class="foot-version" id="appVersion">v2.33.0</span>
     <span class="foot-note">数据只存本机浏览器，请定期导出备份 · 识别模块接口：GaugeApp.pushReading(读数)</span>
   </footer>
 
@@ -2380,7 +2385,7 @@ body.furnace-mode .app-shell { padding-top: 8px; }
         <li>手机只传一个文件：用 <code>读表软件_手机版.html</code>，CSS/JS 已内联；只传 <code>index.html</code> 会缺 <code>js/</code>、<code>assets/</code>，页面会空白或没样式。</li>
         <li>直接打开本地文件时，录入、导入导出、绝压比计算都能用；手机浏览器不允许 <code>file://</code> 调用摄像头。</li>
         <li>要实时相机：页面必须在 <code>https://</code> 开头的网址下；<code>file://</code> 和 <code>http://192.168…</code> 都不允许调用摄像头。可把单文件放到 GitHub Pages / Netlify / 公司 HTTPS 服务器，或用 App 包壳；不要用微信/QQ 的文件预览打开。</li>
-        <li>如果还显示旧界面：打开 <code>https://hanhaicangnan99.github.io/heater-venturi-reader/?v=2.32.0</code> 一次，或清除站点缓存；页脚会显示当前版本 <code>v2.32.0</code>。</li>
+        <li>如果还显示旧界面：打开 <code>https://hanhaicangnan99.github.io/heater-venturi-reader/?v=2.33.0</code> 一次，或清除站点缓存；页脚会显示当前版本 <code>v2.33.0</code>。</li>
       </ul>
       <h3>数据</h3>
       <ul>
@@ -5147,6 +5152,7 @@ body.furnace-mode .app-shell { padding-top: 8px; }
     var side = f.side === 'full' ? '整台' : f.side + '炉膛';
     var count = quickFurnaceGroups(f).length;
     var done = quickActiveGroups(f);
+    var pct = count ? Math.round((done / count) * 100) : 0;
     var seg = el('div', { class: 'seg', role: 'group', 'aria-label': '录入炉膛范围' }, [
       ['full', '整台'], ['A', 'A炉膛'], ['B', 'B炉膛']
     ].map(function (pair) {
@@ -5168,7 +5174,7 @@ body.furnace-mode .app-shell { padding-top: 8px; }
     ]);
 
     return el('article', {
-      class: 'quick-select-card' + (f.imported ? '' : ' is-empty'),
+      class: 'quick-select-card' + (done ? '' : ' is-empty'),
       tabindex: 0, role: 'button',
       'data-quick-furnace': f.id,
       'aria-label': f.label + ' 手动快捷输入',
@@ -5177,10 +5183,11 @@ body.furnace-mode .app-shell { padding-top: 8px; }
       el('div', { class: 'quick-select-head' }, [
         el('h3', { text: f.label }),
         el('span', { class: 'tag', text: side }),
-        el('span', { class: 'tag' + (f.imported ? ' ok' : ''), text: f.imported ? '已导入' : '未导入 · 手动' }),
+        el('span', { class: 'tag' + (done ? ' ok' : ''), text: done ? '已有数据' : '未录入' }),
         f.ambiguous ? el('span', { class: 'tag', text: '文本未写炉膛' }) : null
       ]),
       el('p', { class: 'quick-select-sub', text: '已录 ' + done + '/' + count + ' 组 · 每组只改最高表' }),
+      el('div', { class: 'fc-bar' }, [el('span', { style: 'width:' + pct + '%' })]),
       controls,
       el('span', { class: 'fc-go', text: f.imported ? '进入 ›' : '手动录入 ›' })
     ]);
@@ -5613,6 +5620,8 @@ body.furnace-mode .app-shell { padding-top: 8px; }
       var p = pick[def.id];
       var f = C.furnaceById(batch, def.id);
       var hasData = !!(f && C.hasFurnaceData(f));
+      var scopeGroups = f ? C.groupsInScope(f) : [];
+      var doneGroups = f ? scopeGroups.filter(function (g) { return C.groupStat(f, g).max !== null; }).length : 0;
       var cb = el('input', { type: 'checkbox', class: 'pick-check' });
       cb.checked = p.checked;
       cb.addEventListener('change', function () {
@@ -5632,7 +5641,8 @@ body.furnace-mode .app-shell { padding-top: 8px; }
         el('label', { class: 'pick-main' }, [
           cb,
           el('strong', { text: def.label }),
-          el('span', { class: 'tag' + (hasData ? ' ok' : ''), text: hasData ? '有数据' : '无数据' })
+          el('span', { class: 'tag' + (hasData ? ' ok' : ''), text: hasData ? '有数据' : '无数据' }),
+          el('span', { class: 'pick-progress', text: '已录 ' + doneGroups + '/' + scopeGroups.length + ' 组' })
         ]),
         seg
       ]));

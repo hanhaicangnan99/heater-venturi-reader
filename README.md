@@ -4,7 +4,7 @@
 
 **在线使用（手机推荐，HTTPS，可开相机）：** <https://hanhaicangnan99.github.io/heater-venturi-reader/>
 
-> 如果手机/电脑还显示旧界面，打开 <https://hanhaicangnan99.github.io/heater-venturi-reader/?v=2.32.0> 一次；页脚会显示当前版本 `v2.32.0`。
+> 如果手机/电脑还显示旧界面，打开 <https://hanhaicangnan99.github.io/heater-venturi-reader/?v=2.33.0> 一次；页脚会显示当前版本 `v2.33.0`。
 
 **代码仓库：** <https://github.com/hanhaicangnan99/heater-venturi-reader>
 
@@ -478,6 +478,13 @@ chrome --headless=new --no-sandbox --disable-gpu --user-data-dir=tests/prof ^
 ---
 
 ## 十二、版本
+
+**v2.33.0（2026-10-30）**
+
+- 手动手动卡片增加进度条和「已有数据 / 未录入」状态，与视觉卡片对齐
+- 导出/绝压比选择页每台炉增加「已录 X/Y 组」明细，按当前整台/A/B 实时显示
+- 移动端卡片进度条、炉膛按钮和清空按钮排版优化
+- 测试数量不变：37 + 168
 
 **v2.32.0（2026-10-30）**
 

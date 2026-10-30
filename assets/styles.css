@@ -1721,6 +1721,11 @@ body.furnace-mode .app-shell { padding-top: 8px; }
   cursor: pointer;
 }
 
+.pick-progress {
+  color: var(--muted);
+  font-size: 12px;
+}
+
 .pick-actions {
   display: flex;
   justify-content: flex-end;
