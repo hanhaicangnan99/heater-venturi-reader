@@ -1,13 +1,13 @@
 /* 加热炉文丘里压力 · PWA Service Worker */
-const CACHE = 'hvp-pwa-v7';
+const CACHE = 'hvp-pwa-v8';
 const CORE = [
   './',
   './index.html',
-  './assets/styles.css',
-  './js/core.js',
-  './js/xlsx-lite.js',
-  './js/xlsx-read.js',
-  './js/app.js',
+  './assets/styles.css?v=2.20.0',
+  './js/core.js?v=2.20.0',
+  './js/xlsx-lite.js?v=2.20.0',
+  './js/xlsx-read.js?v=2.20.0',
+  './js/app.js?v=2.20.0',
   './manifest.webmanifest',
   './icons/icon-192.png',
   './icons/icon-512.png',
@@ -40,7 +40,7 @@ self.addEventListener('fetch', (event) => {
 
   if (req.mode === 'navigate') {
     event.respondWith(
-      fetch(req)
+      fetch(req, { cache: 'no-store' })
         .then((resp) => {
           if (resp && resp.ok) {
             const copy = resp.clone();
@@ -54,7 +54,7 @@ self.addEventListener('fetch', (event) => {
   }
 
   event.respondWith(
-    fetch(req)
+    fetch(req, { cache: 'no-store' })
       .then((resp) => {
         if (resp && resp.ok) {
           const copy = resp.clone();

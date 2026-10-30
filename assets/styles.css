@@ -1711,6 +1711,15 @@ body.furnace-mode .app-shell { padding-top: 8px; }
 
 .foot-note { margin-left: auto; }
 
+.foot-version {
+  padding: 1px 6px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  font-size: 10.5px;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
 /* ---------------------------------------------------------------- 方式1 → 方式2 */
 
 .dialog-foot .left { margin-right: auto; }

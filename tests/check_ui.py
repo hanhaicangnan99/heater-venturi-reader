@@ -63,7 +63,8 @@ for el in doc.iter():
 for rel in re.findall(r'(?:src|href)="([^"]+)"', html_text):
     if rel.startswith(('data:', 'http:', 'https:', '#')):
         continue
-    if not os.path.exists(os.path.join(ROOT, rel)):
+    rel_path = rel.split('?', 1)[0].split('#', 1)[0]
+    if not os.path.exists(os.path.join(ROOT, rel_path)):
         errors.append('引用的本地文件不存在: %s' % rel)
 
 # app.js 里出现的 class 是否在 CSS 中定义（忽略动态拼接的）

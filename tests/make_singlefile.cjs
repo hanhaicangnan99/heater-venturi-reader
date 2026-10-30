@@ -13,7 +13,7 @@ const css = fs.readFileSync(path.join(ROOT, 'assets', 'styles.css'), 'utf8');
 if (css.indexOf('</style') >= 0) throw new Error('CSS 里出现 </style>，不能直接内联');
 
 html = html.replace(
-  '<link rel="stylesheet" href="assets/styles.css">',
+  /<link rel="stylesheet" href="assets\/styles\.css(?:\?[^"]*)?">/,
   function () { return '<style>\n' + css + '\n</style>'; }
 );
 
@@ -21,8 +21,8 @@ const scripts = ['core.js', 'xlsx-lite.js', 'xlsx-read.js', 'app.js'];
 for (const name of scripts) {
   const code = fs.readFileSync(path.join(ROOT, 'js', name), 'utf8');
   if (code.indexOf('</script') >= 0) throw new Error(name + ' 里出现 </script>，不能直接内联');
-  const tag = '<script src="js/' + name + '"></script>';
-  if (html.indexOf(tag) < 0) throw new Error('index.html 里找不到 ' + tag);
+  const tag = new RegExp('<script src="js/' + name.replace(/\./g, '\\.') + '(?:\\?[^"]*)?"></script>');
+  if (!tag.test(html)) throw new Error('index.html 里找不到 ' + name);
   html = html.replace(tag, function () { return '<script>\n' + code + '\n</script>'; });
 }
 

@@ -4,6 +4,8 @@
 
 **在线使用（手机推荐，HTTPS，可开相机）：** <https://hanhaicangnan99.github.io/heater-venturi-reader/>
 
+> 如果手机/电脑还显示旧界面，打开 <https://hanhaicangnan99.github.io/heater-venturi-reader/?v=2.20.0> 一次；页脚会显示当前版本 `v2.20.0`。
+
 **代码仓库：** <https://github.com/hanhaicangnan99/heater-venturi-reader>
 
 **第二阶段交接报告：** [交接报告_第二阶段.md](交接报告_第二阶段.md)
@@ -446,6 +448,13 @@ chrome --headless=new --no-sandbox --disable-gpu --user-data-dir=tests/prof ^
 ---
 
 ## 十二、版本
+
+**v2.20.0（2026-10-30）**
+
+- CSS/JS 加 `?v=2.20.0` 版本参数，绕过旧缓存
+- 页脚显示当前版本，方便确认是否最新
+- Service Worker 升到 `hvp-pwa-v8`，网络请求使用 `no-store`
+- 解决部分手机仍加载旧版、单炉页看不到「整台 / A / B」的问题
 
 **v2.19.0（2026-10-30）**
 

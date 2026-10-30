@@ -208,7 +208,9 @@
   function registerServiceWorker() {
     if (!('serviceWorker' in navigator)) return;
     if (location.protocol !== 'https:' && location.hostname !== 'localhost' && location.hostname !== '127.0.0.1') return;
-    navigator.serviceWorker.register('sw.js').catch(function () { /* 离线能力失败不影响使用 */ });
+    navigator.serviceWorker.register('sw.js').then(function (reg) {
+      if (reg && reg.update) reg.update();
+    }).catch(function () { /* 离线能力失败不影响使用 */ });
   }
 
   function renderHome() {
