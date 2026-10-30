@@ -75,7 +75,11 @@ const driver = `
     // ---- 绝压比计算：粘贴方式1（无当前数据）----
     document.getElementById('btnRatioHome').click();
     await sleep(30);
+    ok('打开绝压比选择页', q('.page-title').textContent === '选择计算炉子', q('.page-title').textContent);
+    q('#btnRatioPaste').click();
+    await sleep(30);
     ok('打开绝压比计算', q('.page-title').textContent === '绝压比计算', q('.page-title').textContent);
+    ok('方式1 文本有复制按钮', !!q('#btnCopyConvText'));
     var sample = [
       '文丘里压力', '',
       '3号炉', '3 0.170', '3 0.148', '3 0.148', '3 0.148', '4 0.170', '3 0.134', '3 0.148', '3 0.148', '',
@@ -110,7 +114,7 @@ const driver = `
     bBtn.click();
     await sleep(20);
     ok('切 B 后从 ⑤ 开始', q('#convPreview').textContent.indexOf('⑤<1>0.100') >= 0, q('#convPreview').textContent);
-    q('.page-actions .btn').click();
+    qa('.page-actions .btn').filter(function (b) { return b.textContent.indexOf('返回炉子列表') >= 0; })[0].click();
     await sleep(30);
     ok('返回首页', qa('.furnace-card').length === 4);
 
@@ -176,22 +180,32 @@ const driver = `
     ok('识别接口返回目标组', res && res.group === 4, JSON.stringify(res));
     ok('识别值顺序填入第 1 块', cellVal(0) === '0.123', cellVal(0));
 
-    // ---- 回主界面 → 导出文丘里压力（方式1）----
+    // ---- 回主界面 → 导出文丘里压力（多页：先选炉子）----
     q('.furnace-head .back').click();
     await sleep(30);
     q('.page-actions .btn').click();
     await sleep(30);
-    ok('方式1 弹窗打开', !!q('#dlgExport').open);
-    ok('方式1 弹窗标题正确', q('#dlgExport h2').textContent === '导出文丘里压力', q('#dlgExport h2').textContent);
-    var ev = q('#exportPreview').textContent;
+    ok('打开导出选择页', q('.page-title').textContent === '选择导出炉子', q('.page-title').textContent);
+    ok('导出选择页显示全部 4 台炉', qa('.pick-row').length === 4, qa('.pick-row').length);
+    ok('每台炉都有整台/A/B', qa('.pick-row .seg-btn').length === 12, qa('.pick-row .seg-btn').length);
+    ok('有数据炉子默认勾选', qa('.pick-check').filter(function (c) { return c.checked; }).length >= 1, qa('.pick-check').filter(function (c) { return c.checked; }).length);
+    q('#btnPickExportNext').click();
+    await sleep(30);
+    ok('进入导出预览页', q('.page-title').textContent === '导出文丘里压力', q('.page-title').textContent);
+    var ev = q('#exportPagePreview').textContent;
     ok('方式1 含文丘里压力', ev.indexOf('文丘里压力') >= 0);
     ok('方式1 含 3号炉', ev.indexOf('3号炉') >= 0);
-    ok('方式1 弹窗有绝压比入口', !!q('#btnOpenRatio'));
-    q('[data-close="dlgExport"]').click();
-    await sleep(20);
+    ok('导出预览有复制按钮', !!q('#btnCopyExportPage'));
+    qa('.page-actions .btn').filter(function (b) { return b.textContent === '返回主界面'; })[0].click();
+    await sleep(30);
 
-    // ---- 绝压比计算自动载入当前读数 ----
+    // ---- 绝压比计算多页：先选炉子再计算 ----
     document.getElementById('btnRatioHome').click();
+    await sleep(30);
+    ok('打开绝压比选择页', q('.page-title').textContent === '选择计算炉子', q('.page-title').textContent);
+    ok('绝压比选择页显示全部 4 台炉', qa('.pick-row').length === 4, qa('.pick-row').length);
+    ok('绝压比选择页有整台/A/B', qa('.pick-row .seg-btn').length === 12, qa('.pick-row .seg-btn').length);
+    q('#btnPickRatioNext').click();
     await sleep(30);
     ok('自动载入当前读数', q('#convText').value.indexOf('3号炉') >= 0, q('#convText').value.slice(0, 20));
     ok('当前读数解析出 1 台炉', qa('.conv-furnace').length === 1 && q('.conv-furnace').textContent.indexOf('3号炉') >= 0, qa('.conv-furnace').length);
@@ -219,7 +233,7 @@ const driver = `
     q('[data-close="dlgExportAll"]').click();
     await sleep(20);
 
-    q('.page-actions .btn').click();
+    qa('.page-actions .btn').filter(function (b) { return b.textContent.indexOf('返回炉子列表') >= 0; })[0].click();
     await sleep(30);
 
     await sleep(500);
@@ -359,17 +373,6 @@ const driver = `
     ok('选炉页显示全部 4 台炉', qa('.quick-select-card').length === 4, qa('.quick-select-card').length);
     ok('未导入的 3 台有区分', qa('.quick-select-card.is-empty').length === 3, qa('.quick-select-card.is-empty').length);
     ok('选炉页底部有导出/返回/绝压比按钮', qa('.quick-select-footer .btn').length === 3, qa('.quick-select-footer .btn').length);
-    qa('.quick-select-footer .btn').filter(function (b) { return b.textContent === '导出文丘里压力'; })[0].click();
-    await sleep(50);
-    ok('选炉页可直接导出方式1', !!q('#dlgExport').open, q('#dlgExport').open);
-    ok('导出弹窗内有炉子勾选', qa('#exportSelect .export-select-check').length > 0, qa('#exportSelect .export-select-check').length);
-    ok('导出炉子默认勾选', qa('#exportSelect .export-select-check')[0].checked);
-    var firstExportLabel = q('#exportSelect .export-select-label span').textContent.split(' · ')[0];
-    q('#exportSelect .export-select-check').click();
-    await sleep(40);
-    ok('导出取消勾选后预览剔除该炉', q('#exportPreview').textContent.indexOf(firstExportLabel) < 0, q('#exportPreview').textContent.slice(0, 60));
-    q('[data-close="dlgExport"]').click();
-    await sleep(30);
     var before2 = window.GaugeApp.getBatch().furnaces[0].cells[0][0].v;
     q('#btnQuickApply').click();
     await sleep(50);
@@ -551,16 +554,13 @@ const driver = `
 
     q('#btnRatioHome').click();
     await sleep(50);
-    var br = window.GaugeApp.getBatch();
-    var withData = br.furnaces.filter(function (f) { return f.cells.some(function (row) { return row.some(function (c) { return c.v != null; }); }); }).length;
-    ok('绝压比页默认包含全部有数据炉子', qa('.conv-select-check').length === withData, qa('.conv-select-check').length + ' vs ' + withData);
-    var firstLabel = q('.conv-select-label span').textContent.split(' · ')[0];
-    q('.conv-select-check').click();
-    await sleep(40);
-    ok('绝压比取消勾选后剔除该炉', q('#convText').value.indexOf(firstLabel) < 0 && qa('.conv-select-check').filter(function (c) { return c.checked; }).length === withData - 1, q('#convText').value.slice(0, 40));
-    qa('.conv-select-actions .btn').filter(function (b) { return b.textContent === '全选'; })[0].click();
-    await sleep(40);
-    ok('绝压比全选恢复', qa('.conv-select-check').filter(function (c) { return c.checked; }).length === withData);
+    ok('绝压比选择页不受数据限制显示 4 台炉', qa('.pick-row').length === 4, qa('.pick-row').length);
+    ok('绝压比选择页每台有整台/A/B', qa('.pick-row .seg-btn').length === 12, qa('.pick-row .seg-btn').length);
+    q('#btnPickRatioNext').click();
+    await sleep(50);
+    ok('绝压比从选择页进入计算', q('.page-title').textContent === '绝压比计算', q('.page-title').textContent);
+    ok('绝压比带入已录入炉子', q('#convText').value.indexOf('号炉') >= 0, q('#convText').value.slice(0, 30));
+    ok('方式1 文本有复制按钮', !!q('#btnCopyConvText'));
 
     qa('.page-actions .btn').filter(function (b) { return b.textContent.indexOf('返回炉子列表') >= 0; })[0].click();
     await sleep(30);

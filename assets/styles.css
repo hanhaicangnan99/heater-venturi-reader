@@ -1617,6 +1617,54 @@ body.furnace-mode .app-shell { padding-top: 8px; }
   cursor: pointer;
 }
 
+.pick-tools {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 6px;
+}
+
+.pick-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.pick-row:last-child { border-bottom: 0; }
+
+.pick-main {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 15px;
+  cursor: pointer;
+}
+
+.pick-check {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--brand);
+  cursor: pointer;
+}
+
+.pick-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 12px;
+}
+
+.export-page-preview { max-height: 60vh; }
+
+@media (max-width: 640px) {
+  .pick-actions .btn { flex: 1; }
+}
+
 /* 导出所有数据：摘要 */
 .export-summary {
   margin: 12px 0;

@@ -50,20 +50,28 @@ const driver = `
         if (b.textContent === label) b.click();
       });
     }
-  } else if (view === 'export') {
+  } else if (view === 'export' || view === 'exportPreview') {
     var mb = Array.prototype.filter.call(document.querySelectorAll('.page-actions .btn'), function (b) { return b.textContent === '导出文丘里压力'; })[0];
     if (mb) mb.click();
+    if (view === 'exportPreview') {
+      var en = document.getElementById('btnPickExportNext');
+      if (en) en.click();
+    }
   } else if (view === 'mode1') {
     document.querySelector('.page-actions .btn').click();
-  } else if (view === 'convert') {
+  } else if (view === 'ratioSelect' || view === 'convert') {
     document.getElementById('btnRatioHome').click();
-    var vals = [0.240, 0.230, 0.230, 0.220, 0.230, 0.230, 0.220];
-    var inputs = document.querySelectorAll('.cf-header input');
-    vals.forEach(function (v, i) {
-      if (!inputs[i]) return;
-      inputs[i].value = v.toFixed(3);
-      inputs[i].dispatchEvent(new Event('input', { bubbles: true }));
-    });
+    if (view === 'convert') {
+      var rn = document.getElementById('btnPickRatioNext');
+      if (rn) rn.click();
+      var vals = [0.240, 0.230, 0.230, 0.220, 0.230, 0.230, 0.220];
+      var inputs = document.querySelectorAll('.cf-header input');
+      vals.forEach(function (v, i) {
+        if (!inputs[i]) return;
+        inputs[i].value = v.toFixed(3);
+        inputs[i].dispatchEvent(new Event('input', { bubbles: true }));
+      });
+    }
   } else if (view === 'quick') {
     document.getElementById('btnQuick').click();
   } else if (view === 'quickSelect' || view === 'quickFurnace') {

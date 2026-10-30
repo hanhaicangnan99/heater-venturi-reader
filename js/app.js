@@ -19,8 +19,10 @@
   var deferredInstall = null;
   var convText = '';
   var conv = null;
-  var convSelected = null;
-  var exportSelected = null;
+  var pickExport = null;
+  var pickRatio = null;
+  var exportPageText = '';
+  var exportPageLabel = '';
   var quick = {
     text: '', model: null, issues: [], message: '', applyIssues: [],
     selectedId: null, group: 0, reverse: {}
@@ -142,6 +144,12 @@
   function render() {
     if (ui.view === 'convert') {
       renderConverter();
+    } else if (ui.view === 'exportSelect') {
+      renderPickPage('export');
+    } else if (ui.view === 'exportPreview') {
+      renderExportPreviewPage();
+    } else if (ui.view === 'ratioSelect') {
+      renderPickPage('ratio');
     } else if (ui.view === 'quickImport') {
       renderQuickImport();
     } else if (ui.view === 'quickSelect') {
@@ -233,9 +241,9 @@
         el('p', { class: 'page-sub', text: 'A 炉膛 = 1～4 组，B 炉膛 = 5～8 组；点炉子进入录入。' })
       ]),
       el('div', { class: 'page-actions' }, [
-        el('button', { class: 'btn', type: 'button', text: '导出文丘里压力', onclick: openExport }),
+        el('button', { class: 'btn', type: 'button', text: '导出文丘里压力', onclick: openExportSelect }),
         el('button', { class: 'btn', type: 'button', id: 'btnQuick', text: '手动快捷输入', onclick: openQuick }),
-        el('button', { class: 'btn primary', type: 'button', id: 'btnRatioHome', text: '绝压比计算', onclick: openRatioCalc }),
+        el('button', { class: 'btn primary', type: 'button', id: 'btnRatioHome', text: '绝压比计算', onclick: openRatioSelect }),
         canInstall() ? el('button', { class: 'btn install-btn', type: 'button', id: 'btnInstall', text: '安装到桌面', onclick: installPwa }) : null
       ])
     ]));
@@ -956,12 +964,12 @@
 
   function quickApplyAndRatio() {
     applyQuick(true);
-    openRatioCalc();
+    openRatioSelect();
   }
 
   function quickApplyAndExport() {
     applyQuick(true);
-    openExport();
+    openExportSelect();
   }
 
   function applyQuickFurnace() {
@@ -1125,14 +1133,16 @@
   function openRatioCalc() {
     stopCamera();
     ui.view = 'convert';
-    if (C.hasBatchData(batch)) {
-      convSelected = C.furnacesWithData(batch).map(function (f) { return f.id; });
-      convText = C.exportMode1(batch, convSelected);
+    if (!pickRatio) pickRatio = defaultPick();
+    var picked = pickedBatchData(pickRatio);
+    if (C.hasBatchData(batch) && picked.ids.length) {
+      convText = C.exportMode1(picked.batch, picked.ids);
       conv = C.parseMode1(convText);
       conv.fromCurrent = true;
       syncConvHeaders();
     } else {
-      convSelected = [];
+      convText = '';
+      conv = null;
     }
     render();
     scrollTop();
@@ -1148,6 +1158,200 @@
     });
   }
 
+  function defaultPick() {
+    var pick = {};
+    C.FURNACE_DEFS.forEach(function (def) {
+      var f = C.furnaceById(batch, def.id);
+      pick[def.id] = {
+        checked: !!(f && C.hasFurnaceData(f)),
+        side: f ? f.side : 'full'
+      };
+    });
+    return pick;
+  }
+
+  function pickedBatchData(pick) {
+    var copy = C.toJSON(batch);
+    var ids = [];
+    var labels = [];
+    C.FURNACE_DEFS.forEach(function (def) {
+      var p = pick && pick[def.id];
+      if (!p || !p.checked) return;
+      ids.push(def.id);
+      C.setSide(copy, def.id, p.side);
+      labels.push(def.label + ' ' + C.sideLabel(p.side));
+    });
+    return { batch: copy, ids: ids, label: labels.join('、') };
+  }
+
+  function openExportSelect() {
+    pickExport = defaultPick();
+    ui.view = 'exportSelect';
+    render();
+    scrollTop();
+  }
+
+  function openRatioSelect() {
+    pickRatio = defaultPick();
+    ui.view = 'ratioSelect';
+    render();
+    scrollTop();
+  }
+
+  function openRatioPaste() {
+    pickRatio = null;
+    convText = '';
+    conv = null;
+    ui.view = 'convert';
+    render();
+    scrollTop();
+  }
+
+  function renderPickPage(kind) {
+    var isExport = kind === 'export';
+    var pick = isExport ? pickExport : pickRatio;
+    var host = $('#view');
+    host.innerHTML = '';
+    host.appendChild(el('div', { class: 'page-head' }, [
+      el('div', {}, [
+        el('h2', { class: 'page-title', text: isExport ? '选择导出炉子' : '选择计算炉子' }),
+        el('p', { class: 'page-sub', text: '2/3/4/5 号炉全部列出，不受是否已导入限制；每台可自由选整台 / A炉膛 / B炉膛，下一步再生成。' })
+      ]),
+      el('div', { class: 'page-actions' }, [
+        el('button', { class: 'btn ghost', type: 'button', text: '返回主界面', onclick: goHome })
+      ])
+    ]));
+
+    var sec = el('section', { class: 'panel' });
+    sec.appendChild(el('div', { class: 'panel-head' }, [
+      el('h2', { class: 'panel-title', text: '炉子和炉膛范围' }),
+      el('span', { class: 'panel-note', text: '勾选后才参与下一步；无数据的炉子也可以选单炉膛' })
+    ]));
+    var body = el('div', { class: 'panel-body' });
+    var tools = el('div', { class: 'pick-tools' }, [
+      el('button', { class: 'btn ghost small', type: 'button', text: '全选', onclick: function () {
+        C.FURNACE_DEFS.forEach(function (def) { pick[def.id].checked = true; });
+        renderPickPage(kind);
+      } }),
+      el('button', { class: 'btn ghost small', type: 'button', text: '全不选', onclick: function () {
+        C.FURNACE_DEFS.forEach(function (def) { pick[def.id].checked = false; });
+        renderPickPage(kind);
+      } })
+    ]);
+    body.appendChild(tools);
+
+    C.FURNACE_DEFS.forEach(function (def) {
+      var p = pick[def.id];
+      var f = C.furnaceById(batch, def.id);
+      var hasData = !!(f && C.hasFurnaceData(f));
+      var cb = el('input', { type: 'checkbox', class: 'pick-check' });
+      cb.checked = p.checked;
+      cb.addEventListener('change', function () {
+        p.checked = cb.checked;
+        renderPickPage(kind);
+      });
+      var seg = el('div', { class: 'seg' }, [['full', '整台'], ['A', 'A炉膛'], ['B', 'B炉膛']].map(function (pair) {
+        return el('button', {
+          class: 'seg-btn' + (p.side === pair[0] ? ' active' : ''), type: 'button', text: pair[1],
+          onclick: function () {
+            p.side = pair[0];
+            renderPickPage(kind);
+          }
+        });
+      }));
+      body.appendChild(el('div', { class: 'pick-row' }, [
+        el('label', { class: 'pick-main' }, [
+          cb,
+          el('strong', { text: def.label }),
+          el('span', { class: 'tag' + (hasData ? ' ok' : ''), text: hasData ? '有数据' : '无数据' })
+        ]),
+        seg
+      ]));
+    });
+    sec.appendChild(body);
+
+    var selected = C.FURNACE_DEFS.filter(function (def) { return pick[def.id].checked; }).length;
+    var next = el('button', {
+      class: 'btn primary', type: 'button', id: isExport ? 'btnPickExportNext' : 'btnPickRatioNext',
+      text: (isExport ? '下一步：预览导出' : '下一步：计算绝压比') + '（' + selected + ' 台）',
+      disabled: selected === 0,
+      onclick: function () {
+        if (!selected) {
+          toast('至少勾选一台炉子', 'warn', 2200);
+          return;
+        }
+        if (isExport) openExportPreviewPage();
+        else openRatioCalc();
+      }
+    });
+    host.appendChild(sec);
+    var actions = [el('button', { class: 'btn ghost', type: 'button', text: '返回主界面', onclick: goHome })];
+    if (!isExport) {
+      actions.push(el('button', { class: 'btn ghost', type: 'button', id: 'btnRatioPaste', text: '直接粘贴方式1', onclick: openRatioPaste }));
+    }
+    actions.push(next);
+    host.appendChild(el('div', { class: 'pick-actions' }, actions));
+  }
+
+  function openExportPreviewPage() {
+    var picked = pickedBatchData(pickExport);
+    if (!picked.ids.length) {
+      toast('至少勾选一台炉子', 'warn', 2200);
+      return;
+    }
+    exportPageText = C.exportMode1(picked.batch, picked.ids);
+    exportPageLabel = picked.label;
+    ui.view = 'exportPreview';
+    render();
+    scrollTop();
+  }
+
+  function renderExportPreviewPage() {
+    var host = $('#view');
+    host.innerHTML = '';
+    host.appendChild(el('div', { class: 'page-head' }, [
+      el('div', {}, [
+        el('h2', { class: 'page-title', text: '导出文丘里压力' }),
+        el('p', { class: 'page-sub', text: '已选：' + (exportPageLabel || '—') })
+      ]),
+      el('div', { class: 'page-actions' }, [
+        el('button', { class: 'btn ghost', type: 'button', text: '‹ 返回选择', onclick: function () {
+          ui.view = 'exportSelect';
+          render();
+          scrollTop();
+        } }),
+        el('button', { class: 'btn ghost', type: 'button', text: '返回主界面', onclick: goHome })
+      ])
+    ]));
+    var sec = el('section', { class: 'panel' });
+    sec.appendChild(el('div', { class: 'panel-head' }, [
+      el('h2', { class: 'panel-title', text: '方式1 文本预览' }),
+      el('span', { class: 'panel-note', text: '每台炉一个标题，每组一行：最高值表号 最高值' })
+    ]));
+    var body = el('div', { class: 'panel-body' });
+    var pre = el('pre', { class: 'export-preview export-page-preview', id: 'exportPagePreview', tabindex: '-1' });
+    pre.textContent = exportPageText;
+    body.appendChild(pre);
+    body.appendChild(el('div', { class: 'conv-actions' }, [
+      el('button', { class: 'btn', type: 'button', id: 'btnCopyExportPage', text: '复制', onclick: copyExportPage }),
+      el('button', { class: 'btn primary', type: 'button', id: 'btnDownloadExportPage', text: '下载 .txt', onclick: downloadExportPage })
+    ]));
+    sec.appendChild(body);
+    host.appendChild(sec);
+  }
+
+  function copyExportPage() {
+    copyText(exportPageText).then(function (ok) {
+      toast(ok ? '已复制到剪贴板' : '复制失败，请手动选择文本', ok ? 'ok' : 'error', 2200);
+    });
+  }
+
+  function downloadExportPage() {
+    var name = '文丘里压力_' + batch.meta.date.replace(/-/g, '') + '.txt';
+    downloadText(name, exportPageText);
+    toast('已下载 ' + name, 'ok');
+  }
+
   function renderConverter() {
     var host = $('#view');
     host.innerHTML = '';
@@ -1155,14 +1359,14 @@
     host.appendChild(el('div', { class: 'page-head' }, [
       el('div', {}, [
         el('h2', { class: 'page-title', text: '绝压比计算' }),
-        el('p', { class: 'page-sub', text: '默认载入所有有读数的炉子，可勾选本次参与计算的炉子；手动录入的炉子也会自动参与。' })
+        el('p', { class: 'page-sub', text: '从选择页带入的炉子和炉膛；可在方式1文本里粘贴老记录，也可返回上一步重新选炉子。' })
       ]),
       el('div', { class: 'page-actions' }, [
+        el('button', { class: 'btn ghost', type: 'button', text: '‹ 选择炉子', onclick: openRatioSelect }),
         el('button', { class: 'btn', type: 'button', text: '‹ 返回炉子列表', onclick: goHome })
       ])
     ]));
 
-    if (conv && conv.fromCurrent) host.appendChild(convCurrentSelectPanel());
     host.appendChild(convPastePanel());
     if (conv && conv.furnaces.length) {
       host.appendChild(convResultPanel());
@@ -1170,62 +1374,6 @@
     }
     updateConvIssues();
     if (conv && conv.furnaces.length) updateConvPreview();
-  }
-
-  function convCurrentSelectPanel() {
-    var list = C.furnacesWithData(batch);
-    var sec = el('section', { class: 'panel' });
-    sec.appendChild(el('div', { class: 'panel-head' }, [
-      el('h2', { class: 'panel-title', text: '参与计算的炉子' }),
-      el('span', { class: 'panel-note', text: '默认全部；取消勾选后从当前数据重新生成' })
-    ]));
-    var body = el('div', { class: 'panel-body' });
-    if (!Array.isArray(convSelected)) convSelected = list.map(function (f) { return f.id; });
-    var selected = convSelected;
-    if (!list.length) {
-      body.appendChild(el('p', { class: 'hint', text: '当前还没有录入任何炉子读数。' }));
-    } else {
-      body.appendChild(el('div', { class: 'conv-select-actions' }, [
-        el('button', { class: 'btn ghost small', type: 'button', text: '全选', onclick: function () {
-          convSelected = list.map(function (f) { return f.id; });
-          rebuildCurrentConv();
-        } }),
-        el('button', { class: 'btn ghost small', type: 'button', text: '全不选', onclick: function () {
-          convSelected = [];
-          rebuildCurrentConv();
-        } })
-      ]));
-      var row = el('div', { class: 'conv-select-row' });
-      list.forEach(function (f) {
-        var cb = el('input', { type: 'checkbox', class: 'conv-select-check' });
-        cb.checked = selected.indexOf(f.id) >= 0;
-        cb.addEventListener('change', function () {
-          if (cb.checked) {
-            if (convSelected.indexOf(f.id) < 0) convSelected.push(f.id);
-          } else {
-            convSelected = convSelected.filter(function (id) { return id !== f.id; });
-          }
-          rebuildCurrentConv();
-        });
-        row.appendChild(el('label', { class: 'conv-select-label' }, [
-          cb,
-          el('span', { text: f.label + ' · ' + C.sideLabel(f.side) })
-        ]));
-      });
-      body.appendChild(row);
-    }
-    sec.appendChild(body);
-    return sec;
-  }
-
-  function rebuildCurrentConv() {
-    convText = C.exportMode1(batch, convSelected || []);
-    var ta = $('#convText');
-    if (ta) ta.value = convText;
-    conv = C.parseMode1(convText);
-    conv.fromCurrent = true;
-    syncConvHeaders();
-    renderConverter();
   }
 
   function convPastePanel() {
@@ -1246,6 +1394,7 @@
     body.appendChild(el('div', { class: 'conv-actions' }, [
       el('button', { class: 'btn primary', type: 'button', id: 'btnConvParse', text: '解析文本', onclick: parseConv }),
       el('button', { class: 'btn', type: 'button', id: 'btnLoadCurrent', text: '载入当前读数', onclick: loadCurrentConv }),
+      el('button', { class: 'btn', type: 'button', id: 'btnCopyConvText', text: '复制方式1', onclick: copyConvText }),
       el('button', {
         class: 'btn ghost', type: 'button', id: 'btnConvClear', text: '清空',
         onclick: function () { convText = ''; conv = null; renderConverter(); }
@@ -1256,12 +1405,19 @@
     return sec;
   }
 
+  function copyConvText() {
+    var ta = $('#convText');
+    var text = ta ? ta.value : convText;
+    copyText(text).then(function (ok) {
+      toast(ok ? '方式1 文本已复制' : '复制失败，请手动选择文本', ok ? 'ok' : 'error', 2200);
+    });
+  }
+
   function parseConv(isCurrent) {
     var ta = $('#convText');
     if (ta) convText = ta.value;
     conv = C.parseMode1(convText);
     conv.fromCurrent = !!isCurrent;
-    if (!conv.fromCurrent) convSelected = null;
     if (conv.fromCurrent) syncConvHeaders();
     renderConverter();
     if (conv.furnaces.length) toast('解析到 ' + conv.furnaces.length + ' 台炉', 'ok', 1800);
@@ -1273,8 +1429,9 @@
       toast('当前还没有录入任何炉子读数', 'warn', 2600);
       return;
     }
-    convSelected = C.furnacesWithData(batch).map(function (f) { return f.id; });
-    convText = C.exportMode1(batch, convSelected);
+    if (!pickRatio) pickRatio = defaultPick();
+    var picked = pickedBatchData(pickRatio);
+    convText = C.exportMode1(picked.batch, picked.ids);
     var ta = $('#convText');
     if (ta) ta.value = convText;
     parseConv(true);
@@ -2335,78 +2492,6 @@
    * 九、导出文丘里压力（方式1）
    * ================================================================== */
 
-  function openExport() {
-    var list = C.furnacesWithData(batch);
-    if (!list.length) {
-      toast(C.hasBatchData(batch) ? '当前炉膛范围内还没有读数（可切回整台）' : '还没有录入任何读数', 'warn', 3200);
-      return;
-    }
-    exportSelected = list.map(function (f) { return f.id; });
-    renderExportPreview();
-    $('#dlgExport').showModal();
-  }
-
-  function renderExportPreview() {
-    var list = C.furnacesWithData(batch);
-    if (!Array.isArray(exportSelected)) exportSelected = list.map(function (f) { return f.id; });
-    exportSelected = exportSelected.filter(function (id) {
-      return list.some(function (f) { return f.id === id; });
-    });
-    var sel = $('#exportSelect');
-    sel.innerHTML = '';
-    sel.appendChild(el('div', { class: 'export-select-head' }, [
-      el('strong', { text: '选择参与导出的炉子' }),
-      el('span', { class: 'export-select-actions' }, [
-        el('button', { class: 'btn ghost small', type: 'button', text: '全选', onclick: function () {
-          exportSelected = list.map(function (f) { return f.id; });
-          renderExportPreview();
-        } }),
-        el('button', { class: 'btn ghost small', type: 'button', text: '全不选', onclick: function () {
-          exportSelected = [];
-          renderExportPreview();
-        } })
-      ])
-    ]));
-    var row = el('div', { class: 'export-select-row' });
-    list.forEach(function (f) {
-      var cb = el('input', { type: 'checkbox', class: 'export-select-check' });
-      cb.checked = exportSelected.indexOf(f.id) >= 0;
-      cb.addEventListener('change', function () {
-        if (cb.checked) {
-          if (exportSelected.indexOf(f.id) < 0) exportSelected.push(f.id);
-        } else {
-          exportSelected = exportSelected.filter(function (id) { return id !== f.id; });
-        }
-        renderExportPreview();
-      });
-      row.appendChild(el('label', { class: 'export-select-label' }, [
-        cb,
-        el('span', { text: f.label + ' · ' + C.sideLabel(f.side) })
-      ]));
-    });
-    sel.appendChild(row);
-
-    $('#exportPreview').textContent = C.exportMode1(batch, exportSelected);
-    $('#exportHint').textContent = '已选 ' + exportSelected.length + ' / ' + list.length + ' 台；只导出勾选的炉子，手动录入的炉子默认参与。';
-    $('#btnCopyExport').disabled = exportSelected.length === 0;
-    $('#btnDownloadExport').disabled = exportSelected.length === 0;
-
-    var outside = [];
-    list.forEach(function (f) {
-      if (!C.hasFurnaceData(f)) return;
-      var scope = C.groupsInScope(f);
-      var hidden = 0;
-      for (var g = 0; g < f.groups; g++) {
-        if (scope.indexOf(g) >= 0) continue;
-        f.cells[g].forEach(function (c) { if (c.v != null) hidden++; });
-      }
-      if (hidden) outside.push(f.label + ' ' + C.sideLabel(f.side) + '范围外 ' + hidden + ' 个读数');
-    });
-    $('#exportNote').textContent = outside.length
-      ? '未参与本次导出：' + outside.join('；')
-      : '只导出勾选的炉子；空组显示为 - -。';
-  }
-
   function copyText(text) {
     if (navigator.clipboard && navigator.clipboard.writeText) {
       return navigator.clipboard.writeText(text).then(function () { return true; }, function () {
@@ -2620,7 +2705,7 @@
     $('#btnExport').addEventListener('click', openExportAll);
     $('#btnExportAllRatio').addEventListener('click', function () {
       $('#dlgExportAll').close();
-      openRatioCalc();
+      openRatioSelect();
     });
     $('#btnDownloadExportAll').addEventListener('click', function () {
       if (!window.XlsxLite) {
@@ -2661,7 +2746,7 @@
 
     $('#btnOpenRatio').addEventListener('click', function () {
       $('#dlgExport').close();
-      openRatioCalc();
+      openRatioSelect();
     });
 
     document.addEventListener('click', function (e) {
