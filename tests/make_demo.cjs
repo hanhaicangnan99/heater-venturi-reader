@@ -72,7 +72,7 @@ const driver = `
     qt.dispatchEvent(new Event('input', { bubbles: true }));
     document.getElementById('btnQuickParse').click();
     if (view === 'quickFurnace') {
-      document.querySelector('.quick-select-card').click();
+      document.querySelector('.quick-select-card[data-quick-furnace="3"]').click();
     }
   } else if (view === 'quickEmpty') {
     document.getElementById('btnQuick').click();

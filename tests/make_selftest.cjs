@@ -365,6 +365,16 @@ const driver = `
     ok('单炉页只显示一组', qa('.quick-group').length === 1 && !!q('.quick-group-single'), qa('.quick-group').length);
     ok('单炉页第 1 组', q('.quick-progress strong').textContent === '第 1 组', q('.quick-progress strong').textContent);
     ok('单炉页首组位号 3#', q('.quick-group-single .quick-gauge-value').textContent === '3#', q('.quick-group-single .quick-gauge-value').textContent);
+    ok('单炉页有整台/A/B 三个选项', qa('.quick-bar-actions .seg-btn').length === 3, qa('.quick-bar-actions .seg-btn').length);
+    qa('.quick-bar-actions .seg-btn').filter(function (b) { return b.textContent === 'A炉膛'; })[0].click();
+    await sleep(30);
+    ok('快捷切 A 从第 1 组开始', q('.quick-progress strong').textContent === '第 1 组', q('.quick-progress strong').textContent);
+    qa('.quick-bar-actions .seg-btn').filter(function (b) { return b.textContent === 'B炉膛'; })[0].click();
+    await sleep(30);
+    ok('快捷切 B 从第 5 组开始', q('.quick-progress strong').textContent === '第 5 组', q('.quick-progress strong').textContent);
+    qa('.quick-bar-actions .seg-btn').filter(function (b) { return b.textContent === '整台'; })[0].click();
+    await sleep(30);
+    ok('快捷切回整台第 1 组', q('.quick-progress strong').textContent === '第 1 组', q('.quick-progress strong').textContent);
 
     q('.quick-group-single .quick-gauge .qstep').click();
     await sleep(20);

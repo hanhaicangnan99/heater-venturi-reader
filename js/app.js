@@ -258,7 +258,7 @@
   function quickEmptyRows(n) {
     var out = [];
     for (var i = 0; i < n; i++) {
-      out.push({ gauge: 1, value: 0, synced: i !== 0 });
+      out.push({ gauge: 1, value: 0, synced: i !== 0, placeholder: false });
     }
     return out;
   }
@@ -299,6 +299,22 @@
       var pf = byId[def.id];
       if (!pf) return quickEmptyFurnace(def);
       var bf = C.furnaceById(batch, pf.id);
+      var rows = quickEmptyRows(def.groups).map(function (r) {
+        r.synced = false;
+        r.placeholder = true;
+        return r;
+      });
+      var scope = pf.side === 'A' ? [0, 1, 2, 3] : pf.side === 'B' ? [4, 5, 6, 7] : [0, 1, 2, 3, 4, 5, 6, 7];
+      (pf.rawLines || []).forEach(function (r, k) {
+        var g = scope[k];
+        if (g == null) return;
+        rows[g] = {
+          gauge: r.gauge == null ? null : Number(r.gauge),
+          value: r.value == null ? null : Number(r.value),
+          synced: false,
+          placeholder: false
+        };
+      });
       return {
         id: pf.id,
         label: pf.label,
@@ -306,13 +322,7 @@
         perGroup: bf ? bf.perGroup : def.perGroup,
         ambiguous: !!pf.ambiguous,
         imported: true,
-        rows: (pf.rawLines || []).map(function (r) {
-          return {
-            gauge: r.gauge == null ? null : Number(r.gauge),
-            value: r.value == null ? null : Number(r.value),
-            synced: false
-          };
-        })
+        rows: rows
       };
     });
     quick.message = '';
@@ -375,7 +385,9 @@
     var f = quickFind(id);
     if (!f || !f.rows[rowIndex]) return;
     var row = f.rows[rowIndex];
-    if (!f.imported && rowIndex > 0) row.synced = false;
+    var source = quickFirstGroup(f);
+    if (!f.imported && rowIndex !== source) row.synced = false;
+    row.placeholder = false;
     var pg = f.perGroup;
     if (row.gauge == null) row.gauge = delta > 0 ? 1 : pg;
     else row.gauge = Math.max(1, Math.min(pg, row.gauge + delta));
@@ -390,15 +402,17 @@
     var f = quickFind(id);
     if (!f || !f.rows[rowIndex]) return;
     var row = f.rows[rowIndex];
-    if (!f.imported && rowIndex > 0) row.synced = false;
+    var source = quickFirstGroup(f);
+    if (!f.imported && rowIndex !== source) row.synced = false;
+    row.placeholder = false;
     if (row.gauge == null) row.gauge = 1;
     var milli = row.value == null ? 0 : Math.round(row.value * 1000);
     var step = pos === 0 ? 100 : pos === 1 ? 10 : 1;
     milli = Math.max(0, Math.min(400, milli + delta * step));
     row.value = milli / 1000;
-    if (!f.imported && rowIndex === 0) {
-      f.rows.forEach(function (r, i) {
-        if (i > 0 && r.synced) r.value = row.value;
+    if (!f.imported && rowIndex === source) {
+      quickFurnaceGroups(f).forEach(function (g) {
+        if (g !== source && f.rows[g].synced) f.rows[g].value = row.value;
       });
     }
     var hadNotice = quick.message || (quick.applyIssues && quick.applyIssues.length);
@@ -411,7 +425,7 @@
   function quickSideBtn(f, side) {
     return el('button', {
       class: 'seg-btn' + (f.side === side ? ' active' : ''),
-      type: 'button', text: side + '炉膛',
+      type: 'button', text: side === 'full' ? '整台' : side + '炉膛',
       onclick: function () {
         if (f.side === side) return;
         f.side = side;
@@ -430,19 +444,18 @@
     ]);
   }
 
-  function quickGroup(f, row, k, single) {
-    var g = f.side === 'B' ? 4 + k : f.side === 'A' ? k : k;
+  function quickGroup(f, row, g, single) {
     var chamber = C.chamberOf(g);
     var empty = row.gauge == null || row.value == null;
     var digits = quickDigits(row.value);
 
     var gaugeBox = el('div', { class: 'quick-gauge' }, [
-      quickStepBtn('▲', '增大最高表位号', function () { stepQuickGauge(f.id, k, 1); }),
+      quickStepBtn('▲', '增大最高表位号', function () { stepQuickGauge(f.id, g, 1); }),
       el('strong', {
         class: 'quick-gauge-value' + (row.gauge == null ? ' is-empty' : ''),
         text: row.gauge == null ? '—' : row.gauge + '#'
       }),
-      quickStepBtn('▼', '减小最高表位号', function () { stepQuickGauge(f.id, k, -1); })
+      quickStepBtn('▼', '减小最高表位号', function () { stepQuickGauge(f.id, g, -1); })
     ]);
 
     var digitWrap = el('div', { class: 'quick-digits' });
@@ -450,9 +463,9 @@
     digits.forEach(function (d, pos) {
       var label = ['十分位', '百分位', '千分位'][pos];
       digitWrap.appendChild(el('div', { class: 'q-digit' + (row.value == null ? ' is-empty' : '') }, [
-        quickStepBtn('▲', '增加' + label, function () { stepQuickDigit(f.id, k, pos, 1); }),
+        quickStepBtn('▲', '增加' + label, function () { stepQuickDigit(f.id, g, pos, 1); }),
         el('strong', { text: String(d) }),
-        quickStepBtn('▼', '减少' + label, function () { stepQuickDigit(f.id, k, pos, -1); }),
+        quickStepBtn('▼', '减少' + label, function () { stepQuickDigit(f.id, g, pos, -1); }),
         el('span', { class: 'q-digit-label', text: label })
       ]));
     });
@@ -466,7 +479,7 @@
     return el('div', {
       class: 'quick-group' + (single ? ' quick-group-single' : '') + (empty ? ' is-empty' : ''),
       'data-quick-id': f.id,
-      'data-quick-row': k
+      'data-quick-row': g
     }, [
       el('div', { class: 'quick-group-head' }, [
         el('strong', { text: '第' + (g + 1) + '组' }),
@@ -510,14 +523,12 @@
   }
 
   function quickUpdateFor(f) {
-    return {
-      id: f.id,
-      side: f.side,
-      groups: f.rows.map(function (row, k) {
-        var g = f.side === 'B' ? 4 + k : f.side === 'A' ? k : k;
-        return { group: g, gauge: row.gauge, value: row.value };
-      })
-    };
+    var groups = [];
+    f.rows.forEach(function (row, g) {
+      if (row.placeholder) return;
+      groups.push({ group: g, gauge: row.gauge, value: row.value });
+    });
+    return { id: f.id, side: f.side, groups: groups };
   }
 
   function quickSelectFurnace(id) {
@@ -584,6 +595,7 @@
 
   function quickSelectCard(f) {
     var side = f.side === 'full' ? '整台' : f.side + '炉膛';
+    var count = quickFurnaceGroups(f).length;
     return el('article', {
       class: 'quick-select-card' + (f.imported ? '' : ' is-empty'),
       tabindex: 0, role: 'button',
@@ -597,7 +609,7 @@
         el('span', { class: 'tag' + (f.imported ? ' ok' : ''), text: f.imported ? '已导入' : '未导入 · 手动' }),
         f.ambiguous ? el('span', { class: 'tag', text: '文本未写炉膛' }) : null
       ]),
-      el('p', { class: 'quick-select-sub', text: f.imported ? '共 ' + f.rows.length + ' 组 · 每组只改最高表' : '共 ' + f.rows.length + ' 组 · 默认 1# / 0.000，后组跟随第一组' }),
+      el('p', { class: 'quick-select-sub', text: f.imported ? '共 ' + count + ' 组 · 每组只改最高表' : '共 ' + count + ' 组 · 默认 1# / 0.000，后组跟随第一组' }),
       el('span', { class: 'fc-go', text: f.imported ? '进入 ›' : '手动录入 ›' })
     ]);
   }
@@ -664,7 +676,7 @@
     var reverse = quickDirection(f);
     var atStart = reverse ? pos >= list.length - 1 : pos <= 0;
     var atEnd = reverse ? pos <= 0 : pos >= list.length - 1;
-    var rowIndex = quickGroupRow(f, quick.group);
+    var rowIndex = quick.group;
     var row = f.rows[rowIndex];
 
     var host = $('#view');
@@ -687,9 +699,11 @@
         el('span', { text: ' / 共 ' + list.length + ' 组 · ' + C.chamberOf(quick.group) + '炉膛' })
       ]),
       el('div', { class: 'quick-bar-actions' }, [
-        f.rows.length === 4
-          ? el('div', { class: 'seg', role: 'group', 'aria-label': '炉膛选择' }, [quickSideBtn(f, 'A'), quickSideBtn(f, 'B')])
-          : el('span', { class: 'tag', text: '整台（A+B）' }),
+        el('div', { class: 'seg', role: 'group', 'aria-label': '炉膛选择' }, [
+          quickSideBtn(f, 'full'),
+          quickSideBtn(f, 'A'),
+          quickSideBtn(f, 'B')
+        ]),
         el('button', {
           class: 'btn quick-reverse' + (reverse ? ' active' : ''),
           type: 'button', id: 'btnQuickReverse',
@@ -705,6 +719,11 @@
         class: 'quick-default-hint',
         text: '未导入：每组默认 1# / 0.000；改第一组后，未改过的组会自动跟随第一组。'
       }));
+    } else if (f.rows.some(function (r) { return r.placeholder; })) {
+      host.appendChild(el('div', {
+        class: 'quick-default-hint',
+        text: '导入的是半台：另一半是占位数据，未编辑时不会写入；切到整台可以继续补。'
+      }));
     }
 
     if (quick.message || (quick.applyIssues && quick.applyIssues.length)) {
@@ -712,7 +731,7 @@
     }
 
     var cardWrap = el('div', { class: 'quick-single-wrap' });
-    cardWrap.appendChild(quickGroup(f, row, rowIndex, true));
+    cardWrap.appendChild(quickGroup(f, row, quick.group, true));
     host.appendChild(cardWrap);
 
     var nav = el('div', { class: 'quick-nav' }, [
