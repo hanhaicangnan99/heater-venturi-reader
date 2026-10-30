@@ -510,6 +510,34 @@ const driver = `
     await sleep(30);
     ok('未导入后组跟随第一组 0.001', qa('.quick-group-single .quick-field')[1].title.indexOf('0.001') >= 0, qa('.quick-group-single .quick-field')[1].title);
 
+    qa('.page-actions .btn').filter(function (b) { return b.textContent.indexOf('返回选炉') >= 0; })[0].click();
+    await sleep(30);
+    q('.quick-select-card[data-quick-furnace="4"]').click();
+    await sleep(30);
+    qa('.quick-bar-actions .seg-btn').filter(function (b) { return b.textContent === 'B炉膛'; })[0].click();
+    await sleep(30);
+    q('#btnQuickNext').click();
+    await sleep(30);
+    qa('.quick-group-single .q-digit')[2].querySelectorAll('.qstep')[0].click();
+    await sleep(20);
+    q('#btnQuickNext').click();
+    await sleep(30);
+    ok('空白只录 B 且跳过首组，后续仍跟随', qa('.quick-group-single .quick-field')[1].title.indexOf('0.001') >= 0, qa('.quick-group-single .quick-field')[1].title);
+
+    qa('.page-actions .btn').filter(function (b) { return b.textContent.indexOf('返回选炉') >= 0; })[0].click();
+    await sleep(30);
+    q('.quick-select-card[data-quick-furnace="5"]').click();
+    await sleep(30);
+    q('#btnQuickReverse').click();
+    await sleep(30);
+    q('#btnQuickNext').click();
+    await sleep(30);
+    qa('.quick-group-single .q-digit')[2].querySelectorAll('.qstep')[0].click();
+    await sleep(20);
+    q('#btnQuickNext').click();
+    await sleep(30);
+    ok('反向跳过首组，后续仍跟随', qa('.quick-group-single .quick-field')[1].title.indexOf('0.001') >= 0, qa('.quick-group-single .quick-field')[1].title);
+
     qa('.page-actions .btn').filter(function (b) { return b.textContent === '返回主界面'; })[0].click();
     await sleep(30);
     ok('快捷返回首页', qa('.furnace-card').length === 4);

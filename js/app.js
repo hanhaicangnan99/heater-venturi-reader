@@ -399,8 +399,7 @@
     var f = quickFind(id);
     if (!f || !f.rows[rowIndex]) return;
     var row = f.rows[rowIndex];
-    var source = quickFirstGroup(f);
-    if (rowIndex !== source) row.synced = false;
+    row.synced = false;
     row.placeholder = false;
     row.active = true;
     var pg = f.perGroup;
@@ -422,8 +421,7 @@
     var f = quickFind(id);
     if (!f || !f.rows[rowIndex]) return;
     var row = f.rows[rowIndex];
-    var source = quickFirstGroup(f);
-    if (rowIndex !== source) row.synced = false;
+    row.synced = false;
     row.placeholder = false;
     row.active = true;
     if (row.gauge == null) row.gauge = 1;
@@ -438,15 +436,13 @@
       else next = (milli - (milli % 10)) + 9;
     }
     row.value = next / 1000;
-    if (rowIndex === source) {
-      quickFurnaceGroups(f).forEach(function (g) {
-        if (g !== source && f.rows[g].synced) {
-          f.rows[g].value = row.value;
-          f.rows[g].placeholder = false;
-          f.rows[g].active = true;
-        }
-      });
-    }
+    quickFurnaceGroups(f).forEach(function (g) {
+      if (g !== rowIndex && f.rows[g].synced) {
+        f.rows[g].value = row.value;
+        f.rows[g].placeholder = false;
+        f.rows[g].active = true;
+      }
+    });
     quickRememberHalfRow(f, rowIndex);
     var hadNotice = quick.message || (quick.applyIssues && quick.applyIssues.length);
     quick.message = '';
@@ -526,7 +522,7 @@
     row.gauge = n;
     row.placeholder = false;
     row.active = true;
-    if (g !== quickFirstGroup(f)) row.synced = false;
+    row.synced = false;
     quickRememberHalfRow(f, g);
     var card = document.querySelector('.quick-group[data-quick-id="' + id + '"][data-quick-row="' + g + '"]');
     if (card) {
@@ -757,7 +753,7 @@
         el('span', { class: 'tag' + (f.imported ? ' ok' : ''), text: f.imported ? '已导入' : '未导入 · 手动' }),
         f.ambiguous ? el('span', { class: 'tag', text: '文本未写炉膛' }) : null
       ]),
-      el('p', { class: 'quick-select-sub', text: f.imported ? '共 ' + count + ' 组 · 每组只改最高表' : '共 ' + count + ' 组 · 默认 1# / 0.000，后组跟随第一组' }),
+      el('p', { class: 'quick-select-sub', text: f.imported ? '共 ' + count + ' 组 · 每组只改最高表' : '共 ' + count + ' 组 · 默认 1# / 0.000，未改过的组跟随最近改过组' }),
       controls,
       el('span', { class: 'fc-go', text: f.imported ? '进入 ›' : '手动录入 ›' })
     ]);
@@ -866,7 +862,7 @@
     if (!f.imported) {
       host.appendChild(el('div', {
         class: 'quick-default-hint',
-        text: '未导入：每组默认 1# / 0.000；改第一组后，未改过的组会自动跟随第一组。'
+        text: '未导入：每组默认 1# / 0.000；改任意一组后，没改过的组会自动跟随最近改过的那一组。'
       }));
     } else if (f.rows.some(function (r) { return r.placeholder; })) {
       host.appendChild(el('div', {
