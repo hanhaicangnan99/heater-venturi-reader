@@ -63,6 +63,8 @@ const driver = `
       inputs[i].value = v.toFixed(3);
       inputs[i].dispatchEvent(new Event('input', { bubbles: true }));
     });
+  } else if (view === 'quick') {
+    document.getElementById('btnQuick').click();
   }
 })();
 </script>

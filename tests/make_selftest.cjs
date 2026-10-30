@@ -209,7 +209,8 @@ const driver = `
     var xb = window.XlsxLite.build({ sheets: [{ name: 't', rows: [[{ v: 'x', s: 5 }]] }] });
     ok('Excel 生成器输出 ZIP', xb && xb.length > 500 && xb[0] === 0x50 && xb[1] === 0x4b, xb && xb.length);
     var summary = q('#exportAllSummary').textContent;
-    ok('摘要含日期时间', summary.indexOf('2026-10-24') >= 0);
+    var metaDate = window.GaugeApp.getBatch().meta.date;
+    ok('摘要含日期时间', summary.indexOf(metaDate) >= 0, summary.slice(0, 40));
     ok('摘要含 3号炉', summary.indexOf('3号炉') >= 0);
     ok('摘要含最高绝压比', summary.indexOf('0.84375') >= 0, summary);
     ok('最高绝压比注明第几组第几块', summary.indexOf('第5组第4块') >= 0, summary);
@@ -333,6 +334,53 @@ const driver = `
     fireTouch(swipeTarget, 'touchend', 180, 310);
     await sleep(50);
     ok('右划返回主界面', qa('.furnace-card').length === 4);
+
+    // ---- 手动快捷输入 ----
+    q('#btnQuick').click();
+    await sleep(40);
+    ok('进入手动快捷输入', q('.page-title').textContent === '手动快捷输入', q('.page-title').textContent);
+    ok('快捷模式自动载入当前读数', qa('.quick-furnace').length >= 1, qa('.quick-furnace').length);
+
+    qa('.quick-paste-actions .btn').filter(function (b) { return b.textContent === '清空'; })[0].click();
+    await sleep(20);
+    var qText = q('#quickText');
+    qText.value = '文丘里压力\\n\\n3号炉\\n3 0.199\\n4 0.148\\n3 0.148\\n3 0.148\\n4 0.170\\n3 0.134\\n3 0.148\\n3 0.148';
+    qText.dispatchEvent(new Event('input', { bubbles: true }));
+    q('#btnQuickParse').click();
+    await sleep(40);
+    ok('快捷解析出 1 台炉 8 组', qa('.quick-furnace').length === 1 && qa('.quick-group').length === 8, qa('.quick-group').length);
+    ok('快捷首组位号 3#', q('.quick-group .quick-gauge-value').textContent === '3#', q('.quick-group .quick-gauge-value').textContent);
+
+    q('.quick-group .quick-gauge .qstep').click();
+    await sleep(20);
+    ok('快捷位号可增加到 4#', q('.quick-group .quick-gauge-value').textContent === '4#', q('.quick-group .quick-gauge-value').textContent);
+    qa('.quick-group .quick-gauge .qstep')[1].click();
+    await sleep(20);
+    ok('快捷位号可减回 3#', q('.quick-group .quick-gauge-value').textContent === '3#', q('.quick-group .quick-gauge-value').textContent);
+
+    qa('.quick-group')[0].querySelectorAll('.q-digit')[2].querySelectorAll('.qstep')[0].click();
+    await sleep(20);
+    ok('快捷千分位 0.199 → 0.200', qa('.quick-group')[0].querySelectorAll('.quick-field')[1].title.indexOf('0.200') >= 0, qa('.quick-group')[0].querySelectorAll('.quick-field')[1].title);
+
+    q('#btnQuickApply').click();
+    await sleep(50);
+    ok('快捷应用提示已更新', q('.quick-success') && q('.quick-success').textContent.indexOf('已更新') >= 0, q('.quick-success') ? q('.quick-success').textContent : 'no');
+    var qb = window.GaugeApp.getBatch();
+    var qf = qb.furnaces.filter(function (x) { return x.id === '3'; })[0];
+    ok('快捷写回 3号炉 1组 3# 0.200', qf && qf.cells[0][2] && Math.abs(qf.cells[0][2].v - 0.2) < 1e-9, qf ? JSON.stringify(qf.cells[0][2]) : 'no');
+
+    q('#quickText').value = '3号炉\\n1 0.100\\n2 0.200\\n3 0.300\\n4 0.400';
+    q('#quickText').dispatchEvent(new Event('input', { bubbles: true }));
+    q('#btnQuickParse').click();
+    await sleep(30);
+    ok('快捷 4 行出现炉膛选择', !!q('.quick-f-head .seg'), qa('.quick-f-head .seg').length);
+    qa('.quick-f-head .seg-btn').filter(function (b) { return b.textContent === 'B炉膛'; })[0].click();
+    await sleep(30);
+    ok('快捷切 B 后从第5组开始', q('.quick-group .quick-group-head strong').textContent === '第5组', q('.quick-group .quick-group-head strong').textContent);
+
+    q('.page-actions .btn').click();
+    await sleep(30);
+    ok('快捷返回首页', qa('.furnace-card').length === 4);
   } catch (err) {
     results.push('FAIL 测试异常 :: ' + err.message);
   }

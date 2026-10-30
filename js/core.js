@@ -480,6 +480,47 @@
     return cell;
   }
 
+  /** 把“快捷最高表”更新写回 batch：只改指定表，旧最高表若换位则清空，其他表保留 */
+  function applyQuickUpdate(batch, updates) {
+    var updated = 0;
+    var warnings = [];
+    (updates || []).forEach(function (u) {
+      var f = furnaceById(batch, u && u.id);
+      if (!f) return;
+      if (u.side && SIDES.indexOf(u.side) >= 0) setSide(batch, f.id, u.side);
+      (u.groups || []).forEach(function (item) {
+        if (!item || item.gauge == null || item.value == null) return;
+        var g = Number(item.group);
+        if (!f.cells[g] || !isGroupInScope(f, g)) return;
+        var idx = Number(item.gauge) - 1;
+        if (!(idx >= 0 && idx < f.perGroup)) {
+          warnings.push({ id: f.id, group: g, msg: '表号超出范围，已跳过' });
+          return;
+        }
+        var value = Number(item.value);
+        if (!isFinite(value)) return;
+
+        var before = groupStat(f, g);
+        if (before.maxIndex >= 0 && before.maxIndex !== idx) {
+          setValue(batch, f.id, g, before.maxIndex, null);
+        }
+        setValue(batch, f.id, g, idx, value);
+        setExcluded(batch, f.id, g, idx, false);
+        updated++;
+
+        var after = groupStat(f, g);
+        if (after.maxIndex >= 0 && after.maxIndex !== idx) {
+          warnings.push({
+            id: f.id,
+            group: g,
+            msg: '本组其他表读数更高（' + (after.maxIndex + 1) + '#），快捷最高表可能不对'
+          });
+        }
+      });
+    });
+    return { updated: updated, warnings: warnings };
+  }
+
   function setHeader(batch, id, ch, value) {
     var f = furnaceById(batch, id);
     if (!f) return;
@@ -1250,6 +1291,7 @@
     setValue: setValue,
     setExcluded: setExcluded,
     setSkipped: setSkipped,
+    applyQuickUpdate: applyQuickUpdate,
     setHeader: setHeader,
     clearGroup: clearGroup,
     clearFurnace: clearFurnace,

@@ -11,3 +11,15 @@ tests/pwa-cdp-profile/
 tests/pwa-cdp.pid
 tests/pwa-cdp-check.cjs
 tests/u*.png
+
+# ---- 第二阶段识别 ----
+.venv/
+out/
+data/
+models/*.pt
+models/*.onnx
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+压力表读取视频/
+压力表静态照片/

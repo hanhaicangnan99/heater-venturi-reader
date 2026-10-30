@@ -584,3 +584,45 @@ test('清空组 / 清空炉', () => {
   assert.equal(C.hasFurnaceData(C.furnaceById(b, '3')), false);
   assert.equal(C.furnaceById(b, '3').headerA, null);
 });
+
+test('applyQuickUpdate：只换最高表读数，其他表保留', () => {
+  const b = mk();
+  fillGroup(b, '3', 0, [0.100, 0.101, 0.102, 0.103, 0.150, 0.105, 0.106, 0.107, 0.108, 0.109, 0.110, 0.111]);
+  const res = C.applyQuickUpdate(b, [{
+    id: '3',
+    side: 'full',
+    groups: [{ group: 0, gauge: 5, value: 0.170 }]
+  }]);
+  const f = C.furnaceById(b, '3');
+  assert.equal(res.updated, 1);
+  assert.equal(f.cells[0][4].v, 0.170);
+  assert.equal(f.cells[0][0].v, 0.100);
+  assert.equal(C.groupStat(f, 0).maxIndex, 4);
+});
+
+test('applyQuickUpdate：最高表换位时清掉旧最高表，避免旧值压住新值', () => {
+  const b = mk();
+  fillGroup(b, '3', 0, [0.200, 0.100, 0.100, 0.100, 0.100, 0.100, 0.100, 0.100, 0.100, 0.100, 0.100, 0.100]);
+  const res = C.applyQuickUpdate(b, [{
+    id: '3',
+    side: 'full',
+    groups: [{ group: 0, gauge: 5, value: 0.170 }]
+  }]);
+  const f = C.furnaceById(b, '3');
+  assert.equal(res.updated, 1);
+  assert.equal(f.cells[0][0].v, null);
+  assert.equal(f.cells[0][4].v, 0.170);
+  assert.equal(C.groupStat(f, 0).maxIndex, 4);
+});
+
+test('applyQuickUpdate：其他表仍更高时给出提醒', () => {
+  const b = mk();
+  fillGroup(b, '3', 0, [0.200, 0.190, 0.100, 0.100, 0.100, 0.100, 0.100, 0.100, 0.100, 0.100, 0.100, 0.100]);
+  const res = C.applyQuickUpdate(b, [{
+    id: '3',
+    side: 'full',
+    groups: [{ group: 0, gauge: 5, value: 0.170 }]
+  }]);
+  assert.equal(res.warnings.length, 1);
+  assert.ok(res.warnings[0].msg.indexOf('其他表读数更高') >= 0);
+});

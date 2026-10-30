@@ -266,13 +266,276 @@ body {
 
 .page-sub { margin: 4px 0 0; font-size: 13px; color: var(--muted); }
 
-.page-actions { display: flex; gap: 8px; }
+.page-actions { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
 
 .hint-line {
   margin: 14px 0 0;
   font-size: 12.5px;
   color: var(--muted);
   line-height: 1.7;
+}
+
+/* ---------------------------------------------------------------- 手动快捷输入 */
+
+.quick-paste {
+  margin: 0 0 14px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface);
+}
+
+.quick-paste-head {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+
+.quick-paste-head strong { font-size: 14px; }
+
+.quick-text {
+  width: 100%;
+  min-height: 132px;
+  resize: vertical;
+  padding: 10px 12px;
+  border: 1px solid var(--line-strong);
+  border-radius: 9px;
+  background: var(--surface-2);
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.quick-text:focus { outline: 2px solid var(--brand-ring); border-color: var(--brand); }
+
+.quick-paste-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+}
+
+.quick-issues {
+  margin: 0 0 12px;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--surface);
+}
+
+.quick-issue {
+  font-size: 12.5px;
+  line-height: 1.7;
+  color: var(--text-2);
+}
+
+.quick-issue + .quick-issue { margin-top: 4px; }
+
+.quick-issue.error { color: var(--danger); }
+
+.quick-issue.warn { color: #8a5a00; }
+
+[data-theme="dark"] .quick-issue.warn { color: #e8c16a; }
+
+.quick-success {
+  margin: 0 0 12px;
+  padding: 9px 12px;
+  border: 1px solid var(--ok);
+  border-radius: 10px;
+  color: var(--ok);
+  background: var(--ok-weak);
+  font-size: 13px;
+}
+
+.quick-empty {
+  padding: 28px 12px;
+  text-align: center;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.quick-furnace {
+  margin: 0 0 14px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface);
+}
+
+.quick-f-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.quick-f-head h3 { margin: 0; font-size: 17px; }
+
+.quick-f-head .tag { margin-left: auto; }
+
+.quick-f-head .seg { margin-left: auto; }
+
+.quick-groups {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.quick-group {
+  min-width: 0;
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--surface-2);
+}
+
+.quick-group-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.quick-group-head strong { font-size: 13px; }
+
+.quick-group-head .tag.small {
+  margin: 0;
+  padding: 1px 6px;
+  font-size: 10.5px;
+}
+
+.quick-editors {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.quick-field {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.quick-label {
+  font-size: 10.5px;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.quick-gauge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+}
+
+.quick-gauge-value {
+  min-width: 48px;
+  text-align: center;
+  font-size: 22px;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.15;
+}
+
+.quick-gauge-value.is-empty { color: var(--muted); }
+
+.qstep {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 24px;
+  padding: 0;
+  border: 1px solid var(--line-strong);
+  border-radius: 5px;
+  background: var(--surface);
+  color: var(--brand);
+  font-size: 11px;
+  line-height: 1;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.qstep:hover { background: var(--brand-weak); border-color: var(--brand); }
+
+.quick-digits {
+  display: flex;
+  align-items: flex-start;
+  gap: 5px;
+}
+
+.quick-int {
+  padding-top: 22px;
+  font-size: 20px;
+  font-variant-numeric: tabular-nums;
+}
+
+.q-digit {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+}
+
+.q-digit strong {
+  width: 22px;
+  text-align: center;
+  font-size: 23px;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.15;
+}
+
+.q-digit.is-empty strong { color: var(--muted); }
+
+.q-digit .qstep { width: 30px; height: 22px; font-size: 10px; }
+
+.q-digit-label {
+  margin-top: 1px;
+  font-size: 9.5px;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.quick-apply {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin: 16px 0 0;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface);
+}
+
+.quick-apply-hint {
+  flex: 1;
+  min-width: 220px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+@media (max-width: 760px) {
+  .quick-groups { grid-template-columns: 1fr; }
+  .quick-editors { gap: 10px; }
+  .quick-apply { justify-content: stretch; }
+  .quick-apply .btn { flex: 1; }
+}
+
+@media (max-width: 380px) {
+  .qstep { width: 30px; height: 23px; }
+  .q-digit .qstep { width: 27px; height: 21px; }
+  .q-digit strong { width: 20px; font-size: 21px; }
+  .quick-int { font-size: 18px; }
+  .quick-gauge-value { font-size: 20px; }
 }
 
 /* ---------------------------------------------------------------- 指标 */
@@ -1589,6 +1852,7 @@ body.furnace-mode .app-shell { padding-top: 8px; }
         <li>进炉子页默认暂停，点中间大按钮「开始识别」后才接收识别读数；再点变成「暂停识别」。</li>
         <li>指定起点：点下面组内任意一块表，再点「开始识别」，就从这块开始；识别中点击某格会自动暂停。</li>
         <li>「上一组 / 下一组」在大按钮两侧；下一行是「跳过（送检）」和「剔除本块」。</li>
+        <li><b>日常快捷更新</b>：首页「手动快捷输入」→ 粘贴方式1文本 → 选炉膛 → 每组最高表位号和读数用箭头调 → 应用到当前数据；只更新最高表，其他表读数保留。</li>
         <li>点格子输入读数；<b>回车</b>跳到下一块，<b>方向键</b>按位置跳格，<b>X</b> 剔除当前读数，<b>Esc</b> 退出输入框。</li>
         <li>读数支持全角数字、带单位（0.170 MPa）、逗号小数点。</li>
         <li>识别模块识别到一个读数就调用一次 <code>GaugeApp.pushReading(0.170)</code>，会顺序填入当前识别位置；也可以点「识别填入」粘贴一批结果。</li>
@@ -2120,6 +2384,47 @@ body.furnace-mode .app-shell { padding-top: 8px; }
       cell.ex = false;
     }
     return cell;
+  }
+
+  /** 把“快捷最高表”更新写回 batch：只改指定表，旧最高表若换位则清空，其他表保留 */
+  function applyQuickUpdate(batch, updates) {
+    var updated = 0;
+    var warnings = [];
+    (updates || []).forEach(function (u) {
+      var f = furnaceById(batch, u && u.id);
+      if (!f) return;
+      if (u.side && SIDES.indexOf(u.side) >= 0) setSide(batch, f.id, u.side);
+      (u.groups || []).forEach(function (item) {
+        if (!item || item.gauge == null || item.value == null) return;
+        var g = Number(item.group);
+        if (!f.cells[g] || !isGroupInScope(f, g)) return;
+        var idx = Number(item.gauge) - 1;
+        if (!(idx >= 0 && idx < f.perGroup)) {
+          warnings.push({ id: f.id, group: g, msg: '表号超出范围，已跳过' });
+          return;
+        }
+        var value = Number(item.value);
+        if (!isFinite(value)) return;
+
+        var before = groupStat(f, g);
+        if (before.maxIndex >= 0 && before.maxIndex !== idx) {
+          setValue(batch, f.id, g, before.maxIndex, null);
+        }
+        setValue(batch, f.id, g, idx, value);
+        setExcluded(batch, f.id, g, idx, false);
+        updated++;
+
+        var after = groupStat(f, g);
+        if (after.maxIndex >= 0 && after.maxIndex !== idx) {
+          warnings.push({
+            id: f.id,
+            group: g,
+            msg: '本组其他表读数更高（' + (after.maxIndex + 1) + '#），快捷最高表可能不对'
+          });
+        }
+      });
+    });
+    return { updated: updated, warnings: warnings };
   }
 
   function setHeader(batch, id, ch, value) {
@@ -2892,6 +3197,7 @@ body.furnace-mode .app-shell { padding-top: 8px; }
     setValue: setValue,
     setExcluded: setExcluded,
     setSkipped: setSkipped,
+    applyQuickUpdate: applyQuickUpdate,
     setHeader: setHeader,
     clearGroup: clearGroup,
     clearFurnace: clearFurnace,
@@ -3524,6 +3830,7 @@ body.furnace-mode .app-shell { padding-top: 8px; }
   var deferredInstall = null;
   var convText = '';
   var conv = null;
+  var quick = { text: '', model: null, issues: [], message: '', applyIssues: [] };
   var saveTimer = null;
   var storageOk = true;
   var warnedStorage = false;
@@ -3641,6 +3948,8 @@ body.furnace-mode .app-shell { padding-top: 8px; }
   function render() {
     if (ui.view === 'convert') {
       renderConverter();
+    } else if (ui.view === 'quick') {
+      renderQuick();
     } else if (ui.view === 'furnace' && currentFurnace()) {
       renderFurnace();
     } else {
@@ -3723,6 +4032,7 @@ body.furnace-mode .app-shell { padding-top: 8px; }
       ]),
       el('div', { class: 'page-actions' }, [
         el('button', { class: 'btn', type: 'button', text: '导出文丘里压力', onclick: openExport }),
+        el('button', { class: 'btn', type: 'button', id: 'btnQuick', text: '手动快捷输入', onclick: openQuick }),
         el('button', { class: 'btn primary', type: 'button', id: 'btnRatioHome', text: '绝压比计算', onclick: openRatioCalc }),
         canInstall() ? el('button', { class: 'btn install-btn', type: 'button', id: 'btnInstall', text: '安装到桌面', onclick: installPwa }) : null
       ])
@@ -3731,6 +4041,318 @@ body.furnace-mode .app-shell { padding-top: 8px; }
     var grid = el('div', { class: 'furnace-grid' });
     st.furnaces.forEach(function (fs) { grid.appendChild(furnaceCard(fs)); });
     host.appendChild(grid);
+  }
+
+  function openQuick() {
+    stopCamera();
+    ui.view = 'quick';
+    if (!quick.text && C.hasBatchData(batch)) {
+      quick.text = C.exportMode1(batch);
+      parseQuick(true);
+    } else if (quick.text && !quick.model) {
+      parseQuick(true);
+    }
+    render();
+    scrollTop();
+  }
+
+  function quickDigits(value) {
+    var milli = value == null ? 0 : Math.round(value * 1000);
+    milli = Math.max(0, Math.min(400, milli));
+    return [Math.floor(milli / 100), Math.floor(milli / 10) % 10, milli % 10];
+  }
+
+  function parseQuick(silent) {
+    var ta = $('#quickText');
+    if (ta) quick.text = ta.value;
+    var res = C.parseMode1(quick.text || '');
+    quick.issues = res.issues || [];
+    quick.model = (res.furnaces || []).map(function (pf) {
+      var bf = C.furnaceById(batch, pf.id);
+      return {
+        id: pf.id,
+        label: pf.label,
+        side: pf.side || 'full',
+        perGroup: bf ? bf.perGroup : 12,
+        ambiguous: !!pf.ambiguous,
+        rows: (pf.rawLines || []).map(function (r) {
+          return {
+            gauge: r.gauge == null ? null : Number(r.gauge),
+            value: r.value == null ? null : Number(r.value)
+          };
+        })
+      };
+    });
+    quick.message = '';
+    quick.applyIssues = [];
+    if (!silent) renderQuick();
+  }
+
+  function loadQuickCurrent() {
+    if (!C.hasBatchData(batch)) {
+      toast('当前还没有读数，先粘贴方式1文本', 'warn', 2400);
+      return;
+    }
+    quick.text = C.exportMode1(batch);
+    parseQuick(false);
+    toast('已载入当前读数', 'ok', 1600);
+  }
+
+  function clearQuick() {
+    quick.text = '';
+    quick.model = null;
+    quick.issues = [];
+    quick.message = '';
+    quick.applyIssues = [];
+    renderQuick();
+  }
+
+  function quickFind(id) {
+    var out = null;
+    (quick.model || []).forEach(function (f) { if (f.id === String(id)) out = f; });
+    return out;
+  }
+
+  function quickStepBtn(text, label, fn) {
+    return el('button', {
+      class: 'qstep', type: 'button', text: text,
+      title: label, 'aria-label': label,
+      onclick: fn
+    });
+  }
+
+  function stepQuickGauge(id, rowIndex, delta) {
+    var f = quickFind(id);
+    if (!f || !f.rows[rowIndex]) return;
+    var row = f.rows[rowIndex];
+    var pg = f.perGroup;
+    if (row.gauge == null) row.gauge = delta > 0 ? 1 : pg;
+    else row.gauge = Math.max(1, Math.min(pg, row.gauge + delta));
+    var hadNotice = quick.message || (quick.applyIssues && quick.applyIssues.length);
+    quick.message = '';
+    quick.applyIssues = [];
+    if (hadNotice) renderQuick();
+    else refreshQuickCard(id, rowIndex);
+  }
+
+  function stepQuickDigit(id, rowIndex, pos, delta) {
+    var f = quickFind(id);
+    if (!f || !f.rows[rowIndex]) return;
+    var row = f.rows[rowIndex];
+    if (row.gauge == null) row.gauge = 1;
+    var milli = row.value == null ? 0 : Math.round(row.value * 1000);
+    var step = pos === 0 ? 100 : pos === 1 ? 10 : 1;
+    milli = Math.max(0, Math.min(400, milli + delta * step));
+    row.value = milli / 1000;
+    var hadNotice = quick.message || (quick.applyIssues && quick.applyIssues.length);
+    quick.message = '';
+    quick.applyIssues = [];
+    if (hadNotice) renderQuick();
+    else refreshQuickCard(id, rowIndex);
+  }
+
+  function quickSideBtn(f, side) {
+    return el('button', {
+      class: 'seg-btn' + (f.side === side ? ' active' : ''),
+      type: 'button', text: side + '炉膛',
+      onclick: function () {
+        if (f.side === side) return;
+        f.side = side;
+        quick.message = '';
+        quick.applyIssues = [];
+        renderQuick();
+      }
+    });
+  }
+
+  function quickField(label, body, extraClass) {
+    return el('div', { class: 'quick-field' + (extraClass ? ' ' + extraClass : '') }, [
+      el('span', { class: 'quick-label', text: label }),
+      body
+    ]);
+  }
+
+  function quickGroup(f, row, k) {
+    var g = f.side === 'B' ? 4 + k : f.side === 'A' ? k : k;
+    var chamber = C.chamberOf(g);
+    var empty = row.gauge == null || row.value == null;
+    var digits = quickDigits(row.value);
+
+    var gaugeBox = el('div', { class: 'quick-gauge' }, [
+      quickStepBtn('▲', '增大最高表位号', function () { stepQuickGauge(f.id, k, 1); }),
+      el('strong', {
+        class: 'quick-gauge-value' + (row.gauge == null ? ' is-empty' : ''),
+        text: row.gauge == null ? '—' : row.gauge + '#'
+      }),
+      quickStepBtn('▼', '减小最高表位号', function () { stepQuickGauge(f.id, k, -1); })
+    ]);
+
+    var digitWrap = el('div', { class: 'quick-digits' });
+    digitWrap.appendChild(el('span', { class: 'quick-int', text: '0.' }));
+    digits.forEach(function (d, pos) {
+      var label = ['十分位', '百分位', '千分位'][pos];
+      digitWrap.appendChild(el('div', { class: 'q-digit' + (row.value == null ? ' is-empty' : '') }, [
+        quickStepBtn('▲', '增加' + label, function () { stepQuickDigit(f.id, k, pos, 1); }),
+        el('strong', { text: String(d) }),
+        quickStepBtn('▼', '减少' + label, function () { stepQuickDigit(f.id, k, pos, -1); }),
+        el('span', { class: 'q-digit-label', text: label })
+      ]));
+    });
+
+    var readBox = el('div', { class: 'quick-field' }, [
+      el('span', { class: 'quick-label', text: '最高读数' }),
+      digitWrap
+    ]);
+    readBox.title = '当前读数 ' + (row.value == null ? '—' : row.value.toFixed(3));
+
+    return el('div', {
+      class: 'quick-group' + (empty ? ' is-empty' : ''),
+      'data-quick-id': f.id,
+      'data-quick-row': k
+    }, [
+      el('div', { class: 'quick-group-head' }, [
+        el('strong', { text: '第' + (g + 1) + '组' }),
+        el('span', { class: 'tag small', text: chamber + '炉膛' })
+      ]),
+      el('div', { class: 'quick-editors' }, [
+        quickField('最高表位号', gaugeBox),
+        readBox
+      ])
+    ]);
+  }
+
+  function refreshQuickCard(id, rowIndex) {
+    var f = quickFind(id);
+    if (!f || !f.rows[rowIndex]) { renderQuick(); return; }
+    var old = document.querySelector('.quick-group[data-quick-id="' + id + '"][data-quick-row="' + rowIndex + '"]');
+    if (!old) { renderQuick(); return; }
+    old.replaceWith(quickGroup(f, f.rows[rowIndex], rowIndex));
+  }
+
+  function quickFurnace(f) {
+    var head = el('div', { class: 'quick-f-head' }, [
+      el('h3', { text: f.label })
+    ]);
+    if (f.rows.length === 4) {
+      head.appendChild(el('div', { class: 'seg', role: 'group', 'aria-label': '炉膛选择' }, [
+        quickSideBtn(f, 'A'),
+        quickSideBtn(f, 'B')
+      ]));
+      if (f.ambiguous) head.appendChild(el('span', { class: 'tag', text: '文本未写炉膛，请选择 A/B' }));
+    } else {
+      head.appendChild(el('span', { class: 'tag', text: '整台（A+B）' }));
+    }
+
+    var grid = el('div', { class: 'quick-groups' });
+    f.rows.forEach(function (row, k) { grid.appendChild(quickGroup(f, row, k)); });
+
+    return el('section', { class: 'quick-furnace' }, [head, grid]);
+  }
+
+  function quickIssuesPanel() {
+    var box = el('div', { class: 'quick-issues' });
+    quick.issues.forEach(function (it) {
+      box.appendChild(el('div', { class: 'quick-issue ' + (it.level || 'warn') }, [
+        it.line ? el('b', { text: '第 ' + it.line + ' 行：' }) : null,
+        el('span', { text: it.msg })
+      ]));
+    });
+    return box;
+  }
+
+  function quickApplyWarnings() {
+    var box = el('div', { class: 'quick-issues' });
+    quick.applyIssues.forEach(function (w) {
+      var f = C.furnaceById(batch, w.id);
+      box.appendChild(el('div', { class: 'quick-issue warn' }, [
+        el('span', { text: (f ? f.label : w.id) + ' 第 ' + (w.group + 1) + ' 组：' + w.msg })
+      ]));
+    });
+    return box;
+  }
+
+  function applyQuick() {
+    if (!quick.model || !quick.model.length) {
+      toast('还没有可应用的快捷数据', 'warn');
+      return;
+    }
+    if (C.hasBatchData(batch) && !confirm('用快捷数据更新每组最高表？其他表读数保留。')) return;
+
+    var updates = quick.model.map(function (f) {
+      return {
+        id: f.id,
+        side: f.side,
+        groups: f.rows.map(function (row, k) {
+          var g = f.side === 'B' ? 4 + k : f.side === 'A' ? k : k;
+          return { group: g, gauge: row.gauge, value: row.value };
+        })
+      };
+    });
+    var res = C.applyQuickUpdate(batch, updates);
+    persist();
+    quick.message = res.updated
+      ? '已更新 ' + res.updated + ' 组最高表；其他表读数保留。'
+      : '没有可更新的行（空组或表号/读数不完整）。';
+    quick.applyIssues = res.warnings || [];
+    renderQuick();
+    if (res.updated) toast('已更新 ' + res.updated + ' 组', 'ok', 2200);
+    else toast('没有可更新的行', 'warn', 2600);
+  }
+
+  function quickApplyBar() {
+    return el('div', { class: 'quick-apply' }, [
+      el('div', { class: 'quick-apply-hint', text: '只更新每组最高表；其他表读数保留，避免覆盖完整录入。' }),
+      el('button', { class: 'btn primary', type: 'button', id: 'btnQuickApply', text: '应用到当前数据', onclick: applyQuick })
+    ]);
+  }
+
+  function quickPastePanel() {
+    var ta = el('textarea', {
+      class: 'quick-text', id: 'quickText', rows: 7,
+      placeholder: '文丘里压力\n\n3号炉\n1 0.183\n2 0.136\n...'
+    });
+    ta.value = quick.text || '';
+    ta.addEventListener('input', function () { quick.text = ta.value; });
+
+    return el('section', { class: 'quick-paste' }, [
+      el('div', { class: 'quick-paste-head' }, [
+        el('strong', { text: '粘贴「导出文丘里压力」文本' }),
+        el('span', { class: 'hint', text: '空组写 - - 也可以；解析后每组只保留最高表和读数。' })
+      ]),
+      ta,
+      el('div', { class: 'quick-paste-actions' }, [
+        el('button', { class: 'btn primary', type: 'button', id: 'btnQuickParse', text: '解析文本', onclick: function () { parseQuick(false); } }),
+        el('button', { class: 'btn ghost', type: 'button', text: '载入当前数据', onclick: loadQuickCurrent }),
+        el('button', { class: 'btn ghost', type: 'button', text: '清空', onclick: clearQuick })
+      ])
+    ]);
+  }
+
+  function renderQuick() {
+    var host = $('#view');
+    host.innerHTML = '';
+
+    host.appendChild(el('div', { class: 'page-head' }, [
+      el('div', {}, [
+        el('h2', { class: 'page-title', text: '手动快捷输入' }),
+        el('p', { class: 'page-sub', text: '粘贴方式1文本，只更新每组最高表；位号和三个小数位都能上下调。' })
+      ]),
+      el('div', { class: 'page-actions' }, [
+        el('button', { class: 'btn ghost', type: 'button', text: '‹ 返回主界面', onclick: goHome })
+      ])
+    ]));
+
+    host.appendChild(quickPastePanel());
+    if (quick.issues && quick.issues.length) host.appendChild(quickIssuesPanel());
+    if (quick.message) host.appendChild(el('div', { class: 'quick-success', text: quick.message }));
+    if (quick.applyIssues && quick.applyIssues.length) host.appendChild(quickApplyWarnings());
+
+    if (quick.model && quick.model.length) {
+      quick.model.forEach(function (f) { host.appendChild(quickFurnace(f)); });
+      host.appendChild(quickApplyBar());
+    } else {
+      host.appendChild(el('div', { class: 'quick-empty', text: '粘贴文本后点「解析文本」；也可以点「载入当前数据」从现有读数开始。' }));
+    }
   }
 
   function clearFurnaceFromHome(f) {
