@@ -65,6 +65,15 @@ const driver = `
     });
   } else if (view === 'quick') {
     document.getElementById('btnQuick').click();
+  } else if (view === 'quickSelect' || view === 'quickFurnace') {
+    document.getElementById('btnQuick').click();
+    var qt = document.getElementById('quickText');
+    qt.value = '文丘里压力\\n\\n3号炉\\n3 0.199\\n4 0.148\\n3 0.148\\n3 0.148\\n4 0.170\\n3 0.134\\n3 0.148\\n3 0.148';
+    qt.dispatchEvent(new Event('input', { bubbles: true }));
+    document.getElementById('btnQuickParse').click();
+    if (view === 'quickFurnace') {
+      document.querySelector('.quick-select-card').click();
+    }
   }
 })();
 </script>

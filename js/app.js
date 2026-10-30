@@ -19,7 +19,10 @@
   var deferredInstall = null;
   var convText = '';
   var conv = null;
-  var quick = { text: '', model: null, issues: [], message: '', applyIssues: [] };
+  var quick = {
+    text: '', model: null, issues: [], message: '', applyIssues: [],
+    selectedId: null, group: 0, reverse: {}
+  };
   var saveTimer = null;
   var storageOk = true;
   var warnedStorage = false;
@@ -137,6 +140,12 @@
   function render() {
     if (ui.view === 'convert') {
       renderConverter();
+    } else if (ui.view === 'quickImport') {
+      renderQuickImport();
+    } else if (ui.view === 'quickSelect') {
+      renderQuickSelect();
+    } else if (ui.view === 'quickFurnace') {
+      renderQuickFurnace();
     } else if (ui.view === 'quick') {
       renderQuick();
     } else if (ui.view === 'furnace' && currentFurnace()) {
@@ -234,13 +243,8 @@
 
   function openQuick() {
     stopCamera();
-    ui.view = 'quick';
-    if (!quick.text && C.hasBatchData(batch)) {
-      quick.text = C.exportMode1(batch);
-      parseQuick(true);
-    } else if (quick.text && !quick.model) {
-      parseQuick(true);
-    }
+    ui.view = 'quickImport';
+    if (!quick.text && C.hasBatchData(batch)) quick.text = C.exportMode1(batch);
     render();
     scrollTop();
   }
@@ -274,7 +278,16 @@
     });
     quick.message = '';
     quick.applyIssues = [];
-    if (!silent) renderQuick();
+    if (!silent) {
+      if (quick.model.length) {
+        quick.selectedId = null;
+        ui.view = 'quickSelect';
+        render();
+        scrollTop();
+      } else {
+        renderQuickImport();
+      }
+    }
   }
 
   function loadQuickCurrent() {
@@ -293,7 +306,9 @@
     quick.issues = [];
     quick.message = '';
     quick.applyIssues = [];
-    renderQuick();
+    quick.selectedId = null;
+    ui.view = 'quickImport';
+    render();
   }
 
   function quickFind(id) {
@@ -310,6 +325,13 @@
     });
   }
 
+  function renderQuickPage() {
+    if (ui.view === 'quickFurnace') renderQuickFurnace();
+    else if (ui.view === 'quickSelect') renderQuickSelect();
+    else if (ui.view === 'quickImport') renderQuickImport();
+    else renderQuick();
+  }
+
   function stepQuickGauge(id, rowIndex, delta) {
     var f = quickFind(id);
     if (!f || !f.rows[rowIndex]) return;
@@ -320,7 +342,7 @@
     var hadNotice = quick.message || (quick.applyIssues && quick.applyIssues.length);
     quick.message = '';
     quick.applyIssues = [];
-    if (hadNotice) renderQuick();
+    if (hadNotice) renderQuickPage();
     else refreshQuickCard(id, rowIndex);
   }
 
@@ -336,7 +358,7 @@
     var hadNotice = quick.message || (quick.applyIssues && quick.applyIssues.length);
     quick.message = '';
     quick.applyIssues = [];
-    if (hadNotice) renderQuick();
+    if (hadNotice) renderQuickPage();
     else refreshQuickCard(id, rowIndex);
   }
 
@@ -347,9 +369,10 @@
       onclick: function () {
         if (f.side === side) return;
         f.side = side;
+        quick.group = quickFirstGroup(f);
         quick.message = '';
         quick.applyIssues = [];
-        renderQuick();
+        renderQuickFurnace();
       }
     });
   }
@@ -361,7 +384,7 @@
     ]);
   }
 
-  function quickGroup(f, row, k) {
+  function quickGroup(f, row, k, single) {
     var g = f.side === 'B' ? 4 + k : f.side === 'A' ? k : k;
     var chamber = C.chamberOf(g);
     var empty = row.gauge == null || row.value == null;
@@ -395,7 +418,7 @@
     readBox.title = '当前读数 ' + (row.value == null ? '—' : row.value.toFixed(3));
 
     return el('div', {
-      class: 'quick-group' + (empty ? ' is-empty' : ''),
+      class: 'quick-group' + (single ? ' quick-group-single' : '') + (empty ? ' is-empty' : ''),
       'data-quick-id': f.id,
       'data-quick-row': k
     }, [
@@ -412,10 +435,249 @@
 
   function refreshQuickCard(id, rowIndex) {
     var f = quickFind(id);
-    if (!f || !f.rows[rowIndex]) { renderQuick(); return; }
+    if (!f || !f.rows[rowIndex]) { renderQuickPage(); return; }
     var old = document.querySelector('.quick-group[data-quick-id="' + id + '"][data-quick-row="' + rowIndex + '"]');
-    if (!old) { renderQuick(); return; }
-    old.replaceWith(quickGroup(f, f.rows[rowIndex], rowIndex));
+    if (!old) { renderQuickFurnace(); return; }
+    var single = old.classList.contains('quick-group-single');
+    old.replaceWith(quickGroup(f, f.rows[rowIndex], rowIndex, single));
+  }
+
+  function quickFurnaceGroups(f) {
+    var out = [];
+    if (f.side === 'A') {
+      for (var a = 0; a < 4; a++) out.push(a);
+    } else if (f.side === 'B') {
+      for (var b = 4; b < 8; b++) out.push(b);
+    } else {
+      for (var g = 0; g < 8; g++) out.push(g);
+    }
+    return out;
+  }
+
+  function quickFirstGroup(f) {
+    var list = quickFurnaceGroups(f);
+    return quick.reverse[f.id] ? list[list.length - 1] : list[0];
+  }
+
+  function quickGroupRow(f, g) {
+    return f.side === 'full' ? g : f.side === 'A' ? g : g - 4;
+  }
+
+  function quickUpdateFor(f) {
+    return {
+      id: f.id,
+      side: f.side,
+      groups: f.rows.map(function (row, k) {
+        var g = f.side === 'B' ? 4 + k : f.side === 'A' ? k : k;
+        return { group: g, gauge: row.gauge, value: row.value };
+      })
+    };
+  }
+
+  function quickSelectFurnace(id) {
+    var f = quickFind(id);
+    if (!f) return;
+    quick.selectedId = f.id;
+    quick.group = quickFirstGroup(f);
+    quick.message = '';
+    quick.applyIssues = [];
+    ui.view = 'quickFurnace';
+    render();
+    scrollTop();
+  }
+
+  function quickBackToSelect() {
+    quick.message = '';
+    quick.applyIssues = [];
+    ui.view = 'quickSelect';
+    render();
+    scrollTop();
+  }
+
+  function quickBackToImport() {
+    quick.message = '';
+    quick.applyIssues = [];
+    ui.view = 'quickImport';
+    render();
+    scrollTop();
+  }
+
+  function quickDirection(f) {
+    return !!quick.reverse[f.id];
+  }
+
+  function toggleQuickDirection() {
+    var f = quickFind(quick.selectedId);
+    if (!f) return;
+    quick.reverse[f.id] = !quickDirection(f);
+    quick.group = quickFirstGroup(f);
+    quick.message = '';
+    quick.applyIssues = [];
+    renderQuickFurnace();
+  }
+
+  function quickMoveGroup(step) {
+    var f = quickFind(quick.selectedId);
+    if (!f) return;
+    var list = quickFurnaceGroups(f);
+    var pos = list.indexOf(quick.group);
+    var next = pos + step;
+    if (next < 0 || next >= list.length) return;
+    quick.group = list[next];
+    quick.message = '';
+    quick.applyIssues = [];
+    renderQuickFurnace();
+  }
+
+  function quickNotices() {
+    var wrap = el('div');
+    if (quick.message) wrap.appendChild(el('div', { class: 'quick-success', text: quick.message }));
+    if (quick.applyIssues && quick.applyIssues.length) wrap.appendChild(quickApplyWarnings());
+    return wrap;
+  }
+
+  function quickSelectCard(f) {
+    var side = f.side === 'full' ? '整台' : f.side + '炉膛';
+    return el('article', {
+      class: 'quick-select-card', tabindex: 0, role: 'button',
+      'aria-label': f.label + ' 手动快捷输入',
+      onclick: function () { quickSelectFurnace(f.id); }
+    }, [
+      el('div', { class: 'quick-select-head' }, [
+        el('h3', { text: f.label }),
+        el('span', { class: 'tag', text: side }),
+        f.ambiguous ? el('span', { class: 'tag', text: '文本未写炉膛' }) : null
+      ]),
+      el('p', { class: 'quick-select-sub', text: '共 ' + f.rows.length + ' 组 · 每组只改最高表' }),
+      el('span', { class: 'fc-go', text: '进入 ›' })
+    ]);
+  }
+
+  function renderQuickImport() {
+    var host = $('#view');
+    host.innerHTML = '';
+    host.appendChild(el('div', { class: 'page-head' }, [
+      el('div', {}, [
+        el('h2', { class: 'page-title', text: '手动快捷输入' }),
+        el('p', { class: 'page-sub', text: '第 1 步：粘贴「导出文丘里压力」文本，解析后选择要增补的炉子。' })
+      ]),
+      el('div', { class: 'page-actions' }, [
+        quick.model && quick.model.length
+          ? el('button', { class: 'btn', type: 'button', text: '继续选择炉子', onclick: function () { ui.view = 'quickSelect'; render(); } })
+          : null,
+        el('button', { class: 'btn ghost', type: 'button', text: '‹ 返回主界面', onclick: goHome })
+      ])
+    ]));
+    host.appendChild(quickPastePanel());
+    if (quick.issues && quick.issues.length) host.appendChild(quickIssuesPanel());
+    if (!quick.model || !quick.model.length) {
+      host.appendChild(el('div', { class: 'quick-empty', text: '粘贴文本后点「解析文本」；解析成功会进入第 2 步「选择炉子」。' }));
+    }
+  }
+
+  function renderQuickSelect() {
+    if (!quick.model || !quick.model.length) {
+      renderQuickImport();
+      return;
+    }
+    var host = $('#view');
+    host.innerHTML = '';
+    host.appendChild(el('div', { class: 'page-head' }, [
+      el('div', {}, [
+        el('h2', { class: 'page-title', text: '选择需要增补的炉子' }),
+        el('p', { class: 'page-sub', text: '第 2 步：点炉号进入，一次只改一组最高表；改完回这里统一应用。' })
+      ]),
+      el('div', { class: 'page-actions' }, [
+        el('button', { class: 'btn ghost', type: 'button', text: '‹ 返回导入', onclick: quickBackToImport }),
+        el('button', { class: 'btn ghost', type: 'button', text: '返回主界面', onclick: goHome })
+      ])
+    ]));
+    if (quick.message || (quick.applyIssues && quick.applyIssues.length)) {
+      host.appendChild(quickNotices());
+    }
+    if (quick.issues && quick.issues.length) host.appendChild(quickIssuesPanel());
+    var grid = el('div', { class: 'quick-select-grid' });
+    quick.model.forEach(function (f) { grid.appendChild(quickSelectCard(f)); });
+    host.appendChild(grid);
+    host.appendChild(quickApplyBar('全部应用到当前数据'));
+  }
+
+  function renderQuickFurnace() {
+    var f = quickFind(quick.selectedId);
+    if (!f) {
+      quickBackToSelect();
+      return;
+    }
+    var list = quickFurnaceGroups(f);
+    if (list.indexOf(quick.group) < 0) quick.group = quickFirstGroup(f);
+    var pos = list.indexOf(quick.group);
+    var reverse = quickDirection(f);
+    var atStart = reverse ? pos >= list.length - 1 : pos <= 0;
+    var atEnd = reverse ? pos <= 0 : pos >= list.length - 1;
+    var rowIndex = quickGroupRow(f, quick.group);
+    var row = f.rows[rowIndex];
+
+    var host = $('#view');
+    host.innerHTML = '';
+
+    host.appendChild(el('div', { class: 'page-head' }, [
+      el('div', {}, [
+        el('h2', { class: 'page-title', text: f.label + ' · 手动快捷输入' }),
+        el('p', { class: 'page-sub', text: '第 3 步：每组只改最高表，完成一组点「下一组」。' })
+      ]),
+      el('div', { class: 'page-actions' }, [
+        el('button', { class: 'btn ghost', type: 'button', text: '‹ 返回选炉', onclick: quickBackToSelect }),
+        el('button', { class: 'btn ghost', type: 'button', text: '返回主界面', onclick: goHome })
+      ])
+    ]));
+
+    var bar = el('div', { class: 'quick-furnace-bar' }, [
+      el('div', { class: 'quick-progress' }, [
+        el('strong', { text: '第 ' + (quick.group + 1) + ' 组' }),
+        el('span', { text: ' / 共 ' + list.length + ' 组 · ' + C.chamberOf(quick.group) + '炉膛' })
+      ]),
+      el('div', { class: 'quick-bar-actions' }, [
+        f.rows.length === 4
+          ? el('div', { class: 'seg', role: 'group', 'aria-label': '炉膛选择' }, [quickSideBtn(f, 'A'), quickSideBtn(f, 'B')])
+          : el('span', { class: 'tag', text: '整台（A+B）' }),
+        el('button', {
+          class: 'btn quick-reverse' + (reverse ? ' active' : ''),
+          type: 'button', id: 'btnQuickReverse',
+          text: '反向输入：' + (reverse ? '开' : '关'),
+          onclick: toggleQuickDirection
+        })
+      ])
+    ]);
+    host.appendChild(bar);
+
+    if (quick.message || (quick.applyIssues && quick.applyIssues.length)) {
+      host.appendChild(quickNotices());
+    }
+
+    var cardWrap = el('div', { class: 'quick-single-wrap' });
+    cardWrap.appendChild(quickGroup(f, row, rowIndex, true));
+    host.appendChild(cardWrap);
+
+    var nav = el('div', { class: 'quick-nav' }, [
+      el('button', {
+        class: 'btn', type: 'button', id: 'btnQuickPrev',
+        text: '‹ 上一组', disabled: atStart,
+        onclick: function () { quickMoveGroup(reverse ? 1 : -1); }
+      }),
+      el('button', {
+        class: 'btn primary', type: 'button', id: 'btnQuickNext',
+        text: atEnd ? '完成本炉 ›' : '下一组 ›',
+        onclick: atEnd ? quickBackToSelect : function () { quickMoveGroup(reverse ? -1 : 1); }
+      })
+    ]);
+    host.appendChild(nav);
+    host.appendChild(el('div', { class: 'quick-nav-hint', text: reverse ? '反向输入：组 8→1，下一组往编号小的方向走。' : '正序输入：组 1→8，下一组往编号大的方向走。' }));
+
+    host.appendChild(el('div', { class: 'quick-furnace-apply' }, [
+      el('div', { class: 'quick-apply-hint', text: '先改完本炉各组，再应用；其他表读数保留。' }),
+      el('button', { class: 'btn primary', type: 'button', id: 'btnQuickApplyFurnace', text: '应用到本炉', onclick: applyQuickFurnace }),
+      el('button', { class: 'btn ghost', type: 'button', text: '返回选炉', onclick: quickBackToSelect })
+    ]));
   }
 
   function quickFurnace(f) {
@@ -467,31 +729,40 @@
     }
     if (C.hasBatchData(batch) && !confirm('用快捷数据更新每组最高表？其他表读数保留。')) return;
 
-    var updates = quick.model.map(function (f) {
-      return {
-        id: f.id,
-        side: f.side,
-        groups: f.rows.map(function (row, k) {
-          var g = f.side === 'B' ? 4 + k : f.side === 'A' ? k : k;
-          return { group: g, gauge: row.gauge, value: row.value };
-        })
-      };
-    });
+    var updates = quick.model.map(quickUpdateFor);
     var res = C.applyQuickUpdate(batch, updates);
     persist();
     quick.message = res.updated
       ? '已更新 ' + res.updated + ' 组最高表；其他表读数保留。'
       : '没有可更新的行（空组或表号/读数不完整）。';
     quick.applyIssues = res.warnings || [];
-    renderQuick();
+    renderQuickPage();
     if (res.updated) toast('已更新 ' + res.updated + ' 组', 'ok', 2200);
     else toast('没有可更新的行', 'warn', 2600);
   }
 
-  function quickApplyBar() {
+  function applyQuickFurnace() {
+    var f = quickFind(quick.selectedId);
+    if (!f) {
+      toast('没有选中的炉子', 'warn');
+      return;
+    }
+    if (C.hasBatchData(batch) && !confirm('用快捷数据更新 ' + f.label + ' 的最高表？其他表读数保留。')) return;
+    var res = C.applyQuickUpdate(batch, [quickUpdateFor(f)]);
+    persist();
+    quick.message = res.updated
+      ? '已更新 ' + f.label + ' 的 ' + res.updated + ' 组最高表；其他表读数保留。'
+      : '没有可更新的行（空组或表号/读数不完整）。';
+    quick.applyIssues = res.warnings || [];
+    renderQuickFurnace();
+    if (res.updated) toast('已更新 ' + f.label + ' ' + res.updated + ' 组', 'ok', 2200);
+    else toast('没有可更新的行', 'warn', 2600);
+  }
+
+  function quickApplyBar(label) {
     return el('div', { class: 'quick-apply' }, [
       el('div', { class: 'quick-apply-hint', text: '只更新每组最高表；其他表读数保留，避免覆盖完整录入。' }),
-      el('button', { class: 'btn primary', type: 'button', id: 'btnQuickApply', text: '应用到当前数据', onclick: applyQuick })
+      el('button', { class: 'btn primary', type: 'button', id: 'btnQuickApply', text: label || '全部应用到当前数据', onclick: applyQuick })
     ]);
   }
 

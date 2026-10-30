@@ -335,11 +335,11 @@ const driver = `
     await sleep(50);
     ok('右划返回主界面', qa('.furnace-card').length === 4);
 
-    // ---- 手动快捷输入 ----
+    // ---- 手动快捷输入：导入 → 选炉 → 单炉逐组 ----
     q('#btnQuick').click();
     await sleep(40);
-    ok('进入手动快捷输入', q('.page-title').textContent === '手动快捷输入', q('.page-title').textContent);
-    ok('快捷模式自动载入当前读数', qa('.quick-furnace').length >= 1, qa('.quick-furnace').length);
+    ok('进入快捷导入页', q('.page-title').textContent === '手动快捷输入', q('.page-title').textContent);
+    ok('导入页有粘贴框', !!q('#quickText'));
 
     qa('.quick-paste-actions .btn').filter(function (b) { return b.textContent === '清空'; })[0].click();
     await sleep(20);
@@ -348,37 +348,68 @@ const driver = `
     qText.dispatchEvent(new Event('input', { bubbles: true }));
     q('#btnQuickParse').click();
     await sleep(40);
-    ok('快捷解析出 1 台炉 8 组', qa('.quick-furnace').length === 1 && qa('.quick-group').length === 8, qa('.quick-group').length);
-    ok('快捷首组位号 3#', q('.quick-group .quick-gauge-value').textContent === '3#', q('.quick-group .quick-gauge-value').textContent);
+    ok('解析后进入选炉页', q('.page-title').textContent === '选择需要增补的炉子', q('.page-title').textContent);
+    ok('选炉页 1 台炉', qa('.quick-select-card').length === 1, qa('.quick-select-card').length);
 
-    q('.quick-group .quick-gauge .qstep').click();
-    await sleep(20);
-    ok('快捷位号可增加到 4#', q('.quick-group .quick-gauge-value').textContent === '4#', q('.quick-group .quick-gauge-value').textContent);
-    qa('.quick-group .quick-gauge .qstep')[1].click();
-    await sleep(20);
-    ok('快捷位号可减回 3#', q('.quick-group .quick-gauge-value').textContent === '3#', q('.quick-group .quick-gauge-value').textContent);
+    q('.quick-select-card').click();
+    await sleep(40);
+    ok('进入 3号炉手动页', q('.page-title').textContent.indexOf('3号炉') >= 0, q('.page-title').textContent);
+    ok('单炉页只显示一组', qa('.quick-group').length === 1 && !!q('.quick-group-single'), qa('.quick-group').length);
+    ok('单炉页第 1 组', q('.quick-progress strong').textContent === '第 1 组', q('.quick-progress strong').textContent);
+    ok('单炉页首组位号 3#', q('.quick-group-single .quick-gauge-value').textContent === '3#', q('.quick-group-single .quick-gauge-value').textContent);
 
-    qa('.quick-group')[0].querySelectorAll('.q-digit')[2].querySelectorAll('.qstep')[0].click();
+    q('.quick-group-single .quick-gauge .qstep').click();
     await sleep(20);
-    ok('快捷千分位 0.199 → 0.200', qa('.quick-group')[0].querySelectorAll('.quick-field')[1].title.indexOf('0.200') >= 0, qa('.quick-group')[0].querySelectorAll('.quick-field')[1].title);
+    ok('快捷位号可增加到 4#', q('.quick-group-single .quick-gauge-value').textContent === '4#', q('.quick-group-single .quick-gauge-value').textContent);
+    qa('.quick-group-single .quick-gauge .qstep')[1].click();
+    await sleep(20);
+    ok('快捷位号可减回 3#', q('.quick-group-single .quick-gauge-value').textContent === '3#', q('.quick-group-single .quick-gauge-value').textContent);
 
-    q('#btnQuickApply').click();
+    qa('.quick-group-single .q-digit')[2].querySelectorAll('.qstep')[0].click();
+    await sleep(20);
+    ok('快捷千分位 0.199 → 0.200', qa('.quick-group-single .quick-field')[1].title.indexOf('0.200') >= 0, qa('.quick-group-single .quick-field')[1].title);
+
+    q('#btnQuickNext').click();
+    await sleep(30);
+    ok('下一组切到第 2 组', q('.quick-progress strong').textContent === '第 2 组', q('.quick-progress strong').textContent);
+    ok('第 2 组位号 4#', q('.quick-group-single .quick-gauge-value').textContent === '4#', q('.quick-group-single .quick-gauge-value').textContent);
+
+    q('#btnQuickReverse').click();
+    await sleep(30);
+    ok('反向输入已打开', q('#btnQuickReverse').textContent.indexOf('开') >= 0, q('#btnQuickReverse').textContent);
+    ok('反向从第 8 组开始', q('.quick-progress strong').textContent === '第 8 组', q('.quick-progress strong').textContent);
+    q('#btnQuickNext').click();
+    await sleep(30);
+    ok('反向下一组第 7 组', q('.quick-progress strong').textContent === '第 7 组', q('.quick-progress strong').textContent);
+    q('#btnQuickReverse').click();
+    await sleep(30);
+    ok('反向关闭回到第 1 组', q('.quick-progress strong').textContent === '第 1 组', q('.quick-progress strong').textContent);
+
+    q('#btnQuickApplyFurnace').click();
     await sleep(50);
-    ok('快捷应用提示已更新', q('.quick-success') && q('.quick-success').textContent.indexOf('已更新') >= 0, q('.quick-success') ? q('.quick-success').textContent : 'no');
+    ok('单炉应用提示已更新', q('.quick-success') && q('.quick-success').textContent.indexOf('已更新') >= 0, q('.quick-success') ? q('.quick-success').textContent : 'no');
     var qb = window.GaugeApp.getBatch();
     var qf = qb.furnaces.filter(function (x) { return x.id === '3'; })[0];
     ok('快捷写回 3号炉 1组 3# 0.200', qf && qf.cells[0][2] && Math.abs(qf.cells[0][2].v - 0.2) < 1e-9, qf ? JSON.stringify(qf.cells[0][2]) : 'no');
+
+    qa('.page-actions .btn').filter(function (b) { return b.textContent.indexOf('返回选炉') >= 0; })[0].click();
+    await sleep(30);
+    ok('从单炉页返回选炉页', q('.page-title').textContent === '选择需要增补的炉子', q('.page-title').textContent);
+    qa('.page-actions .btn').filter(function (b) { return b.textContent.indexOf('返回导入') >= 0; })[0].click();
+    await sleep(30);
 
     q('#quickText').value = '3号炉\\n1 0.100\\n2 0.200\\n3 0.300\\n4 0.400';
     q('#quickText').dispatchEvent(new Event('input', { bubbles: true }));
     q('#btnQuickParse').click();
     await sleep(30);
-    ok('快捷 4 行出现炉膛选择', !!q('.quick-f-head .seg'), qa('.quick-f-head .seg').length);
-    qa('.quick-f-head .seg-btn').filter(function (b) { return b.textContent === 'B炉膛'; })[0].click();
+    q('.quick-select-card').click();
     await sleep(30);
-    ok('快捷切 B 后从第5组开始', q('.quick-group .quick-group-head strong').textContent === '第5组', q('.quick-group .quick-group-head strong').textContent);
+    ok('快捷 4 行出现炉膛选择', !!q('.quick-bar-actions .seg'), qa('.quick-bar-actions .seg').length);
+    qa('.quick-bar-actions .seg-btn').filter(function (b) { return b.textContent === 'B炉膛'; })[0].click();
+    await sleep(30);
+    ok('快捷切 B 后从第 5 组开始', q('.quick-progress strong').textContent === '第 5 组', q('.quick-progress strong').textContent);
 
-    q('.page-actions .btn').click();
+    qa('.page-actions .btn').filter(function (b) { return b.textContent === '返回主界面'; })[0].click();
     await sleep(30);
     ok('快捷返回首页', qa('.furnace-card').length === 4);
   } catch (err) {
