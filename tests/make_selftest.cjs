@@ -370,7 +370,7 @@ const driver = `
     q('#btnQuickManual').click();
     await sleep(30);
     ok('无导入也显示全部 4 台炉', qa('.quick-select-card').length === 4, qa('.quick-select-card').length);
-    ok('无导入全部标为手动', qa('.quick-select-card.is-empty').length === 4, qa('.quick-select-card.is-empty').length);
+    ok('直接手动会带入已有炉子数据', qa('.quick-select-card:not(.is-empty)').length >= 1, qa('.quick-select-card:not(.is-empty)').length);
     qa('.page-actions .btn').filter(function (b) { return b.textContent.indexOf('返回导入') >= 0; })[0].click();
     await sleep(30);
 
@@ -381,16 +381,14 @@ const driver = `
     qText.dispatchEvent(new Event('input', { bubbles: true }));
     q('#btnQuickParse').click();
     await sleep(40);
-    ok('解析后进入选炉页', q('.page-title').textContent === '选择需要增补的炉子', q('.page-title').textContent);
+    ok('解析后进入手动选炉页', q('.page-title').textContent === '手动快捷录入 · 选择炉子', q('.page-title').textContent);
     ok('选炉页显示全部 4 台炉', qa('.quick-select-card').length === 4, qa('.quick-select-card').length);
     ok('未导入的 3 台有区分', qa('.quick-select-card.is-empty').length === 3, qa('.quick-select-card.is-empty').length);
     ok('选炉页底部有导出/返回/绝压比按钮', qa('.quick-select-footer .btn').length === 3, qa('.quick-select-footer .btn').length);
     var before2 = window.GaugeApp.getBatch().furnaces[0].cells[0][0].v;
-    q('#btnQuickApply').click();
-    await sleep(50);
     var qbSel = window.GaugeApp.getBatch();
     ok('未输入的 2号炉不写默认 1#/0.000', qbSel.furnaces[0].cells[0][0].v === before2, qbSel.furnaces[0].cells[0][0].v + ' vs ' + before2);
-    ok('导入的 3号炉写回快捷数据', qbSel.furnaces[1].cells[0][2].v === 0.199, qbSel.furnaces[1].cells[0][2].v);
+    ok('导入的 3号炉自动写入快捷数据', qbSel.furnaces[1].cells[0][2].v === 0.199, qbSel.furnaces[1].cells[0][2].v);
 
     q('.quick-select-card[data-quick-furnace="3"]').click();
     await sleep(40);
@@ -461,16 +459,13 @@ const driver = `
     await sleep(30);
     ok('反向关闭回到第 1 组', q('.quick-progress strong').textContent === '第 1 组', q('.quick-progress strong').textContent);
 
-    q('#btnQuickApplyFurnace').click();
-    await sleep(50);
-    ok('单炉应用提示已更新', q('.quick-success') && q('.quick-success').textContent.indexOf('已更新') >= 0, q('.quick-success') ? q('.quick-success').textContent : 'no');
     var qb = window.GaugeApp.getBatch();
     var qf = qb.furnaces.filter(function (x) { return x.id === '3'; })[0];
-    ok('快捷写回 3号炉 1组 3# 0.200', qf && qf.cells[0][2] && Math.abs(qf.cells[0][2].v - 0.2) < 1e-9, qf ? JSON.stringify(qf.cells[0][2]) : 'no');
+    ok('快捷自动写入 3号炉 1组 3# 0.200', qf && qf.cells[0][2] && Math.abs(qf.cells[0][2].v - 0.2) < 1e-9, qf ? JSON.stringify(qf.cells[0][2]) : 'no');
 
     qa('.page-actions .btn').filter(function (b) { return b.textContent.indexOf('返回选炉') >= 0; })[0].click();
     await sleep(30);
-    ok('从单炉页返回选炉页', q('.page-title').textContent === '选择需要增补的炉子', q('.page-title').textContent);
+    ok('从单炉页返回选炉页', q('.page-title').textContent === '手动快捷录入 · 选择炉子', q('.page-title').textContent);
     qa('.page-actions .btn').filter(function (b) { return b.textContent.indexOf('返回导入') >= 0; })[0].click();
     await sleep(30);
 
@@ -496,10 +491,8 @@ const driver = `
     await sleep(30);
     ok('整台空白第 2 组跟随 0.001', q('.quick-progress strong').textContent === '第 2 组' && qa('.quick-group-single .quick-field')[1].title.indexOf('0.001') >= 0, q('.quick-progress strong').textContent + ' / ' + qa('.quick-group-single .quick-field')[1].title);
 
-    q('#btnQuickApplyFurnace').click();
-    await sleep(50);
     var hb = window.GaugeApp.getBatch().furnaces.filter(function (x) { return x.id === '3'; })[0];
-    ok('半台切整台后空白组写回 0.001', hb && hb.cells[0][0].v === 0.001 && hb.cells[1][0].v === 0.001 && hb.cells[2][0].v === 0.001, hb ? JSON.stringify([hb.cells[0][0], hb.cells[1][0], hb.cells[2][0]]) : 'no');
+    ok('半台切整台后空白组自动写回 0.001', hb && hb.cells[0][0].v === 0.001 && hb.cells[1][0].v === 0.001 && hb.cells[2][0].v === 0.001, hb ? JSON.stringify([hb.cells[0][0], hb.cells[1][0], hb.cells[2][0]]) : 'no');
     ok('半台导入的 B 组保留 0.100', hb && hb.cells[4][0].v === 0.1, hb ? JSON.stringify(hb.cells[4][0]) : 'no');
 
     qa('.page-actions .btn').filter(function (b) { return b.textContent.indexOf('返回选炉') >= 0; })[0].click();
@@ -577,6 +570,35 @@ const driver = `
     qa('.page-actions .btn').filter(function (b) { return b.textContent.indexOf('返回炉子列表') >= 0; })[0].click();
     await sleep(30);
     ok('绝压比返回首页', qa('.mode-card').length === 2);
+
+    // ---- 两种录入方式界面一致：清空/进度/炉膛 ----
+    q('#btnVisual').click();
+    await sleep(30);
+    ok('视觉卡片有整台/A/B', qa('.furnace-card .fc-side .seg-btn').length === 12, qa('.furnace-card .fc-side .seg-btn').length);
+    var firstVisualCard = q('.furnace-card');
+    Array.from(firstVisualCard.querySelectorAll('.fc-side .seg-btn')).forEach(function (b) { if (b.textContent === 'A炉膛') b.click(); });
+    await sleep(30);
+    ok('视觉卡片可切 A炉膛', window.GaugeApp.getBatch().furnaces[0].side === 'A', window.GaugeApp.getBatch().furnaces[0].side);
+    ok('视觉页有一键清空', qa('.page-actions .btn').some(function (b) { return b.textContent.indexOf('一键清空所有数据') >= 0; }));
+
+    q('#btnQuick').click();
+    await sleep(30);
+    q('#btnQuickManual').click();
+    await sleep(30);
+    var progressText = q('.quick-select-card .quick-select-sub').textContent;
+    ok('手动卡片显示组进度', progressText.indexOf('已录 ') >= 0 && progressText.indexOf(' 组') >= 0, progressText);
+    ok('手动每台可单独清空', qa('.quick-select-card .fc-clear').length === 4, qa('.quick-select-card .fc-clear').length);
+    ok('手动页有一键清空', qa('.page-actions .btn').some(function (b) { return b.textContent.indexOf('一键清空所有数据') >= 0; }));
+    q('.quick-select-card[data-quick-furnace="3"] .fc-clear').click();
+    await sleep(40);
+    var afterClear3 = window.GaugeApp.getBatch();
+    ok('手动单独清空 3号炉', afterClear3.furnaces[1].cells.every(function (row) { return row.every(function (c) { return c.v == null; }); }), JSON.stringify(afterClear3.furnaces[1].cells[0][0]));
+    var clearedProgress = q('.quick-select-card[data-quick-furnace="3"] .quick-select-sub').textContent;
+    ok('清空后进度重新计算', clearedProgress.indexOf('已录 0/') >= 0, clearedProgress);
+    qa('.page-actions .btn').filter(function (b) { return b.textContent.indexOf('一键清空所有数据') >= 0; })[0].click();
+    await sleep(50);
+    var afterClearAll = window.GaugeApp.getBatch();
+    ok('手动一键清空所有数据', afterClearAll.furnaces.every(function (f) { return f.cells.every(function (row) { return row.every(function (c) { return c.v == null; }); }); }));
   } catch (err) {
     results.push('FAIL 测试异常 :: ' + err.message);
   }

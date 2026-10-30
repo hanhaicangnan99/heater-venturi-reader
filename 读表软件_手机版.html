@@ -2250,7 +2250,7 @@ body.furnace-mode .app-shell { padding-top: 8px; }
 
   <footer class="foot">
     <span id="saveHint">自动保存已开启</span>
-    <span class="foot-version" id="appVersion">v2.31.0</span>
+    <span class="foot-version" id="appVersion">v2.32.0</span>
     <span class="foot-note">数据只存本机浏览器，请定期导出备份 · 识别模块接口：GaugeApp.pushReading(读数)</span>
   </footer>
 
@@ -2331,6 +2331,7 @@ body.furnace-mode .app-shell { padding-top: 8px; }
         <li>顶部填日期、时间、记录人；首页选炉子（2# / 3# / 4# / 5#）→ 逐组录入 → 「下一组」→「完成本炉」回主界面。</li>
         <li>2#～5# 炉都录完后，回主界面点「<b>绝压比计算</b>」，填集合管压力生成方式2。</li>
         <li>主界面只选两种并行录入方式：<b>视觉录入</b>（进入全部 2/3/4/5 号炉，逐块录原始读数）或<b>手动快捷录入</b>（只记每组最高表）。</li>
+        <li>视觉炉子列表每台卡片可直接选「整台 / A炉膛 / B炉膛」；每台可单独「清空」，页头有「一键清空所有数据」。</li>
         <li>每台炉卡片左下角有「<b>清空</b>」，只清空这一台炉的读数。</li>
         <li>每台炉 8 组：<b>第 1～4 组 = A 炉膛</b>，<b>第 5～8 组 = B 炉膛</b>。右上角可切换「整台 / A炉膛 / B炉膛」，只测半台时选 A 或 B。</li>
         <li>2号炉每组 2 块表（每行一组）；3/4/5号炉每组 12 块表（每行 6 块，两行一组）。</li>
@@ -2342,7 +2343,7 @@ body.furnace-mode .app-shell { padding-top: 8px; }
         <li>进炉子页默认暂停，点中间大按钮「开始识别」后才接收识别读数；再点变成「暂停识别」。</li>
         <li>指定起点：点下面组内任意一块表，再点「开始识别」，就从这块开始；识别中点击某格会自动暂停。</li>
         <li>「上一组 / 下一组」在大按钮两侧；下一行是「跳过（送检）」和「剔除本块」。</li>
-        <li><b>日常快捷更新（视觉识别备用）</b>：首页「手动快捷录入」→ 导入页粘贴方式1并解析，或「不导入，直接手动」→ 选炉页始终显示全部 2/3/4/5 号炉，每台可选整台/A/B 录入范围；导出和绝压比改为多页，先选炉子（4台全列出、不受数据限制、每台可选整台/A/B）再预览/计算；已导入的正常显示、未导入的虚线显示但也能点 → 单炉页一次改一组，顶部始终可选「整台/A炉膛/B炉膛」，点「下一组」；选炉页应用按钮下方有「导出文丘里压力」「返回主界面」「计算绝压比」；未导入的每组默认 1#、第一组 0.000，没改过的组跟随最近改过的那组；导入半台切整台时，空白组也跟随最近改过的组，被跟随的组会写回；位号和读数用大箭头调，位号旁有滑杆可快速拖动，位号到 1# 按↓回最大，读数到 0.000 按↓按位循环（千分位 0→9 等）；可开「反向输入」；最后「应用到本炉」。只更新最高表，其他表读数保留。</li>
+        <li><b>日常快捷更新（视觉识别备用）</b>：首页「手动快捷录入」→ 导入页粘贴方式1并解析，或「不导入，直接手动」→ 选炉页始终显示全部 2/3/4/5 号炉，每台可选整台/A/B 录入范围；导出和绝压比改为多页，先选炉子（4台全列出、不受数据限制、每台可选整台/A/B）再预览/计算；已导入的正常显示、未导入的虚线显示但也能点 → 单炉页一次改一组，顶部始终可选「整台/A炉膛/B炉膛」，点「下一组」；选炉页显示「已录 X/8 组」，可清空本炉或一键清空所有数据，底部有「导出文丘里压力」「返回主界面」「计算绝压比」；未导入的每组默认 1#、第一组 0.000，没改过的组跟随最近改过的那组；导入半台切整台时，空白组也跟随最近改过的组，被跟随的组会写回；位号和读数用大箭头调，位号旁有滑杆可快速拖动，位号到 1# 按↓回最大，读数到 0.000 按↓按位循环（千分位 0→9 等）；可开「反向输入」；改动立即保存，不需要应用。只更新最高表，其他表读数保留。</li>
         <li>点格子输入读数；<b>回车</b>跳到下一块，<b>方向键</b>按位置跳格，<b>X</b> 剔除当前读数，<b>Esc</b> 退出输入框。</li>
         <li>读数支持全角数字、带单位（0.170 MPa）、逗号小数点。</li>
         <li>识别模块识别到一个读数就调用一次 <code>GaugeApp.pushReading(0.170)</code>，会顺序填入当前识别位置；也可以点「识别填入」粘贴一批结果。</li>
@@ -2377,7 +2378,7 @@ body.furnace-mode .app-shell { padding-top: 8px; }
         <li>手机只传一个文件：用 <code>读表软件_手机版.html</code>，CSS/JS 已内联；只传 <code>index.html</code> 会缺 <code>js/</code>、<code>assets/</code>，页面会空白或没样式。</li>
         <li>直接打开本地文件时，录入、导入导出、绝压比计算都能用；手机浏览器不允许 <code>file://</code> 调用摄像头。</li>
         <li>要实时相机：页面必须在 <code>https://</code> 开头的网址下；<code>file://</code> 和 <code>http://192.168…</code> 都不允许调用摄像头。可把单文件放到 GitHub Pages / Netlify / 公司 HTTPS 服务器，或用 App 包壳；不要用微信/QQ 的文件预览打开。</li>
-        <li>如果还显示旧界面：打开 <code>https://hanhaicangnan99.github.io/heater-venturi-reader/?v=2.31.0</code> 一次，或清除站点缓存；页脚会显示当前版本 <code>v2.31.0</code>。</li>
+        <li>如果还显示旧界面：打开 <code>https://hanhaicangnan99.github.io/heater-venturi-reader/?v=2.32.0</code> 一次，或清除站点缓存；页脚会显示当前版本 <code>v2.32.0</code>。</li>
       </ul>
       <h3>数据</h3>
       <ul>
@@ -4597,6 +4598,7 @@ body.furnace-mode .app-shell { padding-top: 8px; }
       ]),
       el('div', { class: 'page-actions' }, [
         el('button', { class: 'btn ghost', type: 'button', text: '‹ 录入方式', onclick: goHome }),
+        el('button', { class: 'btn ghost danger-text', type: 'button', text: '一键清空所有数据', onclick: function () { clearAllData('visual'); } }),
         el('button', { class: 'btn', type: 'button', id: 'btnQuick', text: '手动快捷录入', onclick: openQuick })
       ])
     ]));
@@ -4608,6 +4610,8 @@ body.furnace-mode .app-shell { padding-top: 8px; }
   function openQuick() {
     stopCamera();
     ui.view = 'quickImport';
+    quick.model = null;
+    quick.selectedId = null;
     if (!quick.text && C.hasBatchData(batch)) quick.text = C.exportMode1(batch);
     render();
     scrollTop();
@@ -4701,6 +4705,7 @@ body.furnace-mode .app-shell { padding-top: 8px; }
     });
     quick.message = '';
     quick.applyIssues = [];
+    quickCommitAll();
     if (!silent) {
       if (parsed.length) {
         quick.selectedId = null;
@@ -4770,6 +4775,7 @@ body.furnace-mode .app-shell { padding-top: 8px; }
       if (row.gauge > pg) row.gauge = 1;
     }
     quickRememberHalfRow(f, rowIndex);
+    quickCommit(f);
     var hadNotice = quick.message || (quick.applyIssues && quick.applyIssues.length);
     quick.message = '';
     quick.applyIssues = [];
@@ -4804,6 +4810,7 @@ body.furnace-mode .app-shell { padding-top: 8px; }
       }
     });
     quickRememberHalfRow(f, rowIndex);
+    quickCommit(f);
     var hadNotice = quick.message || (quick.applyIssues && quick.applyIssues.length);
     quick.message = '';
     quick.applyIssues = [];
@@ -4884,6 +4891,7 @@ body.furnace-mode .app-shell { padding-top: 8px; }
     row.active = true;
     row.synced = false;
     quickRememberHalfRow(f, g);
+    quickCommit(f);
     var card = document.querySelector('.quick-group[data-quick-id="' + id + '"][data-quick-row="' + g + '"]');
     if (card) {
       var v = card.querySelector('.quick-gauge-value');
@@ -5069,9 +5077,76 @@ body.furnace-mode .app-shell { padding-top: 8px; }
     return wrap;
   }
 
+  function quickCommit(f) {
+    if (!f) return;
+    C.applyQuickUpdate(batch, [quickUpdateFor(f)]);
+    persist();
+  }
+
+  function quickCommitAll() {
+    if (!quick.model) return;
+    var updates = [];
+    quick.model.forEach(function (f) {
+      var u = quickUpdateFor(f);
+      if (u.groups.length) updates.push(u);
+    });
+    if (updates.length) C.applyQuickUpdate(batch, updates);
+    persist();
+  }
+
+  function quickActiveGroups(f) {
+    var scope = quickFurnaceGroups(f);
+    return scope.filter(function (g) {
+      var row = f.rows[g];
+      return row && row.active && !row.placeholder;
+    }).length;
+  }
+
+  function quickResetFurnaceModel(id) {
+    if (!quick.model) return;
+    var f = quickFind(id);
+    if (!f) return;
+    f.rows = quickEmptyRows(8);
+    f.side = 'full';
+    f.imported = false;
+    f.halfRows = null;
+    f.halfSide = null;
+  }
+
+  function clearAllData(where) {
+    if (!confirm('清空所有炉子的全部数据？此操作不可撤销。')) return;
+    batch.furnaces.forEach(function (f) { C.clearFurnace(batch, f.id); });
+    quick.model = null;
+    quick.selectedId = null;
+    quick.text = '';
+    quick.message = '';
+    quick.applyIssues = [];
+    persist();
+    if (where === 'quick') {
+      quickEnsureAllFurnaces();
+      renderQuickSelect();
+    } else {
+      renderVisualSelect();
+    }
+    toast('已清空所有炉子数据', 'ok', 1800);
+  }
+
+  function clearOneFurnace(id, where) {
+    var bf = C.furnaceById(batch, id);
+    if (!bf) return;
+    if (!confirm('清空 ' + bf.label + ' 的全部数据？')) return;
+    C.clearFurnace(batch, id);
+    quickResetFurnaceModel(id);
+    persist();
+    if (where === 'quick') renderQuickSelect();
+    else renderVisualSelect();
+    toast('已清空 ' + bf.label, 'ok', 1500);
+  }
+
   function quickSelectCard(f) {
     var side = f.side === 'full' ? '整台' : f.side + '炉膛';
     var count = quickFurnaceGroups(f).length;
+    var done = quickActiveGroups(f);
     var seg = el('div', { class: 'seg', role: 'group', 'aria-label': '录入炉膛范围' }, [
       ['full', '整台'], ['A', 'A炉膛'], ['B', 'B炉膛']
     ].map(function (pair) {
@@ -5084,7 +5159,13 @@ body.furnace-mode .app-shell { padding-top: 8px; }
         }
       });
     }));
-    var controls = el('div', { class: 'quick-select-controls', onclick: function (e) { e.stopPropagation(); } }, [seg]);
+    var controls = el('div', { class: 'quick-select-controls', onclick: function (e) { e.stopPropagation(); } }, [
+      el('button', {
+        class: 'btn sm ghost danger-text fc-clear', type: 'button', text: '清空本炉',
+        onclick: function (e) { e.stopPropagation(); clearOneFurnace(f.id, 'quick'); }
+      }),
+      seg
+    ]);
 
     return el('article', {
       class: 'quick-select-card' + (f.imported ? '' : ' is-empty'),
@@ -5099,7 +5180,7 @@ body.furnace-mode .app-shell { padding-top: 8px; }
         el('span', { class: 'tag' + (f.imported ? ' ok' : ''), text: f.imported ? '已导入' : '未导入 · 手动' }),
         f.ambiguous ? el('span', { class: 'tag', text: '文本未写炉膛' }) : null
       ]),
-      el('p', { class: 'quick-select-sub', text: f.imported ? '共 ' + count + ' 组 · 每组只改最高表' : '共 ' + count + ' 组 · 默认 1# / 0.000，未改过的组跟随最近改过组' }),
+      el('p', { class: 'quick-select-sub', text: '已录 ' + done + '/' + count + ' 组 · 每组只改最高表' }),
       controls,
       el('span', { class: 'fc-go', text: f.imported ? '进入 ›' : '手动录入 ›' })
     ]);
@@ -5119,7 +5200,18 @@ body.furnace-mode .app-shell { padding-top: 8px; }
           : null,
         el('button', {
           class: 'btn', type: 'button', id: 'btnQuickManual', text: '不导入，直接手动',
-          onclick: function () { quickEnsureAllFurnaces(); ui.view = 'quickSelect'; render(); scrollTop(); }
+          onclick: function () {
+            if (C.hasBatchData(batch)) {
+              quick.text = C.exportMode1(batch);
+              parseQuick(false);
+            } else {
+              quick.model = null;
+              quickEnsureAllFurnaces();
+            }
+            ui.view = 'quickSelect';
+            render();
+            scrollTop();
+          }
         }),
         el('button', { class: 'btn ghost', type: 'button', text: '‹ 返回主界面', onclick: goHome })
       ])
@@ -5137,11 +5229,12 @@ body.furnace-mode .app-shell { padding-top: 8px; }
     host.innerHTML = '';
     host.appendChild(el('div', { class: 'page-head' }, [
       el('div', {}, [
-        el('h2', { class: 'page-title', text: '选择需要增补的炉子' }),
-        el('p', { class: 'page-sub', text: '点卡片进入单炉页；录完所有炉子后点「应用快捷数据」。导出/绝压比页面里再单独选要计算的炉子。' })
+        el('h2', { class: 'page-title', text: '手动快捷录入 · 选择炉子' }),
+        el('p', { class: 'page-sub', text: '只记每组最高表；改动会立即保存，不需要再点应用。导出/绝压比页面里再选要计算的炉子。' })
       ]),
       el('div', { class: 'page-actions' }, [
         el('button', { class: 'btn ghost', type: 'button', text: '‹ 返回导入', onclick: quickBackToImport }),
+        el('button', { class: 'btn ghost danger-text', type: 'button', text: '一键清空所有数据', onclick: function () { clearAllData('quick'); } }),
         el('button', { class: 'btn ghost', type: 'button', text: '返回主界面', onclick: goHome })
       ])
     ]));
@@ -5152,7 +5245,6 @@ body.furnace-mode .app-shell { padding-top: 8px; }
     var grid = el('div', { class: 'quick-select-grid' });
     quick.model.forEach(function (f) { grid.appendChild(quickSelectCard(f)); });
     host.appendChild(grid);
-    host.appendChild(quickApplyBar('应用快捷数据'));
     host.appendChild(el('div', { class: 'quick-select-footer' }, [
       el('button', { class: 'btn', type: 'button', id: 'btnQuickExport', text: '导出文丘里压力', onclick: quickApplyAndExport }),
       el('button', { class: 'btn ghost', type: 'button', text: '返回主界面', onclick: goHome }),
@@ -5246,8 +5338,7 @@ body.furnace-mode .app-shell { padding-top: 8px; }
     host.appendChild(el('div', { class: 'quick-nav-hint', text: (reverse ? '反向输入：组 8→1，下一组往编号小的方向走。' : '正序输入：组 1→8，下一组往编号大的方向走。') + ' 位号/读数箭头循环。' }));
 
     host.appendChild(el('div', { class: 'quick-furnace-apply' }, [
-      el('div', { class: 'quick-apply-hint', text: '先改完本炉各组，再应用；其他表读数保留。' }),
-      el('button', { class: 'btn primary', type: 'button', id: 'btnQuickApplyFurnace', text: '应用到本炉', onclick: applyQuickFurnace }),
+      el('div', { class: 'quick-apply-hint', text: '改动会立即保存到当前数据；其他表读数保留。' }),
       el('button', { class: 'btn ghost', type: 'button', text: '返回选炉', onclick: quickBackToSelect })
     ]));
   }
@@ -5315,12 +5406,10 @@ body.furnace-mode .app-shell { padding-top: 8px; }
   }
 
   function quickApplyAndRatio() {
-    applyQuick(true);
     openRatioSelect();
   }
 
   function quickApplyAndExport() {
-    applyQuick(true);
     openExportSelect();
   }
 
@@ -5407,23 +5496,30 @@ body.furnace-mode .app-shell { padding-top: 8px; }
   }
 
   function clearFurnaceFromHome(f) {
-    if (!confirm('清空 ' + f.label + ' 的全部读数？')) return;
-    C.clearFurnace(batch, f.id);
-    persist();
-    renderVisualSelect();
-    toast('已清空 ' + f.label, 'ok', 1500);
+    clearOneFurnace(f.id, 'visual');
   }
 
   function furnaceCard(st) {
     var f = st.furnace;
     var pct = st.total ? Math.round((st.handled / st.total) * 100) : 0;
+    var sideSeg = el('div', { class: 'seg fc-side' }, [['full', '整台'], ['A', 'A炉膛'], ['B', 'B炉膛']].map(function (pair) {
+      return el('button', {
+        class: 'seg-btn' + (f.side === pair[0] ? ' active' : ''), type: 'button', text: pair[1],
+        onclick: function (e) {
+          e.stopPropagation();
+          C.setSide(batch, f.id, pair[0]);
+          persist();
+          renderVisualSelect();
+        }
+      });
+    }));
     var card = el('article', {
       class: 'furnace-card' + (st.complete ? ' done' : '') + (st.handled ? ' started' : ''),
       tabindex: '0',
       role: 'button',
       'aria-label': f.label + ' 进入录入',
       onclick: function (e) {
-        if (e.target.closest && e.target.closest('.fc-clear')) return;
+        if (e.target.closest && e.target.closest('.fc-clear, .fc-side')) return;
         openFurnace(f.id);
       },
       onkeydown: function (e) {
@@ -5444,6 +5540,7 @@ body.furnace-mode .app-shell { padding-top: 8px; }
         el('span', { text: '有效 ' + st.valid + (st.excluded ? ' · 剔除 ' + st.excluded : '') + (st.skipped ? ' · 送检 ' + st.skipped : '') })
       ]),
       el('div', { class: 'fc-actions' }, [
+        sideSeg,
         el('button', {
           class: 'btn sm ghost danger-text fc-clear', type: 'button', text: '清空',
           title: '清空这台炉子的全部读数',
