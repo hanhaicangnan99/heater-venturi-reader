@@ -808,6 +808,7 @@
     host.appendChild(grid);
     host.appendChild(quickApplyBar('应用勾选的炉子'));
     host.appendChild(el('div', { class: 'quick-select-footer' }, [
+      el('button', { class: 'btn', type: 'button', id: 'btnQuickExport', text: '导出文丘里压力', onclick: quickApplyAndExport }),
       el('button', { class: 'btn ghost', type: 'button', text: '返回主界面', onclick: goHome }),
       el('button', { class: 'btn', type: 'button', id: 'btnQuickRatio', text: '计算绝压比', onclick: quickApplyAndRatio })
     ]));
@@ -974,6 +975,11 @@
 
   function quickApplyAndRatio() {
     if (applyQuick(true)) openRatioCalc();
+  }
+
+  function quickApplyAndExport() {
+    if ((quick.model || []).some(function (f) { return f.selected; })) applyQuick(true);
+    openExport();
   }
 
   function applyQuickFurnace() {
