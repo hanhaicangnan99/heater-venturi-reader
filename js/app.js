@@ -158,8 +158,6 @@
       renderQuickSelect();
     } else if (ui.view === 'quickFurnace') {
       renderQuickFurnace();
-    } else if (ui.view === 'quick') {
-      renderQuick();
     } else if (ui.view === 'furnace' && currentFurnace()) {
       renderFurnace();
     } else {
@@ -450,7 +448,7 @@
     if (ui.view === 'quickFurnace') renderQuickFurnace();
     else if (ui.view === 'quickSelect') renderQuickSelect();
     else if (ui.view === 'quickImport') renderQuickImport();
-    else renderQuick();
+    else renderQuickSelect();
   }
 
   function stepQuickGauge(id, rowIndex, delta) {
@@ -1078,65 +1076,12 @@
     return box;
   }
 
-  function applyQuick(skipConfirm) {
-    if (!quick.model || !quick.model.length) {
-      toast('还没有可应用的快捷数据', 'warn');
-      return false;
-    }
-    if (!skipConfirm && C.hasBatchData(batch) && !confirm('用快捷数据更新最高表？其他表读数保留。')) return false;
-
-    var updates = quick.model.map(quickUpdateFor);
-    var res = C.applyQuickUpdate(batch, updates);
-    persist();
-    quick.message = res.updated
-      ? '已更新 ' + res.updated + ' 组最高表；其他表读数保留。'
-      : '没有可更新的行（未输入或表号/读数不完整）。';
-    quick.applyIssues = res.warnings || [];
-    renderQuickPage();
-    if (res.updated) toast('已更新 ' + res.updated + ' 组', 'ok', 2200);
-    else toast('没有可更新数据', 'warn', 2600);
-    return res.updated > 0;
-  }
-
   function quickApplyAndRatio() {
     openRatioSelect();
   }
 
   function quickApplyAndExport() {
     openExportSelect();
-  }
-
-  function applyQuickFurnace() {
-    var f = quickFind(quick.selectedId);
-    if (!f) {
-      toast('没有选中的炉子', 'warn');
-      return;
-    }
-    if (C.hasBatchData(batch) && !confirm('用快捷数据更新 ' + f.label + ' 的最高表？其他表读数保留。')) return;
-    var res = C.applyQuickUpdate(batch, [quickUpdateFor(f)]);
-    persist();
-    quick.message = res.updated
-      ? '已更新 ' + f.label + ' 的 ' + res.updated + ' 组最高表；其他表读数保留。'
-      : '没有可更新的行（空组或表号/读数不完整）。';
-    quick.applyIssues = res.warnings || [];
-    renderQuickFurnace();
-    if (res.updated) toast('已更新 ' + f.label + ' ' + res.updated + ' 组', 'ok', 2200);
-    else toast('没有可更新的行', 'warn', 2600);
-  }
-
-  function quickApplyBar(label) {
-    var active = (quick.model || []).filter(function (f) {
-      return f.rows.some(function (r) { return r.active && !r.placeholder; });
-    }).length;
-    return el('div', { class: 'quick-apply' }, [
-      el('div', { class: 'quick-apply-hint', text: '应用到所有已输入的炉子；没输入的行不写入，其他表读数保留。' }),
-      el('button', {
-        class: 'btn primary', type: 'button', id: 'btnQuickApply',
-        text: (label || '应用快捷数据') + (active ? '（' + active + ' 台）' : ''),
-        disabled: active === 0,
-        onclick: function () { applyQuick(false); }
-      })
-    ]);
   }
 
   function quickPastePanel() {
@@ -1159,33 +1104,6 @@
         el('button', { class: 'btn ghost', type: 'button', text: '清空', onclick: clearQuick })
       ])
     ]);
-  }
-
-  function renderQuick() {
-    var host = $('#view');
-    host.innerHTML = '';
-
-    host.appendChild(el('div', { class: 'page-head' }, [
-      el('div', {}, [
-        el('h2', { class: 'page-title', text: '手动快捷输入' }),
-        el('p', { class: 'page-sub', text: '粘贴方式1文本，只更新每组最高表；位号和三个小数位都能上下调。' })
-      ]),
-      el('div', { class: 'page-actions' }, [
-        el('button', { class: 'btn ghost', type: 'button', text: '‹ 返回主界面', onclick: goHome })
-      ])
-    ]));
-
-    host.appendChild(quickPastePanel());
-    if (quick.issues && quick.issues.length) host.appendChild(quickIssuesPanel());
-    if (quick.message) host.appendChild(el('div', { class: 'quick-success', text: quick.message }));
-    if (quick.applyIssues && quick.applyIssues.length) host.appendChild(quickApplyWarnings());
-
-    if (quick.model && quick.model.length) {
-      quick.model.forEach(function (f) { host.appendChild(quickFurnace(f)); });
-      host.appendChild(quickApplyBar());
-    } else {
-      host.appendChild(el('div', { class: 'quick-empty', text: '粘贴文本后点「解析文本」；也可以点「载入当前数据」从现有读数开始。' }));
-    }
   }
 
   function clearFurnaceFromHome(f) {
