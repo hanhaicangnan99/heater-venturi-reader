@@ -359,6 +359,7 @@ const driver = `
     ok('选炉页显示全部 4 台炉', qa('.quick-select-card').length === 4, qa('.quick-select-card').length);
     ok('未导入的 3 台有区分', qa('.quick-select-card.is-empty').length === 3, qa('.quick-select-card.is-empty').length);
     ok('选炉页有 4 个导出勾选框', qa('.quick-select-check').length === 4, qa('.quick-select-check').length);
+    ok('选炉页底部有返回/绝压比按钮', qa('.quick-select-footer .btn').length === 2, qa('.quick-select-footer .btn').length);
     ok('已导入 3号炉默认勾选', q('.quick-select-card[data-quick-furnace="3"] .quick-select-check').checked);
     ok('未导入 2号炉默认不勾选', !q('.quick-select-card[data-quick-furnace="2"] .quick-select-check').checked);
     q('.quick-select-card[data-quick-furnace="2"] .quick-select-check').click();

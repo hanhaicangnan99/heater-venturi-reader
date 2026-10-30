@@ -4,7 +4,7 @@
 
 **在线使用（手机推荐，HTTPS，可开相机）：** <https://hanhaicangnan99.github.io/heater-venturi-reader/>
 
-> 如果手机/电脑还显示旧界面，打开 <https://hanhaicangnan99.github.io/heater-venturi-reader/?v=2.25.0> 一次；页脚会显示当前版本 `v2.25.0`。
+> 如果手机/电脑还显示旧界面，打开 <https://hanhaicangnan99.github.io/heater-venturi-reader/?v=2.26.0> 一次；页脚会显示当前版本 `v2.26.0`。
 
 **代码仓库：** <https://github.com/hanhaicangnan99/heater-venturi-reader>
 
@@ -122,7 +122,7 @@
    - **导入半台后切整台**：空白半台默认跟随最近改过的组；跟过的组会写回，没跟过也没改过的占位组不写，导入的那半保留；
    - 「**反向输入：开/关**」：打开后按 组8→1 切换，「下一组」往编号小的方向走；
    - 完成一组点「**下一组**」；到最后一组按钮变「**完成本炉**」，回选炉页。
-5. 在单炉页点「**应用到本炉**」，或在选炉页点「**应用勾选的炉子**」。
+5. 在单炉页点「**应用到本炉**」，或在选炉页点「**应用勾选的炉子**」；应用按钮下方还有「**返回主界面**」「**计算绝压比**」两个快捷按钮，计算绝压比会先应用勾选的数据再跳转。
 
 ![快捷输入：导入页](docs/screenshot-quick-import.png)
 
@@ -425,13 +425,13 @@ node tests/make_singlefile.cjs
 # HTML/JS/CSS 静态一致性
 python tests/check_ui.py
 
-# 真实浏览器交互自测（146 项）
+# 真实浏览器交互自测（147 项）
 node tests/make_selftest.cjs
 chrome --headless=new --no-sandbox --disable-gpu --user-data-dir=tests/prof ^
   --window-size=1440,1200 --virtual-time-budget=25000 --dump-dom "file:///.../tests/selftest.html"
 ```
 
-当前结果：**36 项单元测试 + 146 项浏览器交互测试全部通过，0 个 JS 错误**；方式2 的数值、圈号、组号/表号、集合管压力和 0.84375 与 `导出文件示例/快捷导出方式2.txt` 一致。
+当前结果：**36 项单元测试 + 147 项浏览器交互测试全部通过，0 个 JS 错误**；方式2 的数值、圈号、组号/表号、集合管压力和 0.84375 与 `导出文件示例/快捷导出方式2.txt` 一致。
 
 单文件版另做了冒烟检查：file:// 打开能正常渲染 4 台炉并显示本地文件提示。
 
@@ -452,6 +452,12 @@ chrome --headless=new --no-sandbox --disable-gpu --user-data-dir=tests/prof ^
 ---
 
 ## 十二、版本
+
+**v2.26.0（2026-10-30）**
+
+- 选炉页「应用勾选的炉子」下方增加「返回主界面」「计算绝压比」按钮
+- 计算绝压比会先应用勾选数据，再跳到绝压比计算页
+- 新增 1 项浏览器交互测试（合计 147 项）
 
 **v2.25.0（2026-10-30）**
 

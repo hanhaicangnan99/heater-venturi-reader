@@ -807,6 +807,10 @@
     quick.model.forEach(function (f) { grid.appendChild(quickSelectCard(f)); });
     host.appendChild(grid);
     host.appendChild(quickApplyBar('应用勾选的炉子'));
+    host.appendChild(el('div', { class: 'quick-select-footer' }, [
+      el('button', { class: 'btn ghost', type: 'button', text: '返回主界面', onclick: goHome }),
+      el('button', { class: 'btn', type: 'button', id: 'btnQuickRatio', text: '计算绝压比', onclick: quickApplyAndRatio })
+    ]));
   }
 
   function renderQuickFurnace() {
@@ -943,17 +947,17 @@
     return box;
   }
 
-  function applyQuick() {
+  function applyQuick(skipConfirm) {
     if (!quick.model || !quick.model.length) {
       toast('还没有可应用的快捷数据', 'warn');
-      return;
+      return false;
     }
     var picked = quick.model.filter(function (f) { return f.selected; });
     if (!picked.length) {
       toast('先在选炉页勾选要导出的炉子', 'warn', 2600);
-      return;
+      return false;
     }
-    if (C.hasBatchData(batch) && !confirm('用勾选炉子的快捷数据更新最高表？其他表读数保留。')) return;
+    if (!skipConfirm && C.hasBatchData(batch) && !confirm('用勾选炉子的快捷数据更新最高表？其他表读数保留。')) return false;
 
     var updates = picked.map(quickUpdateFor);
     var res = C.applyQuickUpdate(batch, updates);
@@ -965,6 +969,11 @@
     renderQuickPage();
     if (res.updated) toast('已更新 ' + res.updated + ' 组', 'ok', 2200);
     else toast('勾选的炉子没有可更新数据', 'warn', 2600);
+    return res.updated > 0;
+  }
+
+  function quickApplyAndRatio() {
+    if (applyQuick(true)) openRatioCalc();
   }
 
   function applyQuickFurnace() {
@@ -994,7 +1003,7 @@
         class: 'btn primary', type: 'button', id: 'btnQuickApply',
         text: (label || '应用勾选的炉子') + '（' + picked + '）',
         disabled: picked === 0,
-        onclick: applyQuick
+        onclick: function () { applyQuick(false); }
       })
     ]);
   }
