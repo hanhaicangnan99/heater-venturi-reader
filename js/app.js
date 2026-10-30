@@ -260,7 +260,7 @@
   function quickEmptyRows(n) {
     var out = [];
     for (var i = 0; i < n; i++) {
-      out.push({ gauge: 1, value: 0, synced: i !== 0, placeholder: false });
+      out.push({ gauge: 1, value: 0, synced: i !== 0, placeholder: false, active: false });
     }
     return out;
   }
@@ -273,6 +273,7 @@
       perGroup: def.perGroup,
       ambiguous: false,
       imported: false,
+      selected: false,
       rows: quickEmptyRows(def.groups)
     };
   }
@@ -304,6 +305,7 @@
       var rows = quickEmptyRows(def.groups).map(function (r) {
         r.synced = true;
         r.placeholder = true;
+        r.active = false;
         return r;
       });
       var scope = pf.side === 'A' ? [0, 1, 2, 3] : pf.side === 'B' ? [4, 5, 6, 7] : [0, 1, 2, 3, 4, 5, 6, 7];
@@ -314,7 +316,8 @@
           gauge: r.gauge == null ? null : Number(r.gauge),
           value: r.value == null ? null : Number(r.value),
           synced: false,
-          placeholder: false
+          placeholder: false,
+          active: true
         };
       });
       var halfRows = null;
@@ -330,6 +333,7 @@
         perGroup: bf ? bf.perGroup : def.perGroup,
         ambiguous: !!pf.ambiguous,
         imported: true,
+        selected: true,
         halfRows: halfRows,
         halfSide: halfRows ? pf.side : null,
         rows: rows
@@ -398,6 +402,7 @@
     var source = quickFirstGroup(f);
     if (rowIndex !== source) row.synced = false;
     row.placeholder = false;
+    row.active = true;
     var pg = f.perGroup;
     if (row.gauge == null) row.gauge = delta > 0 ? 1 : pg;
     else {
@@ -420,6 +425,7 @@
     var source = quickFirstGroup(f);
     if (rowIndex !== source) row.synced = false;
     row.placeholder = false;
+    row.active = true;
     if (row.gauge == null) row.gauge = 1;
     var milli = row.value == null ? 0 : Math.round(row.value * 1000);
     var step = pos === 0 ? 100 : pos === 1 ? 10 : 1;
@@ -437,6 +443,7 @@
         if (g !== source && f.rows[g].synced) {
           f.rows[g].value = row.value;
           f.rows[g].placeholder = false;
+          f.rows[g].active = true;
         }
       });
     }
@@ -463,11 +470,12 @@
     var rows = quickEmptyRows(8).map(function (r) {
       r.synced = true;
       r.placeholder = true;
+      r.active = false;
       return r;
     });
     scope.forEach(function (g, k) {
       var r = f.halfRows[k] || { gauge: null, value: null };
-      rows[g] = { gauge: r.gauge, value: r.value, synced: false, placeholder: false };
+      rows[g] = { gauge: r.gauge, value: r.value, synced: false, placeholder: false, active: true };
     });
     f.rows = rows;
     f.halfSide = side;
@@ -481,20 +489,23 @@
     }
   }
 
+  function quickSwitchSide(f, side) {
+    if (f.side === side) return;
+    if (f.halfRows) quickCaptureHalf(f);
+    f.side = side;
+    if (f.halfRows && (side === 'A' || side === 'B')) quickRebuildHalf(f, side);
+    quick.group = quickFirstGroup(f);
+    quick.message = '';
+    quick.applyIssues = [];
+    if (ui.view === 'quickSelect') renderQuickSelect();
+    else renderQuickFurnace();
+  }
+
   function quickSideBtn(f, side) {
     return el('button', {
       class: 'seg-btn' + (f.side === side ? ' active' : ''),
       type: 'button', text: side === 'full' ? '整台' : side + '炉膛',
-      onclick: function () {
-        if (f.side === side) return;
-        if (f.halfRows) quickCaptureHalf(f);
-        f.side = side;
-        if (f.halfRows && (side === 'A' || side === 'B')) quickRebuildHalf(f, side);
-        quick.group = quickFirstGroup(f);
-        quick.message = '';
-        quick.applyIssues = [];
-        renderQuickFurnace();
-      }
+      onclick: function () { quickSwitchSide(f, side); }
     });
   }
 
@@ -514,6 +525,7 @@
     var row = f.rows[g];
     row.gauge = n;
     row.placeholder = false;
+    row.active = true;
     if (g !== quickFirstGroup(f)) row.synced = false;
     quickRememberHalfRow(f, g);
     var card = document.querySelector('.quick-group[data-quick-id="' + id + '"][data-quick-row="' + g + '"]');
@@ -633,7 +645,7 @@
   function quickUpdateFor(f) {
     var groups = [];
     f.rows.forEach(function (row, g) {
-      if (row.placeholder) return;
+      if (row.placeholder || !row.active) return;
       groups.push({ group: g, gauge: row.gauge, value: row.value });
     });
     return { id: f.id, side: f.side, groups: groups };
@@ -643,6 +655,7 @@
     var f = quickFind(id);
     if (!f) return;
     quick.selectedId = f.id;
+    f.selected = true;
     quick.group = quickFirstGroup(f);
     quick.message = '';
     quick.applyIssues = [];
@@ -704,6 +717,33 @@
   function quickSelectCard(f) {
     var side = f.side === 'full' ? '整台' : f.side + '炉膛';
     var count = quickFurnaceGroups(f).length;
+    var check = el('input', { class: 'quick-select-check', type: 'checkbox' });
+    check.checked = !!f.selected;
+    check.addEventListener('change', function (e) {
+      e.stopPropagation();
+      f.selected = check.checked;
+      renderQuickSelect();
+    });
+    var seg = el('div', { class: 'seg', role: 'group', 'aria-label': '导出炉膛范围' }, [
+      ['full', '整台'], ['A', 'A炉膛'], ['B', 'B炉膛']
+    ].map(function (pair) {
+      return el('button', {
+        class: 'seg-btn' + (f.side === pair[0] ? ' active' : ''),
+        type: 'button', text: pair[1],
+        onclick: function (e) {
+          e.stopPropagation();
+          quickSwitchSide(f, pair[0]);
+        }
+      });
+    }));
+    var controls = el('div', { class: 'quick-select-controls', onclick: function (e) { e.stopPropagation(); } }, [
+      el('label', { class: 'quick-select-toggle' }, [
+        check,
+        el('span', { text: '导出/算绝压比' })
+      ]),
+      seg
+    ]);
+
     return el('article', {
       class: 'quick-select-card' + (f.imported ? '' : ' is-empty'),
       tabindex: 0, role: 'button',
@@ -718,6 +758,7 @@
         f.ambiguous ? el('span', { class: 'tag', text: '文本未写炉膛' }) : null
       ]),
       el('p', { class: 'quick-select-sub', text: f.imported ? '共 ' + count + ' 组 · 每组只改最高表' : '共 ' + count + ' 组 · 默认 1# / 0.000，后组跟随第一组' }),
+      controls,
       el('span', { class: 'fc-go', text: f.imported ? '进入 ›' : '手动录入 ›' })
     ]);
   }
@@ -755,7 +796,7 @@
     host.appendChild(el('div', { class: 'page-head' }, [
       el('div', {}, [
         el('h2', { class: 'page-title', text: '选择需要增补的炉子' }),
-        el('p', { class: 'page-sub', text: '全部 2/3/4/5 号炉都在这里；有导入数据的高亮，没有导入的也可以点进去手动补。' })
+        el('p', { class: 'page-sub', text: '勾选要「导出/算绝压比」的炉子；未勾选不应用，没输入的行不写入。点卡片进入单炉页。' })
       ]),
       el('div', { class: 'page-actions' }, [
         el('button', { class: 'btn ghost', type: 'button', text: '‹ 返回导入', onclick: quickBackToImport }),
@@ -769,7 +810,7 @@
     var grid = el('div', { class: 'quick-select-grid' });
     quick.model.forEach(function (f) { grid.appendChild(quickSelectCard(f)); });
     host.appendChild(grid);
-    host.appendChild(quickApplyBar('全部应用到当前数据'));
+    host.appendChild(quickApplyBar('应用勾选的炉子'));
   }
 
   function renderQuickFurnace() {
@@ -911,18 +952,23 @@
       toast('还没有可应用的快捷数据', 'warn');
       return;
     }
-    if (C.hasBatchData(batch) && !confirm('用快捷数据更新每组最高表？其他表读数保留。')) return;
+    var picked = quick.model.filter(function (f) { return f.selected; });
+    if (!picked.length) {
+      toast('先在选炉页勾选要导出的炉子', 'warn', 2600);
+      return;
+    }
+    if (C.hasBatchData(batch) && !confirm('用勾选炉子的快捷数据更新最高表？其他表读数保留。')) return;
 
-    var updates = quick.model.map(quickUpdateFor);
+    var updates = picked.map(quickUpdateFor);
     var res = C.applyQuickUpdate(batch, updates);
     persist();
     quick.message = res.updated
-      ? '已更新 ' + res.updated + ' 组最高表；其他表读数保留。'
-      : '没有可更新的行（空组或表号/读数不完整）。';
+      ? '已更新 ' + res.updated + ' 组最高表（' + picked.length + ' 台炉勾选）；其他表读数保留。'
+      : '勾选的炉子里没有可更新的行（未输入或表号/读数不完整）。';
     quick.applyIssues = res.warnings || [];
     renderQuickPage();
     if (res.updated) toast('已更新 ' + res.updated + ' 组', 'ok', 2200);
-    else toast('没有可更新的行', 'warn', 2600);
+    else toast('勾选的炉子没有可更新数据', 'warn', 2600);
   }
 
   function applyQuickFurnace() {
@@ -932,6 +978,7 @@
       return;
     }
     if (C.hasBatchData(batch) && !confirm('用快捷数据更新 ' + f.label + ' 的最高表？其他表读数保留。')) return;
+    f.selected = true;
     var res = C.applyQuickUpdate(batch, [quickUpdateFor(f)]);
     persist();
     quick.message = res.updated
@@ -944,9 +991,15 @@
   }
 
   function quickApplyBar(label) {
+    var picked = (quick.model || []).filter(function (f) { return f.selected; }).length;
     return el('div', { class: 'quick-apply' }, [
-      el('div', { class: 'quick-apply-hint', text: '只更新每组最高表；其他表读数保留，避免覆盖完整录入。' }),
-      el('button', { class: 'btn primary', type: 'button', id: 'btnQuickApply', text: label || '全部应用到当前数据', onclick: applyQuick })
+      el('div', { class: 'quick-apply-hint', text: '只应用勾选的炉子；未勾选的不导出，未输入的行不写入。' }),
+      el('button', {
+        class: 'btn primary', type: 'button', id: 'btnQuickApply',
+        text: (label || '应用勾选的炉子') + '（' + picked + '）',
+        disabled: picked === 0,
+        onclick: applyQuick
+      })
     ]);
   }
 
