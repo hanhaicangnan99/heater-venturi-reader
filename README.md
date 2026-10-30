@@ -4,7 +4,7 @@
 
 **在线使用（手机推荐，HTTPS，可开相机）：** <https://hanhaicangnan99.github.io/heater-venturi-reader/>
 
-> 如果手机/电脑还显示旧界面，打开 <https://hanhaicangnan99.github.io/heater-venturi-reader/?v=2.33.0> 一次；页脚会显示当前版本 `v2.33.0`。
+> 如果手机/电脑还显示旧界面，打开 <https://hanhaicangnan99.github.io/heater-venturi-reader/?v=2.34.0> 一次；页脚会显示当前版本 `v2.34.0`。
 
 **代码仓库：** <https://github.com/hanhaicangnan99/heater-venturi-reader>
 
@@ -478,6 +478,13 @@ chrome --headless=new --no-sandbox --disable-gpu --user-data-dir=tests/prof ^
 ---
 
 ## 十二、版本
+
+**v2.34.0（2026-10-30）**
+
+- 修复：粘贴文本修改后未重新解析就返回主界面，绝压比仍使用旧粘贴数据
+- 离开导入页时检测文本是否已修改，提示先解析再返回
+- 单炉页箭头/滑杆修改仍即时写回当前数据
+- 测试数量不变：37 + 168
 
 **v2.33.0（2026-10-30）**
 

@@ -24,7 +24,7 @@
   var exportPageText = '';
   var exportPageLabel = '';
   var quick = {
-    text: '', model: null, issues: [], message: '', applyIssues: [],
+    text: '', parsedText: '', model: null, issues: [], message: '', applyIssues: [],
     selectedId: null, group: 0, reverse: {}
   };
   var saveTimer = null;
@@ -304,6 +304,7 @@
     quick.model = null;
     quick.selectedId = null;
     if (!quick.text && C.hasBatchData(batch)) quick.text = C.exportMode1(batch);
+    quick.parsedText = quick.text;
     render();
     scrollTop();
   }
@@ -396,6 +397,7 @@
     });
     quick.message = '';
     quick.applyIssues = [];
+    quick.parsedText = quick.text;
     quickCommitAll();
     if (!silent) {
       if (parsed.length) {
@@ -1181,6 +1183,9 @@
   }
 
   function goHome() {
+    if (ui.view === 'quickImport' && quick.text.trim() && quick.text !== quick.parsedText) {
+      if (confirm('粘贴的文本已修改但还没解析，是否先解析再返回主界面？')) parseQuick(true);
+    }
     stopCamera();
     ui.view = 'home';
     ui.furnaceId = null;
