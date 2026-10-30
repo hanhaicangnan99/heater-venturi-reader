@@ -4,7 +4,7 @@
   "description": "加热炉文丘里压力快捷读数、绝压比计算与导出",
   "lang": "zh-CN",
   "id": "./",
-  "start_url": "./?v=2.22.0",
+  "start_url": "./?v=2.23.0",
   "scope": "./",
   "display": "standalone",
   "display_override": ["standalone", "minimal-ui"],

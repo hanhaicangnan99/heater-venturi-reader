@@ -4,7 +4,7 @@
 
 **在线使用（手机推荐，HTTPS，可开相机）：** <https://hanhaicangnan99.github.io/heater-venturi-reader/>
 
-> 如果手机/电脑还显示旧界面，打开 <https://hanhaicangnan99.github.io/heater-venturi-reader/?v=2.22.0> 一次；页脚会显示当前版本 `v2.22.0`。
+> 如果手机/电脑还显示旧界面，打开 <https://hanhaicangnan99.github.io/heater-venturi-reader/?v=2.23.0> 一次；页脚会显示当前版本 `v2.23.0`。
 
 **代码仓库：** <https://github.com/hanhaicangnan99/heater-venturi-reader>
 
@@ -113,7 +113,7 @@
    - 点需要增补的炉号，进入该炉的 **单炉逐组页**。
 4. **单炉逐组页**：
    - 一次只显示一组，位号和读数都放大；
-   - **最高表位号**：一组上下箭头，改 1#～12#（2号炉 1#～2#）；
+   - **最高表位号**：一组上下箭头，改 1#～12#（2号炉 1#～2#）；位号旁有滑杆，可快速拖到目标表号；
    - **最高读数**：十分位/百分位/千分位三列，每列上下箭头，支持进位/借位（0.199 + 千分位 = 0.200）；到边界后循环（0.000 千分位↓→0.009、百分位↓→0.090、十分位↓→0.400；0.400↑→0.000）；
    - 位号到 1# 按↓回最大（2号炉 2#，其余炉 12#）；
    - 每台炉顶部始终有 **整台 / A炉膛 / B炉膛** 三个选项；4 行文本没写炉膛时默认 A，可自己切 B；
@@ -423,13 +423,13 @@ node tests/make_singlefile.cjs
 # HTML/JS/CSS 静态一致性
 python tests/check_ui.py
 
-# 真实浏览器交互自测（135 项）
+# 真实浏览器交互自测（139 项）
 node tests/make_selftest.cjs
 chrome --headless=new --no-sandbox --disable-gpu --user-data-dir=tests/prof ^
   --window-size=1440,1200 --virtual-time-budget=25000 --dump-dom "file:///.../tests/selftest.html"
 ```
 
-当前结果：**36 项单元测试 + 135 项浏览器交互测试全部通过，0 个 JS 错误**；方式2 的数值、圈号、组号/表号、集合管压力和 0.84375 与 `导出文件示例/快捷导出方式2.txt` 一致。
+当前结果：**36 项单元测试 + 139 项浏览器交互测试全部通过，0 个 JS 错误**；方式2 的数值、圈号、组号/表号、集合管压力和 0.84375 与 `导出文件示例/快捷导出方式2.txt` 一致。
 
 单文件版另做了冒烟检查：file:// 打开能正常渲染 4 台炉并显示本地文件提示。
 
@@ -450,6 +450,12 @@ chrome --headless=new --no-sandbox --disable-gpu --user-data-dir=tests/prof ^
 ---
 
 ## 十二、版本
+
+**v2.23.0（2026-10-30）**
+
+- 位号旁增加滑杆，1#～最大表号快速拖动选择
+- 滑杆拖动时实时更新位号，松手后同步当前组
+- 新增 4 项浏览器交互测试（合计 139 项）
 
 **v2.22.0（2026-10-30）**
 

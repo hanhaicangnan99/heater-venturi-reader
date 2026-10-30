@@ -376,6 +376,17 @@ const driver = `
     await sleep(30);
     ok('快捷切回整台第 1 组', q('.quick-progress strong').textContent === '第 1 组', q('.quick-progress strong').textContent);
 
+    var gslider = q('.quick-gauge-slider');
+    ok('位号滑杆范围 1-12', gslider && gslider.min === '1' && gslider.max === '12' && gslider.value === '3', gslider ? gslider.min + '-' + gslider.max + ' ' + gslider.value : 'no');
+    gslider.value = '12';
+    gslider.dispatchEvent(new Event('input', { bubbles: true }));
+    await sleep(20);
+    ok('滑杆快速选到 12#', q('.quick-group-single .quick-gauge-value').textContent === '12#', q('.quick-group-single .quick-gauge-value').textContent);
+    gslider.value = '3';
+    gslider.dispatchEvent(new Event('input', { bubbles: true }));
+    await sleep(20);
+    ok('滑杆回到 3#', q('.quick-group-single .quick-gauge-value').textContent === '3#', q('.quick-group-single .quick-gauge-value').textContent);
+
     qa('.quick-group-single .quick-gauge .qstep')[1].click();
     await sleep(10);
     qa('.quick-group-single .quick-gauge .qstep')[1].click();
@@ -464,6 +475,7 @@ const driver = `
     await sleep(30);
     ok('未导入 2号炉也可进入', q('.page-title').textContent.indexOf('2号炉') >= 0, q('.page-title').textContent);
     ok('未导入 2号炉默认 1#', q('.quick-group-single .quick-gauge-value').textContent === '1#', q('.quick-group-single .quick-gauge-value').textContent);
+    ok('2号炉滑杆最大 2#', q('.quick-gauge-slider').max === '2', q('.quick-gauge-slider').max);
     ok('未导入 2号炉首组默认 0.000', qa('.quick-group-single .quick-field')[1].title.indexOf('0.000') >= 0, qa('.quick-group-single .quick-field')[1].title);
     qa('.quick-group-single .quick-gauge .qstep')[1].click();
     await sleep(20);

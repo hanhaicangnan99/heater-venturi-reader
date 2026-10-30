@@ -505,6 +505,30 @@
     ]);
   }
 
+  function quickSetGauge(id, g, value, refresh) {
+    var f = quickFind(id);
+    if (!f || !f.rows[g]) return;
+    var n = Number(value);
+    if (!isFinite(n)) n = 1;
+    n = Math.max(1, Math.min(f.perGroup, Math.round(n)));
+    var row = f.rows[g];
+    row.gauge = n;
+    row.placeholder = false;
+    if (g !== quickFirstGroup(f)) row.synced = false;
+    quickRememberHalfRow(f, g);
+    var card = document.querySelector('.quick-group[data-quick-id="' + id + '"][data-quick-row="' + g + '"]');
+    if (card) {
+      var v = card.querySelector('.quick-gauge-value');
+      if (v) {
+        v.textContent = n + '#';
+        v.classList.remove('is-empty');
+      }
+    }
+    quick.message = '';
+    quick.applyIssues = [];
+    if (refresh) renderQuickFurnace();
+  }
+
   function quickGroup(f, row, g, single) {
     var chamber = C.chamberOf(g);
     var empty = row.gauge == null || row.value == null;
@@ -517,6 +541,29 @@
         text: row.gauge == null ? '—' : row.gauge + '#'
       }),
       quickStepBtn('▼', '减小最高表位号', function () { stepQuickGauge(f.id, g, -1); })
+    ]);
+
+    var gaugeSlider = el('input', {
+      class: 'quick-gauge-slider', type: 'range',
+      min: 1, max: f.perGroup, step: 1,
+      value: row.gauge == null ? 1 : row.gauge,
+      'aria-label': '快速选择最高表位号'
+    });
+    gaugeSlider.addEventListener('input', function () {
+      quickSetGauge(f.id, g, this.value, false);
+    });
+    gaugeSlider.addEventListener('change', function () {
+      quickSetGauge(f.id, g, this.value, true);
+    });
+    var gaugeRow = el('div', { class: 'quick-gauge-row' }, [
+      gaugeBox,
+      el('div', { class: 'quick-gauge-slider-wrap' }, [
+        gaugeSlider,
+        el('div', { class: 'quick-gauge-scale' }, [
+          el('span', { text: '1#' }),
+          el('span', { text: f.perGroup + '#' })
+        ])
+      ])
     ]);
 
     var digitWrap = el('div', { class: 'quick-digits' });
@@ -547,7 +594,7 @@
         el('span', { class: 'tag small', text: chamber + '炉膛' })
       ]),
       el('div', { class: 'quick-editors' }, [
-        quickField('最高表位号', gaugeBox),
+        quickField('最高表位号', gaugeRow),
         readBox
       ])
     ]);
