@@ -2257,7 +2257,7 @@ body.furnace-mode .app-shell { padding-top: 8px; }
 
   <footer class="foot">
     <span id="saveHint">自动保存已开启</span>
-    <span class="foot-version" id="appVersion">v2.34.0</span>
+    <span class="foot-version" id="appVersion">v2.35.0</span>
     <span class="foot-note">数据只存本机浏览器，请定期导出备份 · 识别模块接口：GaugeApp.pushReading(读数)</span>
   </footer>
 
@@ -2385,7 +2385,7 @@ body.furnace-mode .app-shell { padding-top: 8px; }
         <li>手机只传一个文件：用 <code>读表软件_手机版.html</code>，CSS/JS 已内联；只传 <code>index.html</code> 会缺 <code>js/</code>、<code>assets/</code>，页面会空白或没样式。</li>
         <li>直接打开本地文件时，录入、导入导出、绝压比计算都能用；手机浏览器不允许 <code>file://</code> 调用摄像头。</li>
         <li>要实时相机：页面必须在 <code>https://</code> 开头的网址下；<code>file://</code> 和 <code>http://192.168…</code> 都不允许调用摄像头。可把单文件放到 GitHub Pages / Netlify / 公司 HTTPS 服务器，或用 App 包壳；不要用微信/QQ 的文件预览打开。</li>
-        <li>如果还显示旧界面：打开 <code>https://hanhaicangnan99.github.io/heater-venturi-reader/?v=2.34.0</code> 一次，或清除站点缓存；页脚会显示当前版本 <code>v2.34.0</code>。</li>
+        <li>如果还显示旧界面：打开 <code>https://hanhaicangnan99.github.io/heater-venturi-reader/?v=2.35.0</code> 一次，或清除站点缓存；页脚会显示当前版本 <code>v2.35.0</code>。</li>
       </ul>
       <h3>数据</h3>
       <ul>
@@ -4617,8 +4617,11 @@ body.furnace-mode .app-shell { padding-top: 8px; }
     ui.view = 'quickImport';
     quick.model = null;
     quick.selectedId = null;
-    if (!quick.text && C.hasBatchData(batch)) quick.text = C.exportMode1(batch);
+    quick.text = C.hasBatchData(batch) ? C.exportMode1(batch) : '';
     quick.parsedText = quick.text;
+    quick.issues = [];
+    quick.message = '';
+    quick.applyIssues = [];
     render();
     scrollTop();
   }

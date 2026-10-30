@@ -4,7 +4,7 @@
 
 **在线使用（手机推荐，HTTPS，可开相机）：** <https://hanhaicangnan99.github.io/heater-venturi-reader/>
 
-> 如果手机/电脑还显示旧界面，打开 <https://hanhaicangnan99.github.io/heater-venturi-reader/?v=2.34.0> 一次；页脚会显示当前版本 `v2.34.0`。
+> 如果手机/电脑还显示旧界面，打开 <https://hanhaicangnan99.github.io/heater-venturi-reader/?v=2.35.0> 一次；页脚会显示当前版本 `v2.35.0`。
 
 **代码仓库：** <https://github.com/hanhaicangnan99/heater-venturi-reader>
 
@@ -451,13 +451,13 @@ node tests/make_singlefile.cjs
 # HTML/JS/CSS 静态一致性
 python tests/check_ui.py
 
-# 真实浏览器交互自测（168 项）
+# 真实浏览器交互自测（170 项）
 node tests/make_selftest.cjs
 chrome --headless=new --no-sandbox --disable-gpu --user-data-dir=tests/prof ^
   --window-size=1440,1200 --virtual-time-budget=25000 --dump-dom "file:///.../tests/selftest.html"
 ```
 
-当前结果：**37 项单元测试 + 168 项浏览器交互测试全部通过，0 个 JS 错误**；方式2 的数值、圈号、组号/表号、集合管压力和 0.84375 与 `导出文件示例/快捷导出方式2.txt` 一致。
+当前结果：**37 项单元测试 + 170 项浏览器交互测试全部通过，0 个 JS 错误**；方式2 的数值、圈号、组号/表号、集合管压力和 0.84375 与 `导出文件示例/快捷导出方式2.txt` 一致。
 
 单文件版另做了冒烟检查：file:// 打开能正常渲染 4 台炉并显示本地文件提示。
 
@@ -478,6 +478,12 @@ chrome --headless=new --no-sandbox --disable-gpu --user-data-dir=tests/prof ^
 ---
 
 ## 十二、版本
+
+**v2.35.0（2026-10-30）**
+
+- 修复：修改后返回主界面，再进手动模式时导入框仍保留旧粘贴文本，重新解析会覆盖新数据
+- 每次重新进入手动模式都从当前数据重新生成文本，不再沿用上次粘贴内容
+- 新增 2 项浏览器回归测试（合计 37 + 170）
 
 **v2.34.0（2026-10-30）**
 

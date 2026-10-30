@@ -557,6 +557,15 @@ const driver = `
     await sleep(30);
     ok('快捷返回首页', qa('.mode-card').length === 2);
 
+    q('#btnQuick').click();
+    await sleep(40);
+    ok('重新进入手动时用当前数据而不是旧粘贴', q('#quickText').value.indexOf('0.200') >= 0 && q('#quickText').value.indexOf('0.199') < 0, q('#quickText').value.slice(0, 80));
+    q('#btnQuickManual').click();
+    await sleep(40);
+    ok('重新进入手动选炉页', q('.page-title').textContent === '手动快捷录入 · 选择炉子', q('.page-title').textContent);
+    qa('.quick-select-footer .btn').filter(function (b) { return b.textContent === '返回主界面'; })[0].click();
+    await sleep(30);
+
     q('#btnRatioHome').click();
     await sleep(50);
     ok('绝压比选择页不受数据限制显示 4 台炉', qa('.pick-row').length === 4, qa('.pick-row').length);

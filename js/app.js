@@ -303,8 +303,11 @@
     ui.view = 'quickImport';
     quick.model = null;
     quick.selectedId = null;
-    if (!quick.text && C.hasBatchData(batch)) quick.text = C.exportMode1(batch);
+    quick.text = C.hasBatchData(batch) ? C.exportMode1(batch) : '';
     quick.parsedText = quick.text;
+    quick.issues = [];
+    quick.message = '';
+    quick.applyIssues = [];
     render();
     scrollTop();
   }
