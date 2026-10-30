@@ -72,6 +72,8 @@ const driver = `
         inputs[i].dispatchEvent(new Event('input', { bubbles: true }));
       });
     }
+  } else if (view === 'visual') {
+    document.getElementById('btnVisual').click();
   } else if (view === 'quick') {
     document.getElementById('btnQuick').click();
   } else if (view === 'quickSelect' || view === 'quickFurnace') {

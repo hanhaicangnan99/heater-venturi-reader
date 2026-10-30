@@ -853,6 +853,74 @@ body {
 
 /* ---------------------------------------------------------------- 炉子卡片 */
 
+.mode-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.mode-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-height: 220px;
+  padding: 22px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: var(--surface);
+  box-shadow: var(--shadow);
+  cursor: pointer;
+  transition: border-color .12s, transform .12s;
+}
+
+.mode-card:hover,
+.mode-card:focus-visible {
+  border-color: var(--brand);
+  transform: translateY(-1px);
+  outline: none;
+}
+
+.mode-kicker {
+  color: var(--brand);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: .04em;
+}
+
+.mode-card h3 {
+  margin: 0;
+  font-size: 24px;
+  line-height: 1.2;
+}
+
+.mode-card p {
+  margin: 0;
+  color: var(--text-2);
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.mode-status {
+  margin-top: auto;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: var(--surface-2);
+  color: var(--muted);
+  font-size: 12.5px;
+}
+
+.mode-go {
+  color: var(--brand);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+@media (max-width: 640px) {
+  .mode-grid { grid-template-columns: 1fr; }
+  .mode-card { min-height: 0; padding: 18px; }
+}
+
 .furnace-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -2182,7 +2250,7 @@ body.furnace-mode .app-shell { padding-top: 8px; }
 
   <footer class="foot">
     <span id="saveHint">自动保存已开启</span>
-    <span class="foot-version" id="appVersion">v2.30.0</span>
+    <span class="foot-version" id="appVersion">v2.31.0</span>
     <span class="foot-note">数据只存本机浏览器，请定期导出备份 · 识别模块接口：GaugeApp.pushReading(读数)</span>
   </footer>
 
@@ -2262,18 +2330,19 @@ body.furnace-mode .app-shell { padding-top: 8px; }
       <ul>
         <li>顶部填日期、时间、记录人；首页选炉子（2# / 3# / 4# / 5#）→ 逐组录入 → 「下一组」→「完成本炉」回主界面。</li>
         <li>2#～5# 炉都录完后，回主界面点「<b>绝压比计算</b>」，填集合管压力生成方式2。</li>
+        <li>主界面只选两种并行录入方式：<b>视觉录入</b>（进入全部 2/3/4/5 号炉，逐块录原始读数）或<b>手动快捷录入</b>（只记每组最高表）。</li>
         <li>每台炉卡片左下角有「<b>清空</b>」，只清空这一台炉的读数。</li>
         <li>每台炉 8 组：<b>第 1～4 组 = A 炉膛</b>，<b>第 5～8 组 = B 炉膛</b>。右上角可切换「整台 / A炉膛 / B炉膛」，只测半台时选 A 或 B。</li>
         <li>2号炉每组 2 块表（每行一组）；3/4/5号炉每组 12 块表（每行 6 块，两行一组）。</li>
       </ul>
       <h3>录入</h3>
       <ul>
-        <li>单炉页隐藏顶部栏：第一行只显示炉号和炉膛选择，第二行是加宽的返回主界面按钮；手机从页面中间向右划也能返回。</li>
+        <li>单炉页隐藏顶部栏：第一行只显示炉号和炉膛选择，第二行是加宽的返回炉子列表按钮；手机从页面中间向右划也能返回列表。</li>
         <li>单炉页主区域是相机实时画面；手机浏览器需要 HTTPS，没权限时点「打开相机」重试。</li>
         <li>进炉子页默认暂停，点中间大按钮「开始识别」后才接收识别读数；再点变成「暂停识别」。</li>
         <li>指定起点：点下面组内任意一块表，再点「开始识别」，就从这块开始；识别中点击某格会自动暂停。</li>
         <li>「上一组 / 下一组」在大按钮两侧；下一行是「跳过（送检）」和「剔除本块」。</li>
-        <li><b>日常快捷更新（视觉识别备用）</b>：首页「手动快捷输入」→ 导入页粘贴方式1并解析，或「不导入，直接手动」→ 选炉页始终显示全部 2/3/4/5 号炉，每台可选整台/A/B 录入范围；导出和绝压比改为多页，先选炉子（4台全列出、不受数据限制、每台可选整台/A/B）再预览/计算；已导入的正常显示、未导入的虚线显示但也能点 → 单炉页一次改一组，顶部始终可选「整台/A炉膛/B炉膛」，点「下一组」；选炉页应用按钮下方有「导出文丘里压力」「返回主界面」「计算绝压比」；未导入的每组默认 1#、第一组 0.000，没改过的组跟随最近改过的那组；导入半台切整台时，空白组也跟随最近改过的组，被跟随的组会写回；位号和读数用大箭头调，位号旁有滑杆可快速拖动，位号到 1# 按↓回最大，读数到 0.000 按↓按位循环（千分位 0→9 等）；可开「反向输入」；最后「应用到本炉」。只更新最高表，其他表读数保留。</li>
+        <li><b>日常快捷更新（视觉识别备用）</b>：首页「手动快捷录入」→ 导入页粘贴方式1并解析，或「不导入，直接手动」→ 选炉页始终显示全部 2/3/4/5 号炉，每台可选整台/A/B 录入范围；导出和绝压比改为多页，先选炉子（4台全列出、不受数据限制、每台可选整台/A/B）再预览/计算；已导入的正常显示、未导入的虚线显示但也能点 → 单炉页一次改一组，顶部始终可选「整台/A炉膛/B炉膛」，点「下一组」；选炉页应用按钮下方有「导出文丘里压力」「返回主界面」「计算绝压比」；未导入的每组默认 1#、第一组 0.000，没改过的组跟随最近改过的那组；导入半台切整台时，空白组也跟随最近改过的组，被跟随的组会写回；位号和读数用大箭头调，位号旁有滑杆可快速拖动，位号到 1# 按↓回最大，读数到 0.000 按↓按位循环（千分位 0→9 等）；可开「反向输入」；最后「应用到本炉」。只更新最高表，其他表读数保留。</li>
         <li>点格子输入读数；<b>回车</b>跳到下一块，<b>方向键</b>按位置跳格，<b>X</b> 剔除当前读数，<b>Esc</b> 退出输入框。</li>
         <li>读数支持全角数字、带单位（0.170 MPa）、逗号小数点。</li>
         <li>识别模块识别到一个读数就调用一次 <code>GaugeApp.pushReading(0.170)</code>，会顺序填入当前识别位置；也可以点「识别填入」粘贴一批结果。</li>
@@ -2308,7 +2377,7 @@ body.furnace-mode .app-shell { padding-top: 8px; }
         <li>手机只传一个文件：用 <code>读表软件_手机版.html</code>，CSS/JS 已内联；只传 <code>index.html</code> 会缺 <code>js/</code>、<code>assets/</code>，页面会空白或没样式。</li>
         <li>直接打开本地文件时，录入、导入导出、绝压比计算都能用；手机浏览器不允许 <code>file://</code> 调用摄像头。</li>
         <li>要实时相机：页面必须在 <code>https://</code> 开头的网址下；<code>file://</code> 和 <code>http://192.168…</code> 都不允许调用摄像头。可把单文件放到 GitHub Pages / Netlify / 公司 HTTPS 服务器，或用 App 包壳；不要用微信/QQ 的文件预览打开。</li>
-        <li>如果还显示旧界面：打开 <code>https://hanhaicangnan99.github.io/heater-venturi-reader/?v=2.30.0</code> 一次，或清除站点缓存；页脚会显示当前版本 <code>v2.30.0</code>。</li>
+        <li>如果还显示旧界面：打开 <code>https://hanhaicangnan99.github.io/heater-venturi-reader/?v=2.31.0</code> 一次，或清除站点缓存；页脚会显示当前版本 <code>v2.31.0</code>。</li>
       </ul>
       <h3>数据</h3>
       <ul>
@@ -4387,6 +4456,8 @@ body.furnace-mode .app-shell { padding-top: 8px; }
       renderExportPreviewPage();
     } else if (ui.view === 'ratioSelect') {
       renderPickPage('ratio');
+    } else if (ui.view === 'visual') {
+      renderVisualSelect();
     } else if (ui.view === 'quickImport') {
       renderQuickImport();
     } else if (ui.view === 'quickSelect') {
@@ -4474,17 +4545,61 @@ body.furnace-mode .app-shell { padding-top: 8px; }
 
     host.appendChild(el('div', { class: 'page-head' }, [
       el('div', {}, [
-        el('h2', { class: 'page-title', text: '选择加热炉' }),
-        el('p', { class: 'page-sub', text: 'A 炉膛 = 1～4 组，B 炉膛 = 5～8 组；点炉子进入录入。' })
+        el('h2', { class: 'page-title', text: '选择录入方式' }),
+        el('p', { class: 'page-sub', text: '两种方式并行：视觉录入全部炉子的原始读数，或手动只记每组最高表。' })
       ]),
       el('div', { class: 'page-actions' }, [
         el('button', { class: 'btn', type: 'button', text: '导出文丘里压力', onclick: openExportSelect }),
-        el('button', { class: 'btn', type: 'button', id: 'btnQuick', text: '手动快捷输入', onclick: openQuick }),
         el('button', { class: 'btn primary', type: 'button', id: 'btnRatioHome', text: '绝压比计算', onclick: openRatioSelect }),
         canInstall() ? el('button', { class: 'btn install-btn', type: 'button', id: 'btnInstall', text: '安装到桌面', onclick: installPwa }) : null
       ])
     ]));
 
+    var grid = el('div', { class: 'mode-grid' });
+    grid.appendChild(el('article', {
+      class: 'mode-card', id: 'btnVisual', tabindex: 0, role: 'button',
+      onclick: openVisual
+    }, [
+      el('span', { class: 'mode-kicker', text: '完整录入' }),
+      el('h3', { text: '视觉录入' }),
+      el('p', { text: '相机逐块识别 2/3/4/5 号炉的全部读数，保留每组每块原始数据。' }),
+      el('span', { class: 'mode-status', text: '已录 ' + st.measured + ' / 4 台 · 已处理 ' + st.handled + ' / ' + st.total + ' 块' }),
+      el('span', { class: 'mode-go', text: '进入视觉录入 ›' })
+    ]));
+    grid.appendChild(el('article', {
+      class: 'mode-card', id: 'btnQuick', tabindex: 0, role: 'button',
+      onclick: openQuick
+    }, [
+      el('span', { class: 'mode-kicker', text: '日常更新' }),
+      el('h3', { text: '手动快捷录入' }),
+      el('p', { text: '只记每组最高表位号和读数，适合视觉识别不能用时的快速更新。' }),
+      el('span', { class: 'mode-status', text: '每组只改最高表 · 不必逐块录' }),
+      el('span', { class: 'mode-go', text: '进入手动录入 ›' })
+    ]));
+    host.appendChild(grid);
+  }
+
+  function openVisual() {
+    stopCamera();
+    ui.view = 'visual';
+    render();
+    scrollTop();
+  }
+
+  function renderVisualSelect() {
+    var st = C.batchStat(batch);
+    var host = $('#view');
+    host.innerHTML = '';
+    host.appendChild(el('div', { class: 'page-head' }, [
+      el('div', {}, [
+        el('h2', { class: 'page-title', text: '视觉录入 · 全部炉子' }),
+        el('p', { class: 'page-sub', text: '录入全部原始读数；A 炉膛 = 1～4 组，B 炉膛 = 5～8 组。' })
+      ]),
+      el('div', { class: 'page-actions' }, [
+        el('button', { class: 'btn ghost', type: 'button', text: '‹ 录入方式', onclick: goHome }),
+        el('button', { class: 'btn', type: 'button', id: 'btnQuick', text: '手动快捷录入', onclick: openQuick })
+      ])
+    ]));
     var grid = el('div', { class: 'furnace-grid' });
     st.furnaces.forEach(function (fs) { grid.appendChild(furnaceCard(fs)); });
     host.appendChild(grid);
@@ -5295,7 +5410,7 @@ body.furnace-mode .app-shell { padding-top: 8px; }
     if (!confirm('清空 ' + f.label + ' 的全部读数？')) return;
     C.clearFurnace(batch, f.id);
     persist();
-    renderHome();
+    renderVisualSelect();
     toast('已清空 ' + f.label, 'ok', 1500);
   }
 
@@ -5892,9 +6007,9 @@ body.furnace-mode .app-shell { padding-top: 8px; }
       ]),
       el('div', { class: 'fh-line2' }, [
         el('button', {
-          class: 'btn back', type: 'button', text: '‹ 返回主界面',
-          title: '返回主界面；手机可从页面中间向右划',
-          onclick: goHome
+          class: 'btn back', type: 'button', text: '‹ 返回炉子列表',
+          title: '返回视觉录入的炉子列表；手机可从页面中间向右划',
+          onclick: openVisual
         }),
         el('span', { class: 'swipe-hint', text: '手机右划也可返回' })
       ])
@@ -6914,7 +7029,7 @@ body.furnace-mode .app-shell { padding-top: 8px; }
       if (!t) return;
       var dx = t.clientX - s.x;
       var dy = t.clientY - s.y;
-      if (dx >= 80 && Math.abs(dy) <= 60 && Date.now() - s.t <= 900) goHome();
+      if (dx >= 80 && Math.abs(dy) <= 60 && Date.now() - s.t <= 900) openVisual();
     }, { passive: true });
 
     document.addEventListener('touchcancel', function () { start = null; }, { passive: true });

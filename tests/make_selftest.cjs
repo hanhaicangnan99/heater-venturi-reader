@@ -64,7 +64,8 @@ const driver = `
   }
 
   try {
-    ok('首页 4 台炉', qa('.furnace-card').length === 4, qa('.furnace-card').length);
+    ok('首页两种录入方式', qa('.mode-card').length === 2, qa('.mode-card').length);
+    ok('首页不再显示炉子选择', qa('.furnace-card').length === 0, qa('.furnace-card').length);
     ok('顶部按钮为导出所有数据', q('#btnExport').textContent === '导出所有数据', q('#btnExport').textContent);
     ok('导入按钮为 Excel', q('#btnImport').textContent === '导入 Excel', q('#btnImport').textContent);
     ok('Excel 读取组件已加载', !!window.XlsxRead);
@@ -116,9 +117,12 @@ const driver = `
     ok('切 B 后从 ⑤ 开始', q('#convPreview').textContent.indexOf('⑤<1>0.100') >= 0, q('#convPreview').textContent);
     qa('.page-actions .btn').filter(function (b) { return b.textContent.indexOf('返回炉子列表') >= 0; })[0].click();
     await sleep(30);
-    ok('返回首页', qa('.furnace-card').length === 4);
+    ok('返回首页', qa('.mode-card').length === 2);
 
-    // ---- 3号炉录入 ----
+    // ---- 视觉录入：全部炉子 ----
+    q('#btnVisual').click();
+    await sleep(30);
+    ok('视觉模式显示全部 4 台炉', qa('.furnace-card').length === 4, qa('.furnace-card').length);
     qa('.furnace-card')[1].click();
     await sleep(40);
     ok('进入 3号炉', q('.fh-name').textContent === '3号炉', q('.fh-name').textContent);
@@ -185,6 +189,8 @@ const driver = `
     await sleep(30);
     q('.page-actions .btn').click();
     await sleep(30);
+    q('.page-actions .btn').click();
+    await sleep(30);
     ok('打开导出选择页', q('.page-title').textContent === '选择导出炉子', q('.page-title').textContent);
     ok('导出选择页显示全部 4 台炉', qa('.pick-row').length === 4, qa('.pick-row').length);
     ok('每台炉都有整台/A/B', qa('.pick-row .seg-btn').length === 12, qa('.pick-row .seg-btn').length);
@@ -241,20 +247,22 @@ const driver = `
     ok('自动保存已写入', !!stored && stored.indexOf('3号炉') >= 0);
 
     // ---- 2号炉 ----
+    q('#btnVisual').click();
+    await sleep(30);
     qa('.furnace-card')[0].click();
     await sleep(30);
     ok('2号炉每组 2 块', qa('.cell').length === 2, qa('.cell').length);
     ok('2号炉单行双列', q('.cell-grid').classList.contains('cols-2'));
     ok('2号炉 8 个组', qa('.group-chip').length === 8, qa('.group-chip').length);
 
-    // ---- 主界面清空单台炉子 ----
+    // ---- 返回视觉炉子列表，清空单台炉子 ----
     q('.furnace-head .back').click();
     await sleep(30);
     var clearBtn = qa('.furnace-card')[1].querySelector('.fc-clear');
-    ok('主界面有清空按钮', !!clearBtn);
+    ok('视觉列表有清空按钮', !!clearBtn);
     clearBtn.click();
     await sleep(30);
-    ok('清空后仍在主界面', qa('.furnace-card').length === 4);
+    ok('清空后仍在炉子列表', qa('.furnace-card').length === 4);
     ok('3号炉已清空为 0/96', qa('.furnace-card')[1].textContent.indexOf('0/96') >= 0, qa('.furnace-card')[1].textContent.slice(0, 40));
 
     // ---- 导入 Excel（用同一套生成器造一个 2号炉文件）----
@@ -285,6 +293,10 @@ const driver = `
     iinput.dispatchEvent(new Event('change', { bubbles: true }));
     await sleep(1200);
 
+    if (!qa('.furnace-card').length) {
+      q('#btnVisual').click();
+      await sleep(30);
+    }
     ok('Excel 导入后仍 4 台炉', qa('.furnace-card').length === 4);
     ok('Excel 导入 2号炉 16/16', qa('.furnace-card')[0].textContent.indexOf('16/16') >= 0, qa('.furnace-card')[0].textContent.slice(0, 40));
     ok('Excel 导入日期', q('#metaDate').value === '2026-10-24', q('#metaDate').value);
@@ -550,7 +562,7 @@ const driver = `
 
     qa('.page-actions .btn').filter(function (b) { return b.textContent === '返回主界面'; })[0].click();
     await sleep(30);
-    ok('快捷返回首页', qa('.furnace-card').length === 4);
+    ok('快捷返回首页', qa('.mode-card').length === 2);
 
     q('#btnRatioHome').click();
     await sleep(50);
@@ -564,7 +576,7 @@ const driver = `
 
     qa('.page-actions .btn').filter(function (b) { return b.textContent.indexOf('返回炉子列表') >= 0; })[0].click();
     await sleep(30);
-    ok('绝压比返回首页', qa('.furnace-card').length === 4);
+    ok('绝压比返回首页', qa('.mode-card').length === 2);
   } catch (err) {
     results.push('FAIL 测试异常 :: ' + err.message);
   }

@@ -150,6 +150,8 @@
       renderExportPreviewPage();
     } else if (ui.view === 'ratioSelect') {
       renderPickPage('ratio');
+    } else if (ui.view === 'visual') {
+      renderVisualSelect();
     } else if (ui.view === 'quickImport') {
       renderQuickImport();
     } else if (ui.view === 'quickSelect') {
@@ -237,17 +239,61 @@
 
     host.appendChild(el('div', { class: 'page-head' }, [
       el('div', {}, [
-        el('h2', { class: 'page-title', text: '选择加热炉' }),
-        el('p', { class: 'page-sub', text: 'A 炉膛 = 1～4 组，B 炉膛 = 5～8 组；点炉子进入录入。' })
+        el('h2', { class: 'page-title', text: '选择录入方式' }),
+        el('p', { class: 'page-sub', text: '两种方式并行：视觉录入全部炉子的原始读数，或手动只记每组最高表。' })
       ]),
       el('div', { class: 'page-actions' }, [
         el('button', { class: 'btn', type: 'button', text: '导出文丘里压力', onclick: openExportSelect }),
-        el('button', { class: 'btn', type: 'button', id: 'btnQuick', text: '手动快捷输入', onclick: openQuick }),
         el('button', { class: 'btn primary', type: 'button', id: 'btnRatioHome', text: '绝压比计算', onclick: openRatioSelect }),
         canInstall() ? el('button', { class: 'btn install-btn', type: 'button', id: 'btnInstall', text: '安装到桌面', onclick: installPwa }) : null
       ])
     ]));
 
+    var grid = el('div', { class: 'mode-grid' });
+    grid.appendChild(el('article', {
+      class: 'mode-card', id: 'btnVisual', tabindex: 0, role: 'button',
+      onclick: openVisual
+    }, [
+      el('span', { class: 'mode-kicker', text: '完整录入' }),
+      el('h3', { text: '视觉录入' }),
+      el('p', { text: '相机逐块识别 2/3/4/5 号炉的全部读数，保留每组每块原始数据。' }),
+      el('span', { class: 'mode-status', text: '已录 ' + st.measured + ' / 4 台 · 已处理 ' + st.handled + ' / ' + st.total + ' 块' }),
+      el('span', { class: 'mode-go', text: '进入视觉录入 ›' })
+    ]));
+    grid.appendChild(el('article', {
+      class: 'mode-card', id: 'btnQuick', tabindex: 0, role: 'button',
+      onclick: openQuick
+    }, [
+      el('span', { class: 'mode-kicker', text: '日常更新' }),
+      el('h3', { text: '手动快捷录入' }),
+      el('p', { text: '只记每组最高表位号和读数，适合视觉识别不能用时的快速更新。' }),
+      el('span', { class: 'mode-status', text: '每组只改最高表 · 不必逐块录' }),
+      el('span', { class: 'mode-go', text: '进入手动录入 ›' })
+    ]));
+    host.appendChild(grid);
+  }
+
+  function openVisual() {
+    stopCamera();
+    ui.view = 'visual';
+    render();
+    scrollTop();
+  }
+
+  function renderVisualSelect() {
+    var st = C.batchStat(batch);
+    var host = $('#view');
+    host.innerHTML = '';
+    host.appendChild(el('div', { class: 'page-head' }, [
+      el('div', {}, [
+        el('h2', { class: 'page-title', text: '视觉录入 · 全部炉子' }),
+        el('p', { class: 'page-sub', text: '录入全部原始读数；A 炉膛 = 1～4 组，B 炉膛 = 5～8 组。' })
+      ]),
+      el('div', { class: 'page-actions' }, [
+        el('button', { class: 'btn ghost', type: 'button', text: '‹ 录入方式', onclick: goHome }),
+        el('button', { class: 'btn', type: 'button', id: 'btnQuick', text: '手动快捷录入', onclick: openQuick })
+      ])
+    ]));
     var grid = el('div', { class: 'furnace-grid' });
     st.furnaces.forEach(function (fs) { grid.appendChild(furnaceCard(fs)); });
     host.appendChild(grid);
@@ -1058,7 +1104,7 @@
     if (!confirm('清空 ' + f.label + ' 的全部读数？')) return;
     C.clearFurnace(batch, f.id);
     persist();
-    renderHome();
+    renderVisualSelect();
     toast('已清空 ' + f.label, 'ok', 1500);
   }
 
@@ -1655,9 +1701,9 @@
       ]),
       el('div', { class: 'fh-line2' }, [
         el('button', {
-          class: 'btn back', type: 'button', text: '‹ 返回主界面',
-          title: '返回主界面；手机可从页面中间向右划',
-          onclick: goHome
+          class: 'btn back', type: 'button', text: '‹ 返回炉子列表',
+          title: '返回视觉录入的炉子列表；手机可从页面中间向右划',
+          onclick: openVisual
         }),
         el('span', { class: 'swipe-hint', text: '手机右划也可返回' })
       ])
@@ -2677,7 +2723,7 @@
       if (!t) return;
       var dx = t.clientX - s.x;
       var dy = t.clientY - s.y;
-      if (dx >= 80 && Math.abs(dy) <= 60 && Date.now() - s.t <= 900) goHome();
+      if (dx >= 80 && Math.abs(dy) <= 60 && Date.now() - s.t <= 900) openVisual();
     }, { passive: true });
 
     document.addEventListener('touchcancel', function () { start = null; }, { passive: true });

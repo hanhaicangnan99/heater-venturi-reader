@@ -830,6 +830,74 @@ body {
 
 /* ---------------------------------------------------------------- 炉子卡片 */
 
+.mode-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.mode-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-height: 220px;
+  padding: 22px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: var(--surface);
+  box-shadow: var(--shadow);
+  cursor: pointer;
+  transition: border-color .12s, transform .12s;
+}
+
+.mode-card:hover,
+.mode-card:focus-visible {
+  border-color: var(--brand);
+  transform: translateY(-1px);
+  outline: none;
+}
+
+.mode-kicker {
+  color: var(--brand);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: .04em;
+}
+
+.mode-card h3 {
+  margin: 0;
+  font-size: 24px;
+  line-height: 1.2;
+}
+
+.mode-card p {
+  margin: 0;
+  color: var(--text-2);
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.mode-status {
+  margin-top: auto;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: var(--surface-2);
+  color: var(--muted);
+  font-size: 12.5px;
+}
+
+.mode-go {
+  color: var(--brand);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+@media (max-width: 640px) {
+  .mode-grid { grid-template-columns: 1fr; }
+  .mode-card { min-height: 0; padding: 18px; }
+}
+
 .furnace-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
