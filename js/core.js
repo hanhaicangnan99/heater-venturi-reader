@@ -793,12 +793,7 @@
    * ------------------------------------------------------------------ */
 
   function furnacesWithData(batch) {
-    var scope = batch.meta && batch.meta.exportScope;
-    var limited = Array.isArray(scope) && scope.length;
-    return batch.furnaces.filter(function (f) {
-      if (limited && scope.indexOf(f.id) < 0) return false;
-      return hasScopeData(f);
-    });
+    return batch.furnaces.filter(hasScopeData);
   }
 
   /** 与 xlsx-lite.js 中 cellXfs 的顺序一一对应 */
@@ -1130,9 +1125,12 @@
    *   ...
    * 每个组一行：最高值表号 + 空格 + 最高值（固定 3 位小数，与方式2一致）。
    */
-  function exportMode1(batch) {
+  function exportMode1(batch, onlyIds) {
     var lines = ['文丘里压力', ''];
     var list = furnacesWithData(batch);
+    if (Array.isArray(onlyIds)) {
+      list = list.filter(function (f) { return onlyIds.indexOf(f.id) >= 0; });
+    }
     if (!list.length) {
       lines.push('（暂无读数）');
       return lines.join('\n');

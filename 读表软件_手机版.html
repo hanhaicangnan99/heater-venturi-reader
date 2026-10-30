@@ -613,26 +613,11 @@ body {
 .quick-select-controls {
   display: flex;
   align-items: center;
+  justify-content: flex-end;
   gap: 8px;
   flex-wrap: wrap;
   margin-top: 8px;
   padding-right: 78px;
-}
-
-.quick-select-toggle {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  font-size: 12px;
-  color: var(--text-2);
-  cursor: pointer;
-}
-
-.quick-select-check {
-  width: 17px;
-  height: 17px;
-  accent-color: var(--brand);
-  cursor: pointer;
 }
 
 .quick-select-controls .seg { margin-left: auto; }
@@ -1607,6 +1592,54 @@ body.furnace-mode .app-shell { padding-top: 8px; }
 
 .export-preview:focus { outline: none; }
 
+.export-select {
+  margin: 10px 0;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--surface);
+}
+
+.export-select-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 13px;
+}
+
+.export-select-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.export-select-actions .btn {
+  padding: 4px 8px;
+  font-size: 12px;
+}
+
+.export-select-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 14px;
+  margin-top: 8px;
+}
+
+.export-select-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.export-select-check {
+  width: 17px;
+  height: 17px;
+  accent-color: var(--brand);
+  cursor: pointer;
+}
+
 /* 导出所有数据：摘要 */
 .export-summary {
   margin: 12px 0;
@@ -1822,6 +1855,39 @@ body.furnace-mode .app-shell { padding-top: 8px; }
 /* ---------------------------------------------------------------- 方式1 → 方式2 */
 
 .dialog-foot .left { margin-right: auto; }
+
+.conv-select-actions {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+
+.conv-select-actions .btn {
+  padding: 4px 8px;
+  font-size: 12px;
+}
+
+.conv-select-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 14px;
+}
+
+.conv-select-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.conv-select-check {
+  width: 17px;
+  height: 17px;
+  accent-color: var(--brand);
+  cursor: pointer;
+}
 
 .conv-textarea {
   min-height: 190px;
@@ -2068,7 +2134,7 @@ body.furnace-mode .app-shell { padding-top: 8px; }
 
   <footer class="foot">
     <span id="saveHint">自动保存已开启</span>
-    <span class="foot-version" id="appVersion">v2.28.0</span>
+    <span class="foot-version" id="appVersion">v2.29.0</span>
     <span class="foot-note">数据只存本机浏览器，请定期导出备份 · 识别模块接口：GaugeApp.pushReading(读数)</span>
   </footer>
 
@@ -2085,6 +2151,7 @@ body.furnace-mode .app-shell { padding-top: 8px; }
     </header>
     <div class="dialog-body">
       <p class="hint" id="exportHint"></p>
+      <div class="export-select" id="exportSelect"></div>
       <pre class="export-preview" id="exportPreview" tabindex="-1" autofocus></pre>
       <p class="hint" id="exportNote"></p>
     </div>
@@ -2158,7 +2225,7 @@ body.furnace-mode .app-shell { padding-top: 8px; }
         <li>进炉子页默认暂停，点中间大按钮「开始识别」后才接收识别读数；再点变成「暂停识别」。</li>
         <li>指定起点：点下面组内任意一块表，再点「开始识别」，就从这块开始；识别中点击某格会自动暂停。</li>
         <li>「上一组 / 下一组」在大按钮两侧；下一行是「跳过（送检）」和「剔除本块」。</li>
-        <li><b>日常快捷更新（视觉识别备用）</b>：首页「手动快捷输入」→ 导入页粘贴方式1并解析，或「不导入，直接手动」→ 选炉页始终显示全部 2/3/4/5 号炉，每台有「导出/算绝压比」勾选框和整台/A/B 范围，未勾选不应用、不导出、不进绝压比，没输入行不写入；已导入的正常显示、未导入的虚线显示但也能点 → 单炉页一次改一组，顶部始终可选「整台/A炉膛/B炉膛」，点「下一组」；选炉页应用按钮下方有「导出文丘里压力」「返回主界面」「计算绝压比」；未导入的每组默认 1#、第一组 0.000，没改过的组跟随最近改过的那组；导入半台切整台时，空白组也跟随最近改过的组，被跟随的组会写回；位号和读数用大箭头调，位号旁有滑杆可快速拖动，位号到 1# 按↓回最大，读数到 0.000 按↓按位循环（千分位 0→9 等）；可开「反向输入」；最后「应用到本炉」。只更新最高表，其他表读数保留。</li>
+        <li><b>日常快捷更新（视觉识别备用）</b>：首页「手动快捷输入」→ 导入页粘贴方式1并解析，或「不导入，直接手动」→ 选炉页始终显示全部 2/3/4/5 号炉，每台可选整台/A/B 录入范围；导出和绝压比页面内再勾选参与炉子，默认全部有数据炉子参与；已导入的正常显示、未导入的虚线显示但也能点 → 单炉页一次改一组，顶部始终可选「整台/A炉膛/B炉膛」，点「下一组」；选炉页应用按钮下方有「导出文丘里压力」「返回主界面」「计算绝压比」；未导入的每组默认 1#、第一组 0.000，没改过的组跟随最近改过的那组；导入半台切整台时，空白组也跟随最近改过的组，被跟随的组会写回；位号和读数用大箭头调，位号旁有滑杆可快速拖动，位号到 1# 按↓回最大，读数到 0.000 按↓按位循环（千分位 0→9 等）；可开「反向输入」；最后「应用到本炉」。只更新最高表，其他表读数保留。</li>
         <li>点格子输入读数；<b>回车</b>跳到下一块，<b>方向键</b>按位置跳格，<b>X</b> 剔除当前读数，<b>Esc</b> 退出输入框。</li>
         <li>读数支持全角数字、带单位（0.170 MPa）、逗号小数点。</li>
         <li>识别模块识别到一个读数就调用一次 <code>GaugeApp.pushReading(0.170)</code>，会顺序填入当前识别位置；也可以点「识别填入」粘贴一批结果。</li>
@@ -2193,7 +2260,7 @@ body.furnace-mode .app-shell { padding-top: 8px; }
         <li>手机只传一个文件：用 <code>读表软件_手机版.html</code>，CSS/JS 已内联；只传 <code>index.html</code> 会缺 <code>js/</code>、<code>assets/</code>，页面会空白或没样式。</li>
         <li>直接打开本地文件时，录入、导入导出、绝压比计算都能用；手机浏览器不允许 <code>file://</code> 调用摄像头。</li>
         <li>要实时相机：页面必须在 <code>https://</code> 开头的网址下；<code>file://</code> 和 <code>http://192.168…</code> 都不允许调用摄像头。可把单文件放到 GitHub Pages / Netlify / 公司 HTTPS 服务器，或用 App 包壳；不要用微信/QQ 的文件预览打开。</li>
-        <li>如果还显示旧界面：打开 <code>https://hanhaicangnan99.github.io/heater-venturi-reader/?v=2.28.0</code> 一次，或清除站点缓存；页脚会显示当前版本 <code>v2.28.0</code>。</li>
+        <li>如果还显示旧界面：打开 <code>https://hanhaicangnan99.github.io/heater-venturi-reader/?v=2.29.0</code> 一次，或清除站点缓存；页脚会显示当前版本 <code>v2.29.0</code>。</li>
       </ul>
       <h3>数据</h3>
       <ul>
@@ -3006,12 +3073,7 @@ body.furnace-mode .app-shell { padding-top: 8px; }
    * ------------------------------------------------------------------ */
 
   function furnacesWithData(batch) {
-    var scope = batch.meta && batch.meta.exportScope;
-    var limited = Array.isArray(scope) && scope.length;
-    return batch.furnaces.filter(function (f) {
-      if (limited && scope.indexOf(f.id) < 0) return false;
-      return hasScopeData(f);
-    });
+    return batch.furnaces.filter(hasScopeData);
   }
 
   /** 与 xlsx-lite.js 中 cellXfs 的顺序一一对应 */
@@ -3343,9 +3405,12 @@ body.furnace-mode .app-shell { padding-top: 8px; }
    *   ...
    * 每个组一行：最高值表号 + 空格 + 最高值（固定 3 位小数，与方式2一致）。
    */
-  function exportMode1(batch) {
+  function exportMode1(batch, onlyIds) {
     var lines = ['文丘里压力', ''];
     var list = furnacesWithData(batch);
+    if (Array.isArray(onlyIds)) {
+      list = list.filter(function (f) { return onlyIds.indexOf(f.id) >= 0; });
+    }
     if (!list.length) {
       lines.push('（暂无读数）');
       return lines.join('\n');
@@ -4143,6 +4208,8 @@ body.furnace-mode .app-shell { padding-top: 8px; }
   var deferredInstall = null;
   var convText = '';
   var conv = null;
+  var convSelected = null;
+  var exportSelected = null;
   var quick = {
     text: '', model: null, issues: [], message: '', applyIssues: [],
     selectedId: null, group: 0, reverse: {}
@@ -4397,7 +4464,6 @@ body.furnace-mode .app-shell { padding-top: 8px; }
       perGroup: def.perGroup,
       ambiguous: false,
       imported: false,
-      selected: false,
       rows: quickEmptyRows(def.groups)
     };
   }
@@ -4457,7 +4523,6 @@ body.furnace-mode .app-shell { padding-top: 8px; }
         perGroup: bf ? bf.perGroup : def.perGroup,
         ambiguous: !!pf.ambiguous,
         imported: true,
-        selected: true,
         halfRows: halfRows,
         halfSide: halfRows ? pf.side : null,
         rows: rows
@@ -4775,7 +4840,6 @@ body.furnace-mode .app-shell { padding-top: 8px; }
     var f = quickFind(id);
     if (!f) return;
     quick.selectedId = f.id;
-    f.selected = true;
     quick.group = quickFirstGroup(f);
     quick.message = '';
     quick.applyIssues = [];
@@ -4837,14 +4901,7 @@ body.furnace-mode .app-shell { padding-top: 8px; }
   function quickSelectCard(f) {
     var side = f.side === 'full' ? '整台' : f.side + '炉膛';
     var count = quickFurnaceGroups(f).length;
-    var check = el('input', { class: 'quick-select-check', type: 'checkbox' });
-    check.checked = !!f.selected;
-    check.addEventListener('change', function (e) {
-      e.stopPropagation();
-      f.selected = check.checked;
-      renderQuickSelect();
-    });
-    var seg = el('div', { class: 'seg', role: 'group', 'aria-label': '导出炉膛范围' }, [
+    var seg = el('div', { class: 'seg', role: 'group', 'aria-label': '录入炉膛范围' }, [
       ['full', '整台'], ['A', 'A炉膛'], ['B', 'B炉膛']
     ].map(function (pair) {
       return el('button', {
@@ -4856,13 +4913,7 @@ body.furnace-mode .app-shell { padding-top: 8px; }
         }
       });
     }));
-    var controls = el('div', { class: 'quick-select-controls', onclick: function (e) { e.stopPropagation(); } }, [
-      el('label', { class: 'quick-select-toggle' }, [
-        check,
-        el('span', { text: '导出/算绝压比' })
-      ]),
-      seg
-    ]);
+    var controls = el('div', { class: 'quick-select-controls', onclick: function (e) { e.stopPropagation(); } }, [seg]);
 
     return el('article', {
       class: 'quick-select-card' + (f.imported ? '' : ' is-empty'),
@@ -4916,7 +4967,7 @@ body.furnace-mode .app-shell { padding-top: 8px; }
     host.appendChild(el('div', { class: 'page-head' }, [
       el('div', {}, [
         el('h2', { class: 'page-title', text: '选择需要增补的炉子' }),
-        el('p', { class: 'page-sub', text: '勾选要「导出/算绝压比」的炉子；未勾选不应用，没输入的行不写入。点卡片进入单炉页。' })
+        el('p', { class: 'page-sub', text: '点卡片进入单炉页；录完所有炉子后点「应用快捷数据」。导出/绝压比页面里再单独选要计算的炉子。' })
       ]),
       el('div', { class: 'page-actions' }, [
         el('button', { class: 'btn ghost', type: 'button', text: '‹ 返回导入', onclick: quickBackToImport }),
@@ -4930,7 +4981,7 @@ body.furnace-mode .app-shell { padding-top: 8px; }
     var grid = el('div', { class: 'quick-select-grid' });
     quick.model.forEach(function (f) { grid.appendChild(quickSelectCard(f)); });
     host.appendChild(grid);
-    host.appendChild(quickApplyBar('应用勾选的炉子'));
+    host.appendChild(quickApplyBar('应用快捷数据'));
     host.appendChild(el('div', { class: 'quick-select-footer' }, [
       el('button', { class: 'btn', type: 'button', id: 'btnQuickExport', text: '导出文丘里压力', onclick: quickApplyAndExport }),
       el('button', { class: 'btn ghost', type: 'button', text: '返回主界面', onclick: goHome }),
@@ -5077,33 +5128,28 @@ body.furnace-mode .app-shell { padding-top: 8px; }
       toast('还没有可应用的快捷数据', 'warn');
       return false;
     }
-    var picked = quick.model.filter(function (f) { return f.selected; });
-    if (!picked.length) {
-      toast('先在选炉页勾选要导出的炉子', 'warn', 2600);
-      return false;
-    }
-    if (!skipConfirm && C.hasBatchData(batch) && !confirm('用勾选炉子的快捷数据更新最高表？其他表读数保留。')) return false;
+    if (!skipConfirm && C.hasBatchData(batch) && !confirm('用快捷数据更新最高表？其他表读数保留。')) return false;
 
-    var updates = picked.map(quickUpdateFor);
-    batch.meta.exportScope = picked.map(function (f) { return f.id; });
+    var updates = quick.model.map(quickUpdateFor);
     var res = C.applyQuickUpdate(batch, updates);
     persist();
     quick.message = res.updated
-      ? '已更新 ' + res.updated + ' 组最高表（' + picked.length + ' 台炉勾选）；其他表读数保留。'
-      : '勾选的炉子里没有可更新的行（未输入或表号/读数不完整）。';
+      ? '已更新 ' + res.updated + ' 组最高表；其他表读数保留。'
+      : '没有可更新的行（未输入或表号/读数不完整）。';
     quick.applyIssues = res.warnings || [];
     renderQuickPage();
     if (res.updated) toast('已更新 ' + res.updated + ' 组', 'ok', 2200);
-    else toast('勾选的炉子没有可更新数据', 'warn', 2600);
+    else toast('没有可更新数据', 'warn', 2600);
     return res.updated > 0;
   }
 
   function quickApplyAndRatio() {
-    if (applyQuick(true)) openRatioCalc();
+    applyQuick(true);
+    openRatioCalc();
   }
 
   function quickApplyAndExport() {
-    if ((quick.model || []).some(function (f) { return f.selected; })) applyQuick(true);
+    applyQuick(true);
     openExport();
   }
 
@@ -5114,7 +5160,6 @@ body.furnace-mode .app-shell { padding-top: 8px; }
       return;
     }
     if (C.hasBatchData(batch) && !confirm('用快捷数据更新 ' + f.label + ' 的最高表？其他表读数保留。')) return;
-    f.selected = true;
     var res = C.applyQuickUpdate(batch, [quickUpdateFor(f)]);
     persist();
     quick.message = res.updated
@@ -5127,13 +5172,15 @@ body.furnace-mode .app-shell { padding-top: 8px; }
   }
 
   function quickApplyBar(label) {
-    var picked = (quick.model || []).filter(function (f) { return f.selected; }).length;
+    var active = (quick.model || []).filter(function (f) {
+      return f.rows.some(function (r) { return r.active && !r.placeholder; });
+    }).length;
     return el('div', { class: 'quick-apply' }, [
-      el('div', { class: 'quick-apply-hint', text: '只应用勾选的炉子；未勾选的不导出，未输入的行不写入。' }),
+      el('div', { class: 'quick-apply-hint', text: '应用到所有已输入的炉子；没输入的行不写入，其他表读数保留。' }),
       el('button', {
         class: 'btn primary', type: 'button', id: 'btnQuickApply',
-        text: (label || '应用勾选的炉子') + '（' + picked + '）',
-        disabled: picked === 0,
+        text: (label || '应用快捷数据') + (active ? '（' + active + ' 台）' : ''),
+        disabled: active === 0,
         onclick: function () { applyQuick(false); }
       })
     ]);
@@ -5268,10 +5315,13 @@ body.furnace-mode .app-shell { padding-top: 8px; }
     stopCamera();
     ui.view = 'convert';
     if (C.hasBatchData(batch)) {
-      convText = C.exportMode1(batch);
+      convSelected = C.furnacesWithData(batch).map(function (f) { return f.id; });
+      convText = C.exportMode1(batch, convSelected);
       conv = C.parseMode1(convText);
       conv.fromCurrent = true;
       syncConvHeaders();
+    } else {
+      convSelected = [];
     }
     render();
     scrollTop();
@@ -5294,13 +5344,14 @@ body.furnace-mode .app-shell { padding-top: 8px; }
     host.appendChild(el('div', { class: 'page-head' }, [
       el('div', {}, [
         el('h2', { class: 'page-title', text: '绝压比计算' }),
-        el('p', { class: 'page-sub', text: '所有炉子的文丘里读数录完后，在这里填集合管压力，生成方式2。打开时会自动载入当前读数；也可以粘贴方式1文本（老记录 / 别人发来的）。' })
+        el('p', { class: 'page-sub', text: '默认载入所有有读数的炉子，可勾选本次参与计算的炉子；手动录入的炉子也会自动参与。' })
       ]),
       el('div', { class: 'page-actions' }, [
         el('button', { class: 'btn', type: 'button', text: '‹ 返回炉子列表', onclick: goHome })
       ])
     ]));
 
+    if (conv && conv.fromCurrent) host.appendChild(convCurrentSelectPanel());
     host.appendChild(convPastePanel());
     if (conv && conv.furnaces.length) {
       host.appendChild(convResultPanel());
@@ -5308,6 +5359,62 @@ body.furnace-mode .app-shell { padding-top: 8px; }
     }
     updateConvIssues();
     if (conv && conv.furnaces.length) updateConvPreview();
+  }
+
+  function convCurrentSelectPanel() {
+    var list = C.furnacesWithData(batch);
+    var sec = el('section', { class: 'panel' });
+    sec.appendChild(el('div', { class: 'panel-head' }, [
+      el('h2', { class: 'panel-title', text: '参与计算的炉子' }),
+      el('span', { class: 'panel-note', text: '默认全部；取消勾选后从当前数据重新生成' })
+    ]));
+    var body = el('div', { class: 'panel-body' });
+    if (!Array.isArray(convSelected)) convSelected = list.map(function (f) { return f.id; });
+    var selected = convSelected;
+    if (!list.length) {
+      body.appendChild(el('p', { class: 'hint', text: '当前还没有录入任何炉子读数。' }));
+    } else {
+      body.appendChild(el('div', { class: 'conv-select-actions' }, [
+        el('button', { class: 'btn ghost small', type: 'button', text: '全选', onclick: function () {
+          convSelected = list.map(function (f) { return f.id; });
+          rebuildCurrentConv();
+        } }),
+        el('button', { class: 'btn ghost small', type: 'button', text: '全不选', onclick: function () {
+          convSelected = [];
+          rebuildCurrentConv();
+        } })
+      ]));
+      var row = el('div', { class: 'conv-select-row' });
+      list.forEach(function (f) {
+        var cb = el('input', { type: 'checkbox', class: 'conv-select-check' });
+        cb.checked = selected.indexOf(f.id) >= 0;
+        cb.addEventListener('change', function () {
+          if (cb.checked) {
+            if (convSelected.indexOf(f.id) < 0) convSelected.push(f.id);
+          } else {
+            convSelected = convSelected.filter(function (id) { return id !== f.id; });
+          }
+          rebuildCurrentConv();
+        });
+        row.appendChild(el('label', { class: 'conv-select-label' }, [
+          cb,
+          el('span', { text: f.label + ' · ' + C.sideLabel(f.side) })
+        ]));
+      });
+      body.appendChild(row);
+    }
+    sec.appendChild(body);
+    return sec;
+  }
+
+  function rebuildCurrentConv() {
+    convText = C.exportMode1(batch, convSelected || []);
+    var ta = $('#convText');
+    if (ta) ta.value = convText;
+    conv = C.parseMode1(convText);
+    conv.fromCurrent = true;
+    syncConvHeaders();
+    renderConverter();
   }
 
   function convPastePanel() {
@@ -5343,6 +5450,7 @@ body.furnace-mode .app-shell { padding-top: 8px; }
     if (ta) convText = ta.value;
     conv = C.parseMode1(convText);
     conv.fromCurrent = !!isCurrent;
+    if (!conv.fromCurrent) convSelected = null;
     if (conv.fromCurrent) syncConvHeaders();
     renderConverter();
     if (conv.furnaces.length) toast('解析到 ' + conv.furnaces.length + ' 台炉', 'ok', 1800);
@@ -5354,7 +5462,8 @@ body.furnace-mode .app-shell { padding-top: 8px; }
       toast('当前还没有录入任何炉子读数', 'warn', 2600);
       return;
     }
-    convText = C.exportMode1(batch);
+    convSelected = C.furnacesWithData(batch).map(function (f) { return f.id; });
+    convText = C.exportMode1(batch, convSelected);
     var ta = $('#convText');
     if (ta) ta.value = convText;
     parseConv(true);
@@ -6416,21 +6525,63 @@ body.furnace-mode .app-shell { padding-top: 8px; }
    * ================================================================== */
 
   function openExport() {
-    var hasScope = C.furnacesWithData(batch).length > 0;
-    if (!hasScope) {
+    var list = C.furnacesWithData(batch);
+    if (!list.length) {
       toast(C.hasBatchData(batch) ? '当前炉膛范围内还没有读数（可切回整台）' : '还没有录入任何读数', 'warn', 3200);
       return;
     }
+    exportSelected = list.map(function (f) { return f.id; });
     renderExportPreview();
     $('#dlgExport').showModal();
   }
 
   function renderExportPreview() {
-    $('#exportPreview').textContent = C.exportMode1(batch);
-    $('#exportHint').textContent = '每台炉一个标题（半台带 A/B炉膛），每组一行：最高值表号 最高值（3 位小数）。';
+    var list = C.furnacesWithData(batch);
+    if (!Array.isArray(exportSelected)) exportSelected = list.map(function (f) { return f.id; });
+    exportSelected = exportSelected.filter(function (id) {
+      return list.some(function (f) { return f.id === id; });
+    });
+    var sel = $('#exportSelect');
+    sel.innerHTML = '';
+    sel.appendChild(el('div', { class: 'export-select-head' }, [
+      el('strong', { text: '选择参与导出的炉子' }),
+      el('span', { class: 'export-select-actions' }, [
+        el('button', { class: 'btn ghost small', type: 'button', text: '全选', onclick: function () {
+          exportSelected = list.map(function (f) { return f.id; });
+          renderExportPreview();
+        } }),
+        el('button', { class: 'btn ghost small', type: 'button', text: '全不选', onclick: function () {
+          exportSelected = [];
+          renderExportPreview();
+        } })
+      ])
+    ]));
+    var row = el('div', { class: 'export-select-row' });
+    list.forEach(function (f) {
+      var cb = el('input', { type: 'checkbox', class: 'export-select-check' });
+      cb.checked = exportSelected.indexOf(f.id) >= 0;
+      cb.addEventListener('change', function () {
+        if (cb.checked) {
+          if (exportSelected.indexOf(f.id) < 0) exportSelected.push(f.id);
+        } else {
+          exportSelected = exportSelected.filter(function (id) { return id !== f.id; });
+        }
+        renderExportPreview();
+      });
+      row.appendChild(el('label', { class: 'export-select-label' }, [
+        cb,
+        el('span', { text: f.label + ' · ' + C.sideLabel(f.side) })
+      ]));
+    });
+    sel.appendChild(row);
+
+    $('#exportPreview').textContent = C.exportMode1(batch, exportSelected);
+    $('#exportHint').textContent = '已选 ' + exportSelected.length + ' / ' + list.length + ' 台；只导出勾选的炉子，手动录入的炉子默认参与。';
+    $('#btnCopyExport').disabled = exportSelected.length === 0;
+    $('#btnDownloadExport').disabled = exportSelected.length === 0;
 
     var outside = [];
-    batch.furnaces.forEach(function (f) {
+    list.forEach(function (f) {
       if (!C.hasFurnaceData(f)) return;
       var scope = C.groupsInScope(f);
       var hidden = 0;
@@ -6442,7 +6593,7 @@ body.furnace-mode .app-shell { padding-top: 8px; }
     });
     $('#exportNote').textContent = outside.length
       ? '未参与本次导出：' + outside.join('；')
-      : '只导出有读数的炉子；空组显示为 - -。';
+      : '只导出勾选的炉子；空组显示为 - -。';
   }
 
   function copyText(text) {

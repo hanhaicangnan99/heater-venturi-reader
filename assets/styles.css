@@ -590,26 +590,11 @@ body {
 .quick-select-controls {
   display: flex;
   align-items: center;
+  justify-content: flex-end;
   gap: 8px;
   flex-wrap: wrap;
   margin-top: 8px;
   padding-right: 78px;
-}
-
-.quick-select-toggle {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  font-size: 12px;
-  color: var(--text-2);
-  cursor: pointer;
-}
-
-.quick-select-check {
-  width: 17px;
-  height: 17px;
-  accent-color: var(--brand);
-  cursor: pointer;
 }
 
 .quick-select-controls .seg { margin-left: auto; }
@@ -1584,6 +1569,54 @@ body.furnace-mode .app-shell { padding-top: 8px; }
 
 .export-preview:focus { outline: none; }
 
+.export-select {
+  margin: 10px 0;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--surface);
+}
+
+.export-select-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 13px;
+}
+
+.export-select-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.export-select-actions .btn {
+  padding: 4px 8px;
+  font-size: 12px;
+}
+
+.export-select-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 14px;
+  margin-top: 8px;
+}
+
+.export-select-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.export-select-check {
+  width: 17px;
+  height: 17px;
+  accent-color: var(--brand);
+  cursor: pointer;
+}
+
 /* 导出所有数据：摘要 */
 .export-summary {
   margin: 12px 0;
@@ -1799,6 +1832,39 @@ body.furnace-mode .app-shell { padding-top: 8px; }
 /* ---------------------------------------------------------------- 方式1 → 方式2 */
 
 .dialog-foot .left { margin-right: auto; }
+
+.conv-select-actions {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+
+.conv-select-actions .btn {
+  padding: 4px 8px;
+  font-size: 12px;
+}
+
+.conv-select-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 14px;
+}
+
+.conv-select-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.conv-select-check {
+  width: 17px;
+  height: 17px;
+  accent-color: var(--brand);
+  cursor: pointer;
+}
 
 .conv-textarea {
   min-height: 190px;

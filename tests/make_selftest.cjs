@@ -358,25 +358,24 @@ const driver = `
     ok('解析后进入选炉页', q('.page-title').textContent === '选择需要增补的炉子', q('.page-title').textContent);
     ok('选炉页显示全部 4 台炉', qa('.quick-select-card').length === 4, qa('.quick-select-card').length);
     ok('未导入的 3 台有区分', qa('.quick-select-card.is-empty').length === 3, qa('.quick-select-card.is-empty').length);
-    ok('选炉页有 4 个导出勾选框', qa('.quick-select-check').length === 4, qa('.quick-select-check').length);
     ok('选炉页底部有导出/返回/绝压比按钮', qa('.quick-select-footer .btn').length === 3, qa('.quick-select-footer .btn').length);
     qa('.quick-select-footer .btn').filter(function (b) { return b.textContent === '导出文丘里压力'; })[0].click();
     await sleep(50);
     ok('选炉页可直接导出方式1', !!q('#dlgExport').open, q('#dlgExport').open);
+    ok('导出弹窗内有炉子勾选', qa('#exportSelect .export-select-check').length > 0, qa('#exportSelect .export-select-check').length);
+    ok('导出炉子默认勾选', qa('#exportSelect .export-select-check')[0].checked);
+    var firstExportLabel = q('#exportSelect .export-select-label span').textContent.split(' · ')[0];
+    q('#exportSelect .export-select-check').click();
+    await sleep(40);
+    ok('导出取消勾选后预览剔除该炉', q('#exportPreview').textContent.indexOf(firstExportLabel) < 0, q('#exportPreview').textContent.slice(0, 60));
     q('[data-close="dlgExport"]').click();
-    await sleep(30);
-    ok('已导入 3号炉默认勾选', q('.quick-select-card[data-quick-furnace="3"] .quick-select-check').checked);
-    ok('未导入 2号炉默认不勾选', !q('.quick-select-card[data-quick-furnace="2"] .quick-select-check').checked);
-    q('.quick-select-card[data-quick-furnace="2"] .quick-select-check').click();
     await sleep(30);
     var before2 = window.GaugeApp.getBatch().furnaces[0].cells[0][0].v;
     q('#btnQuickApply').click();
     await sleep(50);
     var qbSel = window.GaugeApp.getBatch();
-    var scSel = qbSel.meta.exportScope || [];
-    ok('应用后导出范围只含勾选炉', scSel.indexOf('3') >= 0 && scSel.indexOf('2') >= 0 && scSel.indexOf('5') < 0, JSON.stringify(scSel));
     ok('未输入的 2号炉不写默认 1#/0.000', qbSel.furnaces[0].cells[0][0].v === before2, qbSel.furnaces[0].cells[0][0].v + ' vs ' + before2);
-    ok('勾选的 3号炉写回快捷数据', qbSel.furnaces[1].cells[0][2].v === 0.199, qbSel.furnaces[1].cells[0][2].v);
+    ok('导入的 3号炉写回快捷数据', qbSel.furnaces[1].cells[0][2].v === 0.199, qbSel.furnaces[1].cells[0][2].v);
 
     q('.quick-select-card[data-quick-furnace="3"]').click();
     await sleep(40);
@@ -549,6 +548,23 @@ const driver = `
     qa('.page-actions .btn').filter(function (b) { return b.textContent === '返回主界面'; })[0].click();
     await sleep(30);
     ok('快捷返回首页', qa('.furnace-card').length === 4);
+
+    q('#btnRatioHome').click();
+    await sleep(50);
+    var br = window.GaugeApp.getBatch();
+    var withData = br.furnaces.filter(function (f) { return f.cells.some(function (row) { return row.some(function (c) { return c.v != null; }); }); }).length;
+    ok('绝压比页默认包含全部有数据炉子', qa('.conv-select-check').length === withData, qa('.conv-select-check').length + ' vs ' + withData);
+    var firstLabel = q('.conv-select-label span').textContent.split(' · ')[0];
+    q('.conv-select-check').click();
+    await sleep(40);
+    ok('绝压比取消勾选后剔除该炉', q('#convText').value.indexOf(firstLabel) < 0 && qa('.conv-select-check').filter(function (c) { return c.checked; }).length === withData - 1, q('#convText').value.slice(0, 40));
+    qa('.conv-select-actions .btn').filter(function (b) { return b.textContent === '全选'; })[0].click();
+    await sleep(40);
+    ok('绝压比全选恢复', qa('.conv-select-check').filter(function (c) { return c.checked; }).length === withData);
+
+    qa('.page-actions .btn').filter(function (b) { return b.textContent.indexOf('返回炉子列表') >= 0; })[0].click();
+    await sleep(30);
+    ok('绝压比返回首页', qa('.furnace-card').length === 4);
   } catch (err) {
     results.push('FAIL 测试异常 :: ' + err.message);
   }

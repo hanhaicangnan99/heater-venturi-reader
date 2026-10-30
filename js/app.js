@@ -19,6 +19,8 @@
   var deferredInstall = null;
   var convText = '';
   var conv = null;
+  var convSelected = null;
+  var exportSelected = null;
   var quick = {
     text: '', model: null, issues: [], message: '', applyIssues: [],
     selectedId: null, group: 0, reverse: {}
@@ -273,7 +275,6 @@
       perGroup: def.perGroup,
       ambiguous: false,
       imported: false,
-      selected: false,
       rows: quickEmptyRows(def.groups)
     };
   }
@@ -333,7 +334,6 @@
         perGroup: bf ? bf.perGroup : def.perGroup,
         ambiguous: !!pf.ambiguous,
         imported: true,
-        selected: true,
         halfRows: halfRows,
         halfSide: halfRows ? pf.side : null,
         rows: rows
@@ -651,7 +651,6 @@
     var f = quickFind(id);
     if (!f) return;
     quick.selectedId = f.id;
-    f.selected = true;
     quick.group = quickFirstGroup(f);
     quick.message = '';
     quick.applyIssues = [];
@@ -713,14 +712,7 @@
   function quickSelectCard(f) {
     var side = f.side === 'full' ? '整台' : f.side + '炉膛';
     var count = quickFurnaceGroups(f).length;
-    var check = el('input', { class: 'quick-select-check', type: 'checkbox' });
-    check.checked = !!f.selected;
-    check.addEventListener('change', function (e) {
-      e.stopPropagation();
-      f.selected = check.checked;
-      renderQuickSelect();
-    });
-    var seg = el('div', { class: 'seg', role: 'group', 'aria-label': '导出炉膛范围' }, [
+    var seg = el('div', { class: 'seg', role: 'group', 'aria-label': '录入炉膛范围' }, [
       ['full', '整台'], ['A', 'A炉膛'], ['B', 'B炉膛']
     ].map(function (pair) {
       return el('button', {
@@ -732,13 +724,7 @@
         }
       });
     }));
-    var controls = el('div', { class: 'quick-select-controls', onclick: function (e) { e.stopPropagation(); } }, [
-      el('label', { class: 'quick-select-toggle' }, [
-        check,
-        el('span', { text: '导出/算绝压比' })
-      ]),
-      seg
-    ]);
+    var controls = el('div', { class: 'quick-select-controls', onclick: function (e) { e.stopPropagation(); } }, [seg]);
 
     return el('article', {
       class: 'quick-select-card' + (f.imported ? '' : ' is-empty'),
@@ -792,7 +778,7 @@
     host.appendChild(el('div', { class: 'page-head' }, [
       el('div', {}, [
         el('h2', { class: 'page-title', text: '选择需要增补的炉子' }),
-        el('p', { class: 'page-sub', text: '勾选要「导出/算绝压比」的炉子；未勾选不应用，没输入的行不写入。点卡片进入单炉页。' })
+        el('p', { class: 'page-sub', text: '点卡片进入单炉页；录完所有炉子后点「应用快捷数据」。导出/绝压比页面里再单独选要计算的炉子。' })
       ]),
       el('div', { class: 'page-actions' }, [
         el('button', { class: 'btn ghost', type: 'button', text: '‹ 返回导入', onclick: quickBackToImport }),
@@ -806,7 +792,7 @@
     var grid = el('div', { class: 'quick-select-grid' });
     quick.model.forEach(function (f) { grid.appendChild(quickSelectCard(f)); });
     host.appendChild(grid);
-    host.appendChild(quickApplyBar('应用勾选的炉子'));
+    host.appendChild(quickApplyBar('应用快捷数据'));
     host.appendChild(el('div', { class: 'quick-select-footer' }, [
       el('button', { class: 'btn', type: 'button', id: 'btnQuickExport', text: '导出文丘里压力', onclick: quickApplyAndExport }),
       el('button', { class: 'btn ghost', type: 'button', text: '返回主界面', onclick: goHome }),
@@ -953,33 +939,28 @@
       toast('还没有可应用的快捷数据', 'warn');
       return false;
     }
-    var picked = quick.model.filter(function (f) { return f.selected; });
-    if (!picked.length) {
-      toast('先在选炉页勾选要导出的炉子', 'warn', 2600);
-      return false;
-    }
-    if (!skipConfirm && C.hasBatchData(batch) && !confirm('用勾选炉子的快捷数据更新最高表？其他表读数保留。')) return false;
+    if (!skipConfirm && C.hasBatchData(batch) && !confirm('用快捷数据更新最高表？其他表读数保留。')) return false;
 
-    var updates = picked.map(quickUpdateFor);
-    batch.meta.exportScope = picked.map(function (f) { return f.id; });
+    var updates = quick.model.map(quickUpdateFor);
     var res = C.applyQuickUpdate(batch, updates);
     persist();
     quick.message = res.updated
-      ? '已更新 ' + res.updated + ' 组最高表（' + picked.length + ' 台炉勾选）；其他表读数保留。'
-      : '勾选的炉子里没有可更新的行（未输入或表号/读数不完整）。';
+      ? '已更新 ' + res.updated + ' 组最高表；其他表读数保留。'
+      : '没有可更新的行（未输入或表号/读数不完整）。';
     quick.applyIssues = res.warnings || [];
     renderQuickPage();
     if (res.updated) toast('已更新 ' + res.updated + ' 组', 'ok', 2200);
-    else toast('勾选的炉子没有可更新数据', 'warn', 2600);
+    else toast('没有可更新数据', 'warn', 2600);
     return res.updated > 0;
   }
 
   function quickApplyAndRatio() {
-    if (applyQuick(true)) openRatioCalc();
+    applyQuick(true);
+    openRatioCalc();
   }
 
   function quickApplyAndExport() {
-    if ((quick.model || []).some(function (f) { return f.selected; })) applyQuick(true);
+    applyQuick(true);
     openExport();
   }
 
@@ -990,7 +971,6 @@
       return;
     }
     if (C.hasBatchData(batch) && !confirm('用快捷数据更新 ' + f.label + ' 的最高表？其他表读数保留。')) return;
-    f.selected = true;
     var res = C.applyQuickUpdate(batch, [quickUpdateFor(f)]);
     persist();
     quick.message = res.updated
@@ -1003,13 +983,15 @@
   }
 
   function quickApplyBar(label) {
-    var picked = (quick.model || []).filter(function (f) { return f.selected; }).length;
+    var active = (quick.model || []).filter(function (f) {
+      return f.rows.some(function (r) { return r.active && !r.placeholder; });
+    }).length;
     return el('div', { class: 'quick-apply' }, [
-      el('div', { class: 'quick-apply-hint', text: '只应用勾选的炉子；未勾选的不导出，未输入的行不写入。' }),
+      el('div', { class: 'quick-apply-hint', text: '应用到所有已输入的炉子；没输入的行不写入，其他表读数保留。' }),
       el('button', {
         class: 'btn primary', type: 'button', id: 'btnQuickApply',
-        text: (label || '应用勾选的炉子') + '（' + picked + '）',
-        disabled: picked === 0,
+        text: (label || '应用快捷数据') + (active ? '（' + active + ' 台）' : ''),
+        disabled: active === 0,
         onclick: function () { applyQuick(false); }
       })
     ]);
@@ -1144,10 +1126,13 @@
     stopCamera();
     ui.view = 'convert';
     if (C.hasBatchData(batch)) {
-      convText = C.exportMode1(batch);
+      convSelected = C.furnacesWithData(batch).map(function (f) { return f.id; });
+      convText = C.exportMode1(batch, convSelected);
       conv = C.parseMode1(convText);
       conv.fromCurrent = true;
       syncConvHeaders();
+    } else {
+      convSelected = [];
     }
     render();
     scrollTop();
@@ -1170,13 +1155,14 @@
     host.appendChild(el('div', { class: 'page-head' }, [
       el('div', {}, [
         el('h2', { class: 'page-title', text: '绝压比计算' }),
-        el('p', { class: 'page-sub', text: '所有炉子的文丘里读数录完后，在这里填集合管压力，生成方式2。打开时会自动载入当前读数；也可以粘贴方式1文本（老记录 / 别人发来的）。' })
+        el('p', { class: 'page-sub', text: '默认载入所有有读数的炉子，可勾选本次参与计算的炉子；手动录入的炉子也会自动参与。' })
       ]),
       el('div', { class: 'page-actions' }, [
         el('button', { class: 'btn', type: 'button', text: '‹ 返回炉子列表', onclick: goHome })
       ])
     ]));
 
+    if (conv && conv.fromCurrent) host.appendChild(convCurrentSelectPanel());
     host.appendChild(convPastePanel());
     if (conv && conv.furnaces.length) {
       host.appendChild(convResultPanel());
@@ -1184,6 +1170,62 @@
     }
     updateConvIssues();
     if (conv && conv.furnaces.length) updateConvPreview();
+  }
+
+  function convCurrentSelectPanel() {
+    var list = C.furnacesWithData(batch);
+    var sec = el('section', { class: 'panel' });
+    sec.appendChild(el('div', { class: 'panel-head' }, [
+      el('h2', { class: 'panel-title', text: '参与计算的炉子' }),
+      el('span', { class: 'panel-note', text: '默认全部；取消勾选后从当前数据重新生成' })
+    ]));
+    var body = el('div', { class: 'panel-body' });
+    if (!Array.isArray(convSelected)) convSelected = list.map(function (f) { return f.id; });
+    var selected = convSelected;
+    if (!list.length) {
+      body.appendChild(el('p', { class: 'hint', text: '当前还没有录入任何炉子读数。' }));
+    } else {
+      body.appendChild(el('div', { class: 'conv-select-actions' }, [
+        el('button', { class: 'btn ghost small', type: 'button', text: '全选', onclick: function () {
+          convSelected = list.map(function (f) { return f.id; });
+          rebuildCurrentConv();
+        } }),
+        el('button', { class: 'btn ghost small', type: 'button', text: '全不选', onclick: function () {
+          convSelected = [];
+          rebuildCurrentConv();
+        } })
+      ]));
+      var row = el('div', { class: 'conv-select-row' });
+      list.forEach(function (f) {
+        var cb = el('input', { type: 'checkbox', class: 'conv-select-check' });
+        cb.checked = selected.indexOf(f.id) >= 0;
+        cb.addEventListener('change', function () {
+          if (cb.checked) {
+            if (convSelected.indexOf(f.id) < 0) convSelected.push(f.id);
+          } else {
+            convSelected = convSelected.filter(function (id) { return id !== f.id; });
+          }
+          rebuildCurrentConv();
+        });
+        row.appendChild(el('label', { class: 'conv-select-label' }, [
+          cb,
+          el('span', { text: f.label + ' · ' + C.sideLabel(f.side) })
+        ]));
+      });
+      body.appendChild(row);
+    }
+    sec.appendChild(body);
+    return sec;
+  }
+
+  function rebuildCurrentConv() {
+    convText = C.exportMode1(batch, convSelected || []);
+    var ta = $('#convText');
+    if (ta) ta.value = convText;
+    conv = C.parseMode1(convText);
+    conv.fromCurrent = true;
+    syncConvHeaders();
+    renderConverter();
   }
 
   function convPastePanel() {
@@ -1219,6 +1261,7 @@
     if (ta) convText = ta.value;
     conv = C.parseMode1(convText);
     conv.fromCurrent = !!isCurrent;
+    if (!conv.fromCurrent) convSelected = null;
     if (conv.fromCurrent) syncConvHeaders();
     renderConverter();
     if (conv.furnaces.length) toast('解析到 ' + conv.furnaces.length + ' 台炉', 'ok', 1800);
@@ -1230,7 +1273,8 @@
       toast('当前还没有录入任何炉子读数', 'warn', 2600);
       return;
     }
-    convText = C.exportMode1(batch);
+    convSelected = C.furnacesWithData(batch).map(function (f) { return f.id; });
+    convText = C.exportMode1(batch, convSelected);
     var ta = $('#convText');
     if (ta) ta.value = convText;
     parseConv(true);
@@ -2292,21 +2336,63 @@
    * ================================================================== */
 
   function openExport() {
-    var hasScope = C.furnacesWithData(batch).length > 0;
-    if (!hasScope) {
+    var list = C.furnacesWithData(batch);
+    if (!list.length) {
       toast(C.hasBatchData(batch) ? '当前炉膛范围内还没有读数（可切回整台）' : '还没有录入任何读数', 'warn', 3200);
       return;
     }
+    exportSelected = list.map(function (f) { return f.id; });
     renderExportPreview();
     $('#dlgExport').showModal();
   }
 
   function renderExportPreview() {
-    $('#exportPreview').textContent = C.exportMode1(batch);
-    $('#exportHint').textContent = '每台炉一个标题（半台带 A/B炉膛），每组一行：最高值表号 最高值（3 位小数）。';
+    var list = C.furnacesWithData(batch);
+    if (!Array.isArray(exportSelected)) exportSelected = list.map(function (f) { return f.id; });
+    exportSelected = exportSelected.filter(function (id) {
+      return list.some(function (f) { return f.id === id; });
+    });
+    var sel = $('#exportSelect');
+    sel.innerHTML = '';
+    sel.appendChild(el('div', { class: 'export-select-head' }, [
+      el('strong', { text: '选择参与导出的炉子' }),
+      el('span', { class: 'export-select-actions' }, [
+        el('button', { class: 'btn ghost small', type: 'button', text: '全选', onclick: function () {
+          exportSelected = list.map(function (f) { return f.id; });
+          renderExportPreview();
+        } }),
+        el('button', { class: 'btn ghost small', type: 'button', text: '全不选', onclick: function () {
+          exportSelected = [];
+          renderExportPreview();
+        } })
+      ])
+    ]));
+    var row = el('div', { class: 'export-select-row' });
+    list.forEach(function (f) {
+      var cb = el('input', { type: 'checkbox', class: 'export-select-check' });
+      cb.checked = exportSelected.indexOf(f.id) >= 0;
+      cb.addEventListener('change', function () {
+        if (cb.checked) {
+          if (exportSelected.indexOf(f.id) < 0) exportSelected.push(f.id);
+        } else {
+          exportSelected = exportSelected.filter(function (id) { return id !== f.id; });
+        }
+        renderExportPreview();
+      });
+      row.appendChild(el('label', { class: 'export-select-label' }, [
+        cb,
+        el('span', { text: f.label + ' · ' + C.sideLabel(f.side) })
+      ]));
+    });
+    sel.appendChild(row);
+
+    $('#exportPreview').textContent = C.exportMode1(batch, exportSelected);
+    $('#exportHint').textContent = '已选 ' + exportSelected.length + ' / ' + list.length + ' 台；只导出勾选的炉子，手动录入的炉子默认参与。';
+    $('#btnCopyExport').disabled = exportSelected.length === 0;
+    $('#btnDownloadExport').disabled = exportSelected.length === 0;
 
     var outside = [];
-    batch.furnaces.forEach(function (f) {
+    list.forEach(function (f) {
       if (!C.hasFurnaceData(f)) return;
       var scope = C.groupsInScope(f);
       var hidden = 0;
@@ -2318,7 +2404,7 @@
     });
     $('#exportNote').textContent = outside.length
       ? '未参与本次导出：' + outside.join('；')
-      : '只导出有读数的炉子；空组显示为 - -。';
+      : '只导出勾选的炉子；空组显示为 - -。';
   }
 
   function copyText(text) {

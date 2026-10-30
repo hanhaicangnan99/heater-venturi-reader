@@ -184,16 +184,14 @@ test('exportMode1：半台标题与空组占位', () => {
   ].join('\n'));
 });
 
-test('exportMode1：exportScope 排除未勾选炉', () => {
+test('exportMode1：onlyIds 只导出指定炉子', () => {
   const b = mk();
   fillGroup(b, '2', 0, [0.100, 0.111]);
   fillGroup(b, '5', 0, [0.200, 0.222]);
-  b.meta.exportScope = ['2'];
-  const text = C.exportMode1(b);
+  const text = C.exportMode1(b, ['2']);
   assert.ok(text.indexOf('2号炉') >= 0);
   assert.ok(text.indexOf('5号炉') < 0);
-  b.meta.exportScope = ['5'];
-  assert.ok(C.exportMode1(b).indexOf('2号炉') < 0);
+  assert.ok(C.exportMode1(b, ['5']).indexOf('2号炉') < 0);
 });
 
 test('exportMode1：无数据时给出提示', () => {

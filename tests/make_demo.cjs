@@ -51,7 +51,8 @@ const driver = `
       });
     }
   } else if (view === 'export') {
-    document.getElementById('btnExport').click();
+    var mb = Array.prototype.filter.call(document.querySelectorAll('.page-actions .btn'), function (b) { return b.textContent === '导出文丘里压力'; })[0];
+    if (mb) mb.click();
   } else if (view === 'mode1') {
     document.querySelector('.page-actions .btn').click();
   } else if (view === 'convert') {
