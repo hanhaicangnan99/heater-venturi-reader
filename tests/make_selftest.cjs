@@ -341,6 +341,13 @@ const driver = `
     ok('进入快捷导入页', q('.page-title').textContent === '手动快捷输入', q('.page-title').textContent);
     ok('导入页有粘贴框', !!q('#quickText'));
 
+    q('#btnQuickManual').click();
+    await sleep(30);
+    ok('无导入也显示全部 4 台炉', qa('.quick-select-card').length === 4, qa('.quick-select-card').length);
+    ok('无导入全部标为手动', qa('.quick-select-card.is-empty').length === 4, qa('.quick-select-card.is-empty').length);
+    qa('.page-actions .btn').filter(function (b) { return b.textContent.indexOf('返回导入') >= 0; })[0].click();
+    await sleep(30);
+
     qa('.quick-paste-actions .btn').filter(function (b) { return b.textContent === '清空'; })[0].click();
     await sleep(20);
     var qText = q('#quickText');
@@ -349,9 +356,10 @@ const driver = `
     q('#btnQuickParse').click();
     await sleep(40);
     ok('解析后进入选炉页', q('.page-title').textContent === '选择需要增补的炉子', q('.page-title').textContent);
-    ok('选炉页 1 台炉', qa('.quick-select-card').length === 1, qa('.quick-select-card').length);
+    ok('选炉页显示全部 4 台炉', qa('.quick-select-card').length === 4, qa('.quick-select-card').length);
+    ok('未导入的 3 台有区分', qa('.quick-select-card.is-empty').length === 3, qa('.quick-select-card.is-empty').length);
 
-    q('.quick-select-card').click();
+    q('.quick-select-card[data-quick-furnace="3"]').click();
     await sleep(40);
     ok('进入 3号炉手动页', q('.page-title').textContent.indexOf('3号炉') >= 0, q('.page-title').textContent);
     ok('单炉页只显示一组', qa('.quick-group').length === 1 && !!q('.quick-group-single'), qa('.quick-group').length);
@@ -402,12 +410,19 @@ const driver = `
     q('#quickText').dispatchEvent(new Event('input', { bubbles: true }));
     q('#btnQuickParse').click();
     await sleep(30);
-    q('.quick-select-card').click();
+    q('.quick-select-card[data-quick-furnace="3"]').click();
     await sleep(30);
     ok('快捷 4 行出现炉膛选择', !!q('.quick-bar-actions .seg'), qa('.quick-bar-actions .seg').length);
     qa('.quick-bar-actions .seg-btn').filter(function (b) { return b.textContent === 'B炉膛'; })[0].click();
     await sleep(30);
     ok('快捷切 B 后从第 5 组开始', q('.quick-progress strong').textContent === '第 5 组', q('.quick-progress strong').textContent);
+
+    qa('.page-actions .btn').filter(function (b) { return b.textContent.indexOf('返回选炉') >= 0; })[0].click();
+    await sleep(30);
+    q('.quick-select-card[data-quick-furnace="2"]').click();
+    await sleep(30);
+    ok('未导入 2号炉也可进入', q('.page-title').textContent.indexOf('2号炉') >= 0, q('.page-title').textContent);
+    ok('未导入 2号炉首组为空', q('.quick-group-single .quick-gauge-value').textContent === '—', q('.quick-group-single .quick-gauge-value').textContent);
 
     qa('.page-actions .btn').filter(function (b) { return b.textContent === '返回主界面'; })[0].click();
     await sleep(30);

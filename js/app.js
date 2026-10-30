@@ -255,19 +255,55 @@
     return [Math.floor(milli / 100), Math.floor(milli / 10) % 10, milli % 10];
   }
 
+  function quickEmptyRows(n) {
+    var out = [];
+    for (var i = 0; i < n; i++) out.push({ gauge: null, value: null });
+    return out;
+  }
+
+  function quickEmptyFurnace(def) {
+    return {
+      id: def.id,
+      label: def.label,
+      side: 'full',
+      perGroup: def.perGroup,
+      ambiguous: false,
+      imported: false,
+      rows: quickEmptyRows(def.groups)
+    };
+  }
+
+  function quickEnsureAllFurnaces() {
+    var byId = {};
+    (quick.model || []).forEach(function (f) { byId[f.id] = f; });
+    quick.model = C.FURNACE_DEFS.map(function (def) {
+      return byId[def.id] || quickEmptyFurnace(def);
+    });
+  }
+
+  function quickHasImported() {
+    return !!(quick.model || []).some(function (f) { return f.imported; });
+  }
+
   function parseQuick(silent) {
     var ta = $('#quickText');
     if (ta) quick.text = ta.value;
     var res = C.parseMode1(quick.text || '');
+    var parsed = res.furnaces || [];
+    var byId = {};
+    parsed.forEach(function (pf) { byId[pf.id] = pf; });
     quick.issues = res.issues || [];
-    quick.model = (res.furnaces || []).map(function (pf) {
+    quick.model = C.FURNACE_DEFS.map(function (def) {
+      var pf = byId[def.id];
+      if (!pf) return quickEmptyFurnace(def);
       var bf = C.furnaceById(batch, pf.id);
       return {
         id: pf.id,
         label: pf.label,
         side: pf.side || 'full',
-        perGroup: bf ? bf.perGroup : 12,
+        perGroup: bf ? bf.perGroup : def.perGroup,
         ambiguous: !!pf.ambiguous,
+        imported: true,
         rows: (pf.rawLines || []).map(function (r) {
           return {
             gauge: r.gauge == null ? null : Number(r.gauge),
@@ -279,7 +315,7 @@
     quick.message = '';
     quick.applyIssues = [];
     if (!silent) {
-      if (quick.model.length) {
+      if (parsed.length) {
         quick.selectedId = null;
         ui.view = 'quickSelect';
         render();
@@ -539,17 +575,20 @@
   function quickSelectCard(f) {
     var side = f.side === 'full' ? '整台' : f.side + '炉膛';
     return el('article', {
-      class: 'quick-select-card', tabindex: 0, role: 'button',
+      class: 'quick-select-card' + (f.imported ? '' : ' is-empty'),
+      tabindex: 0, role: 'button',
+      'data-quick-furnace': f.id,
       'aria-label': f.label + ' 手动快捷输入',
       onclick: function () { quickSelectFurnace(f.id); }
     }, [
       el('div', { class: 'quick-select-head' }, [
         el('h3', { text: f.label }),
         el('span', { class: 'tag', text: side }),
+        el('span', { class: 'tag' + (f.imported ? ' ok' : ''), text: f.imported ? '已导入' : '未导入 · 手动' }),
         f.ambiguous ? el('span', { class: 'tag', text: '文本未写炉膛' }) : null
       ]),
-      el('p', { class: 'quick-select-sub', text: '共 ' + f.rows.length + ' 组 · 每组只改最高表' }),
-      el('span', { class: 'fc-go', text: '进入 ›' })
+      el('p', { class: 'quick-select-sub', text: f.imported ? '共 ' + f.rows.length + ' 组 · 每组只改最高表' : '共 ' + f.rows.length + ' 组 · 从空白开始手动补最高表' }),
+      el('span', { class: 'fc-go', text: f.imported ? '进入 ›' : '手动录入 ›' })
     ]);
   }
 
@@ -559,33 +598,34 @@
     host.appendChild(el('div', { class: 'page-head' }, [
       el('div', {}, [
         el('h2', { class: 'page-title', text: '手动快捷输入' }),
-        el('p', { class: 'page-sub', text: '第 1 步：粘贴「导出文丘里压力」文本，解析后选择要增补的炉子。' })
+        el('p', { class: 'page-sub', text: '视觉识别不能用时的备用方式：每组只记最高表；粘贴已有的方式1文本可快速带入。' })
       ]),
       el('div', { class: 'page-actions' }, [
-        quick.model && quick.model.length
-          ? el('button', { class: 'btn', type: 'button', text: '继续选择炉子', onclick: function () { ui.view = 'quickSelect'; render(); } })
+        quickHasImported()
+          ? el('button', { class: 'btn', type: 'button', text: '继续选择炉子', onclick: function () { quickEnsureAllFurnaces(); ui.view = 'quickSelect'; render(); } })
           : null,
+        el('button', {
+          class: 'btn', type: 'button', id: 'btnQuickManual', text: '不导入，直接手动',
+          onclick: function () { quickEnsureAllFurnaces(); ui.view = 'quickSelect'; render(); scrollTop(); }
+        }),
         el('button', { class: 'btn ghost', type: 'button', text: '‹ 返回主界面', onclick: goHome })
       ])
     ]));
     host.appendChild(quickPastePanel());
     if (quick.issues && quick.issues.length) host.appendChild(quickIssuesPanel());
-    if (!quick.model || !quick.model.length) {
-      host.appendChild(el('div', { class: 'quick-empty', text: '粘贴文本后点「解析文本」；解析成功会进入第 2 步「选择炉子」。' }));
+    if (!quickHasImported()) {
+      host.appendChild(el('div', { class: 'quick-empty', text: '粘贴文本后点「解析文本」；也可以直接点「不导入，直接手动」，第二页仍会显示全部 2/3/4/5 号炉。' }));
     }
   }
 
   function renderQuickSelect() {
-    if (!quick.model || !quick.model.length) {
-      renderQuickImport();
-      return;
-    }
+    quickEnsureAllFurnaces();
     var host = $('#view');
     host.innerHTML = '';
     host.appendChild(el('div', { class: 'page-head' }, [
       el('div', {}, [
         el('h2', { class: 'page-title', text: '选择需要增补的炉子' }),
-        el('p', { class: 'page-sub', text: '第 2 步：点炉号进入，一次只改一组最高表；改完回这里统一应用。' })
+        el('p', { class: 'page-sub', text: '全部 2/3/4/5 号炉都在这里；有导入数据的高亮，没有导入的也可以点进去手动补。' })
       ]),
       el('div', { class: 'page-actions' }, [
         el('button', { class: 'btn ghost', type: 'button', text: '‹ 返回导入', onclick: quickBackToImport }),

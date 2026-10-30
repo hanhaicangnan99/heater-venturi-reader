@@ -524,6 +524,13 @@ body {
   outline: none;
 }
 
+.quick-select-card.is-empty {
+  border-style: dashed;
+  background: var(--surface-2);
+}
+
+.quick-select-card.is-empty .fc-go { color: var(--muted); }
+
 .quick-select-head {
   display: flex;
   align-items: center;
