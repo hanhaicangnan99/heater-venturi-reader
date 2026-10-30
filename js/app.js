@@ -302,7 +302,7 @@
       if (!pf) return quickEmptyFurnace(def);
       var bf = C.furnaceById(batch, pf.id);
       var rows = quickEmptyRows(def.groups).map(function (r) {
-        r.synced = false;
+        r.synced = true;
         r.placeholder = true;
         return r;
       });
@@ -317,6 +317,12 @@
           placeholder: false
         };
       });
+      var halfRows = null;
+      if (pf.side === 'A' || pf.side === 'B') {
+        halfRows = scope.map(function (g) {
+          return { gauge: rows[g].gauge, value: rows[g].value };
+        });
+      }
       return {
         id: pf.id,
         label: pf.label,
@@ -324,6 +330,8 @@
         perGroup: bf ? bf.perGroup : def.perGroup,
         ambiguous: !!pf.ambiguous,
         imported: true,
+        halfRows: halfRows,
+        halfSide: halfRows ? pf.side : null,
         rows: rows
       };
     });
@@ -388,7 +396,7 @@
     if (!f || !f.rows[rowIndex]) return;
     var row = f.rows[rowIndex];
     var source = quickFirstGroup(f);
-    if (!f.imported && rowIndex !== source) row.synced = false;
+    if (rowIndex !== source) row.synced = false;
     row.placeholder = false;
     var pg = f.perGroup;
     if (row.gauge == null) row.gauge = delta > 0 ? 1 : pg;
@@ -397,6 +405,7 @@
       if (row.gauge < 1) row.gauge = pg;
       if (row.gauge > pg) row.gauge = 1;
     }
+    quickRememberHalfRow(f, rowIndex);
     var hadNotice = quick.message || (quick.applyIssues && quick.applyIssues.length);
     quick.message = '';
     quick.applyIssues = [];
@@ -409,7 +418,7 @@
     if (!f || !f.rows[rowIndex]) return;
     var row = f.rows[rowIndex];
     var source = quickFirstGroup(f);
-    if (!f.imported && rowIndex !== source) row.synced = false;
+    if (rowIndex !== source) row.synced = false;
     row.placeholder = false;
     if (row.gauge == null) row.gauge = 1;
     var milli = row.value == null ? 0 : Math.round(row.value * 1000);
@@ -423,16 +432,53 @@
       else next = (milli - (milli % 10)) + 9;
     }
     row.value = next / 1000;
-    if (!f.imported && rowIndex === source) {
+    if (rowIndex === source) {
       quickFurnaceGroups(f).forEach(function (g) {
-        if (g !== source && f.rows[g].synced) f.rows[g].value = row.value;
+        if (g !== source && f.rows[g].synced) {
+          f.rows[g].value = row.value;
+          f.rows[g].placeholder = false;
+        }
       });
     }
+    quickRememberHalfRow(f, rowIndex);
     var hadNotice = quick.message || (quick.applyIssues && quick.applyIssues.length);
     quick.message = '';
     quick.applyIssues = [];
     if (hadNotice) renderQuickPage();
     else refreshQuickCard(id, rowIndex);
+  }
+
+  function quickCaptureHalf(f) {
+    if (!f.halfRows || (f.side !== 'A' && f.side !== 'B')) return;
+    var scope = f.side === 'A' ? [0, 1, 2, 3] : [4, 5, 6, 7];
+    f.halfRows = scope.map(function (g) {
+      return { gauge: f.rows[g].gauge, value: f.rows[g].value };
+    });
+    f.halfSide = f.side;
+  }
+
+  function quickRebuildHalf(f, side) {
+    if (!f.halfRows || (side !== 'A' && side !== 'B')) return;
+    var scope = side === 'A' ? [0, 1, 2, 3] : [4, 5, 6, 7];
+    var rows = quickEmptyRows(8).map(function (r) {
+      r.synced = true;
+      r.placeholder = true;
+      return r;
+    });
+    scope.forEach(function (g, k) {
+      var r = f.halfRows[k] || { gauge: null, value: null };
+      rows[g] = { gauge: r.gauge, value: r.value, synced: false, placeholder: false };
+    });
+    f.rows = rows;
+    f.halfSide = side;
+  }
+
+  function quickRememberHalfRow(f, g) {
+    if (!f.halfRows || !f.halfSide) return;
+    var off = f.halfSide === 'A' ? 0 : 4;
+    if (g >= off && g < off + 4) {
+      f.halfRows[g - off] = { gauge: f.rows[g].gauge, value: f.rows[g].value };
+    }
   }
 
   function quickSideBtn(f, side) {
@@ -441,7 +487,9 @@
       type: 'button', text: side === 'full' ? '整台' : side + '炉膛',
       onclick: function () {
         if (f.side === side) return;
+        if (f.halfRows) quickCaptureHalf(f);
         f.side = side;
+        if (f.halfRows && (side === 'A' || side === 'B')) quickRebuildHalf(f, side);
         quick.group = quickFirstGroup(f);
         quick.message = '';
         quick.applyIssues = [];
@@ -735,7 +783,7 @@
     } else if (f.rows.some(function (r) { return r.placeholder; })) {
       host.appendChild(el('div', {
         class: 'quick-default-hint',
-        text: '导入的是半台：另一半是占位数据，未编辑时不会写入；切到整台可以继续补。'
+        text: '导入的是半台：切到整台后，空白半台默认跟随第一组；没跟过也没改过的占位组不会写入。'
       }));
     }
 

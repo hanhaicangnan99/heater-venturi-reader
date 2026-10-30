@@ -441,6 +441,23 @@ const driver = `
     await sleep(30);
     ok('快捷切 B 后从第 5 组开始', q('.quick-progress strong').textContent === '第 5 组', q('.quick-progress strong').textContent);
 
+    qa('.quick-bar-actions .seg-btn').filter(function (b) { return b.textContent === '整台'; })[0].click();
+    await sleep(30);
+    ok('半台切整台回到第 1 组', q('.quick-progress strong').textContent === '第 1 组', q('.quick-progress strong').textContent);
+    ok('整台空白第 1 组默认 0.000', qa('.quick-group-single .quick-field')[1].title.indexOf('0.000') >= 0, qa('.quick-group-single .quick-field')[1].title);
+    qa('.quick-group-single .q-digit')[2].querySelectorAll('.qstep')[0].click();
+    await sleep(20);
+    ok('整台空白第 1 组可改 0.001', qa('.quick-group-single .quick-field')[1].title.indexOf('0.001') >= 0, qa('.quick-group-single .quick-field')[1].title);
+    q('#btnQuickNext').click();
+    await sleep(30);
+    ok('整台空白第 2 组跟随 0.001', q('.quick-progress strong').textContent === '第 2 组' && qa('.quick-group-single .quick-field')[1].title.indexOf('0.001') >= 0, q('.quick-progress strong').textContent + ' / ' + qa('.quick-group-single .quick-field')[1].title);
+
+    q('#btnQuickApplyFurnace').click();
+    await sleep(50);
+    var hb = window.GaugeApp.getBatch().furnaces.filter(function (x) { return x.id === '3'; })[0];
+    ok('半台切整台后空白组写回 0.001', hb && hb.cells[0][0].v === 0.001 && hb.cells[1][0].v === 0.001 && hb.cells[2][0].v === 0.001, hb ? JSON.stringify([hb.cells[0][0], hb.cells[1][0], hb.cells[2][0]]) : 'no');
+    ok('半台导入的 B 组保留 0.100', hb && hb.cells[4][0].v === 0.1, hb ? JSON.stringify(hb.cells[4][0]) : 'no');
+
     qa('.page-actions .btn').filter(function (b) { return b.textContent.indexOf('返回选炉') >= 0; })[0].click();
     await sleep(30);
     q('.quick-select-card[data-quick-furnace="2"]').click();
