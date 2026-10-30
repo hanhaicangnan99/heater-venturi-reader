@@ -257,7 +257,9 @@
 
   function quickEmptyRows(n) {
     var out = [];
-    for (var i = 0; i < n; i++) out.push({ gauge: null, value: null });
+    for (var i = 0; i < n; i++) {
+      out.push({ gauge: 1, value: 0, synced: i !== 0 });
+    }
     return out;
   }
 
@@ -307,7 +309,8 @@
         rows: (pf.rawLines || []).map(function (r) {
           return {
             gauge: r.gauge == null ? null : Number(r.gauge),
-            value: r.value == null ? null : Number(r.value)
+            value: r.value == null ? null : Number(r.value),
+            synced: false
           };
         })
       };
@@ -372,6 +375,7 @@
     var f = quickFind(id);
     if (!f || !f.rows[rowIndex]) return;
     var row = f.rows[rowIndex];
+    if (!f.imported && rowIndex > 0) row.synced = false;
     var pg = f.perGroup;
     if (row.gauge == null) row.gauge = delta > 0 ? 1 : pg;
     else row.gauge = Math.max(1, Math.min(pg, row.gauge + delta));
@@ -386,11 +390,17 @@
     var f = quickFind(id);
     if (!f || !f.rows[rowIndex]) return;
     var row = f.rows[rowIndex];
+    if (!f.imported && rowIndex > 0) row.synced = false;
     if (row.gauge == null) row.gauge = 1;
     var milli = row.value == null ? 0 : Math.round(row.value * 1000);
     var step = pos === 0 ? 100 : pos === 1 ? 10 : 1;
     milli = Math.max(0, Math.min(400, milli + delta * step));
     row.value = milli / 1000;
+    if (!f.imported && rowIndex === 0) {
+      f.rows.forEach(function (r, i) {
+        if (i > 0 && r.synced) r.value = row.value;
+      });
+    }
     var hadNotice = quick.message || (quick.applyIssues && quick.applyIssues.length);
     quick.message = '';
     quick.applyIssues = [];
@@ -587,7 +597,7 @@
         el('span', { class: 'tag' + (f.imported ? ' ok' : ''), text: f.imported ? '已导入' : '未导入 · 手动' }),
         f.ambiguous ? el('span', { class: 'tag', text: '文本未写炉膛' }) : null
       ]),
-      el('p', { class: 'quick-select-sub', text: f.imported ? '共 ' + f.rows.length + ' 组 · 每组只改最高表' : '共 ' + f.rows.length + ' 组 · 从空白开始手动补最高表' }),
+      el('p', { class: 'quick-select-sub', text: f.imported ? '共 ' + f.rows.length + ' 组 · 每组只改最高表' : '共 ' + f.rows.length + ' 组 · 默认 1# / 0.000，后组跟随第一组' }),
       el('span', { class: 'fc-go', text: f.imported ? '进入 ›' : '手动录入 ›' })
     ]);
   }
@@ -689,6 +699,13 @@
       ])
     ]);
     host.appendChild(bar);
+
+    if (!f.imported) {
+      host.appendChild(el('div', {
+        class: 'quick-default-hint',
+        text: '未导入：每组默认 1# / 0.000；改第一组后，未改过的组会自动跟随第一组。'
+      }));
+    }
 
     if (quick.message || (quick.applyIssues && quick.applyIssues.length)) {
       host.appendChild(quickNotices());

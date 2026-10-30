@@ -422,7 +422,14 @@ const driver = `
     q('.quick-select-card[data-quick-furnace="2"]').click();
     await sleep(30);
     ok('未导入 2号炉也可进入', q('.page-title').textContent.indexOf('2号炉') >= 0, q('.page-title').textContent);
-    ok('未导入 2号炉首组为空', q('.quick-group-single .quick-gauge-value').textContent === '—', q('.quick-group-single .quick-gauge-value').textContent);
+    ok('未导入 2号炉默认 1#', q('.quick-group-single .quick-gauge-value').textContent === '1#', q('.quick-group-single .quick-gauge-value').textContent);
+    ok('未导入 2号炉首组默认 0.000', qa('.quick-group-single .quick-field')[1].title.indexOf('0.000') >= 0, qa('.quick-group-single .quick-field')[1].title);
+    qa('.quick-group-single .q-digit')[2].querySelectorAll('.qstep')[0].click();
+    await sleep(20);
+    ok('未导入首组可改为 0.001', qa('.quick-group-single .quick-field')[1].title.indexOf('0.001') >= 0, qa('.quick-group-single .quick-field')[1].title);
+    q('#btnQuickNext').click();
+    await sleep(30);
+    ok('未导入后组跟随第一组 0.001', qa('.quick-group-single .quick-field')[1].title.indexOf('0.001') >= 0, qa('.quick-group-single .quick-field')[1].title);
 
     qa('.page-actions .btn').filter(function (b) { return b.textContent === '返回主界面'; })[0].click();
     await sleep(30);

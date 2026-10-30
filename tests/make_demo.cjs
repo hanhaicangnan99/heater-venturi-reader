@@ -74,6 +74,10 @@ const driver = `
     if (view === 'quickFurnace') {
       document.querySelector('.quick-select-card').click();
     }
+  } else if (view === 'quickEmpty') {
+    document.getElementById('btnQuick').click();
+    document.getElementById('btnQuickManual').click();
+    document.querySelector('.quick-select-card[data-quick-furnace="2"]').click();
   }
 })();
 </script>
